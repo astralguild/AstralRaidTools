@@ -1,0 +1,17 @@
+## Interface: 100100
+## Title: Astral Raid
+## Notes: Internal guild raid companion
+## Author: Astral
+## Version: 0.1
+## SavedVariables: AstralRaidSettings
+## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
+
+embeds.xml
+
+Events.lua
+Init.lua
+Settings.lua
+Options.lua
+Communications.lua
+Player.lua
+Reminders.lua
