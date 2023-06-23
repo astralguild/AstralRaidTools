@@ -9,6 +9,7 @@
 embeds.xml
 
 Events.lua
+Instance.lua
 Init.lua
 Settings.lua
 Options.lua

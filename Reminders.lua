@@ -2,7 +2,7 @@ local _, addon = ...
 
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 
-AstralRaidReminders = CreateFrame('FRAME', 'AstralRaidReminders', UIParent)
+local AstralRaidReminders = CreateFrame('FRAME', 'AstralRaidReminders', UIParent)
 AstralRaidReminders:SetHeight(1)
 AstralRaidReminders:SetWidth(1)
 AstralRaidReminders:SetPoint('CENTER', UIParent, 'CENTER')
@@ -16,17 +16,17 @@ function addon.CreateReminder(name, text)
     return textReminders[name]
   end
 
-  local fontPath = SharedMedia:Fetch('font', 'PT Sans Narrow')
+  local fontPath = SharedMedia:Fetch('font', AstralRaidSettings.general.font.name)
 
   textReminders[name] = AstralRaidReminders:CreateFontString(nil, 'OVERLAY', 'GameTooltipText')
   textReminders[name]:SetPoint('CENTER', 0, 400)
-  textReminders[name]:SetFont(fontPath, 72, 'OUTLINE')
+  textReminders[name]:SetFont(fontPath, AstralRaidSettings.general.font.size, 'OUTLINE')
   textReminders[name]:SetText(text)
   textReminders[name]:Hide()
 
   textReminders[name]:SetScript('OnShow', function(self)
     if #displayed > 0 then
-      self:SetPoint('CENTER', displayed[#displayed], 'BOTTOM', 0, -20)
+      self:SetPoint('TOP', displayed[#displayed], 'BOTTOM', 0, -20)
     else
       self:SetPoint('CENTER', 0, 400)
     end
@@ -45,10 +45,28 @@ function addon.CreateReminder(name, text)
       if j == 1 then
         displayed[j]:SetPoint('CENTER', 0, 400)
       else
-        displayed[j]:SetPoint('CENTER', displayed[j-1], 'BOTTOM', 0, -30)
+        displayed[j]:SetPoint('TOP', displayed[j-1], 'BOTTOM', 0, -20)
       end
     end
   end)
 
   return textReminders[name]
+end
+
+function addon.ShowReminders()
+  AstralRaidReminders:Show()
+end
+
+function addon.HideReminders()
+  AstralRaidReminders:Hide()
+end
+
+function addon.InitReminders()
+  local eatFood = addon.CreateReminder('eatFood', 'EAT FOOD')
+  local feast = addon.CreateReminder('feast', 'FEAST DOWN')
+  local cauldron = addon.CreateReminder('cauldron', 'CAULDRON DOWN')
+  local repair = addon.CreateReminder('repair', 'REPAIR')
+  local healthstones = addon.CreateReminder('healthstones', 'GRAB HEALTHSTONES')
+  local infiniteRune = addon.CreateReminder('infiniteRune', 'RUNE UP')
+  local noRelease = addon.CreateReminder('noRelease', 'DONT RELEASE')
 end

@@ -46,6 +46,7 @@ local function LoadDefaultSettings(addonName)
 
 	-- General options
 	addon.AddDefaultSettings('general', 'show_minimap_button', {isEnabled = true})
+	addon.AddDefaultSettings('general', 'font', {name = 'PT Sans Narrow', size = 72})
 
 	--Frame settings, collapsed, saved sorting, etc
 	addon.AddDefaultSettings('frame', 'orientation', 1)

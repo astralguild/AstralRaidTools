@@ -17,7 +17,6 @@ SEND_INTERVAL[3] = 2 -- Used for version checks
 -- Changes when player enters a raid instance or not
 local SEND_INTERVAL_SETTING = 1 -- What intervel to use for sending normal information
 
-local CheckInstanceType
 local msgs, newMsg, delMsg
 
 AstralRaidComms = CreateFrame('FRAME', 'AstralRaidComms')
@@ -96,7 +95,12 @@ function AstralRaidComms:OnUpdate(elapsed)
 	self.loadDelay = 0
 
 	if self.versionPrint then
-		CheckInstanceType()
+		AstralRaidComms.loadDelay = 3
+		if addon.InInstance and addon.InstanceType == 'raid' then
+			SEND_INTERVAL_SETTING = 1
+		else
+			SEND_INTERVAL_SETTING = 2
+		end
 		self.versionPrint = false
 		addon.PrintCheckResults()
 	end
@@ -161,19 +165,6 @@ function AstralRaidComms:SendMessage()
 		delMsg(msg)
 	end
 end
-
--- Checks to see if we zone into a raid instance,
--- Let's increase the send interval if we are raiding, client sync can wait, dc's can't
-CheckInstanceType = function()
-	AstralRaidComms.loadDelay = 3
-	local inInstance, instanceType = IsInInstance()
-	if inInstance and instanceType == 'raid' then
-		SEND_INTERVAL_SETTING = 1
-	else
-		SEND_INTERVAL_SETTING = 2
-	end
-end
-AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', CheckInstanceType, 'astralRaidEnteringWorld')
 
 local function waRequest(channel, ...)
 	local msg, _ = ...
