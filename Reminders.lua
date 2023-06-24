@@ -10,6 +10,7 @@ AstralRaidReminders:Hide()
 
 local textReminders = {}
 local displayed = {}
+local wasShownBeforeCombat = false
 
 function addon.CreateReminder(name, text)
   if textReminders[name] then
@@ -48,6 +49,9 @@ function addon.CreateReminder(name, text)
         displayed[j]:SetPoint('TOP', displayed[j-1], 'BOTTOM', 0, -20)
       end
     end
+    if #displayed == 0 then
+      AstralRaidReminders:Hide()
+    end
   end)
 
   return textReminders[name]
@@ -61,12 +65,202 @@ function addon.HideReminders()
   AstralRaidReminders:Hide()
 end
 
+function addon.ShowReminder(name)
+  if not textReminders[name] then
+    return
+  end
+  if not AstralRaidReminders:IsShown() then
+    AstralRaidReminders:Show()
+  end
+  textReminders[name]:Show()
+end
+
+function addon.HideReminder(name)
+  if not (textReminders[name] or textReminders[name]:IsShown()) then
+    return
+  end
+  textReminders[name]:Hide()
+end
+
+local function hideRemindersIfShownForCombat()
+  if AstralRaidReminders:IsShown() then
+    AstralRaidReminders:Hide()
+    wasShownBeforeCombat = true
+  end
+end
+
+local function showRemindersIfShownAfterCombat()
+  if wasShownBeforeCombat then
+    AstralRaidReminders:Show()
+    wasShownBeforeCombat = false
+  end
+end
+
+-- Event Wiring
+-- Semi-recreating the WeakAuras scripting environment
+
+local enterInstanceChecks, resurrectedChecks, deadChecks, spellcastSuccessChecks, cleuChecks
+local eatFoodReminder, feastReminder, cauldronReminder, repairReminder, noReleaseReminder
+
+local function enterInstance(...)
+  for _, reminder in pairs(enterInstanceChecks) do
+    reminder('PLAYER_ENTERING_WORLD', ...)
+  end
+end
+
+local function resurrected(...)
+  for _, reminder in pairs(resurrectedChecks) do
+    reminder('PLAYER_ALIVE', ...)
+  end
+end
+
+local function dead(...)
+  for _, reminder in pairs(deadChecks) do
+    reminder('PLAYER_DEAD', ...)
+  end
+end
+
+local function spellcastSuccess(...)
+  for _, reminder in pairs(spellcastSuccessChecks) do
+    reminder('UNIT_SPELLCAST_SUCCEEDED', ...)
+  end
+end
+
+local function cleu(...)
+  for _, reminder in pairs(cleuChecks) do
+    reminder('COMBAT_LOG_EVENT_UNFILTERED', ...)
+  end
+end
+
+AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', enterInstance, 'astralRaidRemindersEnterInstance')
+AstralRaidEvents:Register('PLAYER_ALIVE', resurrected, 'astralRaidRemindersResurrected')
+AstralRaidEvents:Register('PLAYER_DEAD', dead, 'astralRaidRemindersDeath')
+AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', spellcastSuccess, 'astralRaidRemindersSpellcastSuccess')
+AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidRemindersCLEU')
+
+AstralRaidEvents:Register('PLAYER_ENTER_COMBAT', hideRemindersIfShownForCombat, 'astralRaidEnterCombatHideReminders')
+AstralRaidEvents:Register('PLAYER_LEAVE_COMBAT', showRemindersIfShownAfterCombat, 'astralRaidLeaveCombatShowReminders')
+
 function addon.InitReminders()
-  local eatFood = addon.CreateReminder('eatFood', 'EAT FOOD')
-  local feast = addon.CreateReminder('feast', 'FEAST DOWN')
-  local cauldron = addon.CreateReminder('cauldron', 'CAULDRON DOWN')
-  local repair = addon.CreateReminder('repair', 'REPAIR')
-  local healthstones = addon.CreateReminder('healthstones', 'GRAB HEALTHSTONES')
-  local infiniteRune = addon.CreateReminder('infiniteRune', 'RUNE UP')
-  local noRelease = addon.CreateReminder('noRelease', 'DONT RELEASE')
+  enterInstanceChecks = {}
+  resurrectedChecks = {}
+  deadChecks = {}
+
+  addon.CreateReminder('eatFood', 'EAT FOOD')
+  addon.CreateReminder('feastDown', 'FEAST DOWN')
+  addon.CreateReminder('cauldronDown', 'CAULDRON DOWN')
+  addon.CreateReminder('repairDown', 'REPAIR')
+  addon.CreateReminder('healthstones', 'GRAB HEALTHSTONES')
+  addon.CreateReminder('infiniteRune', 'RUNE UP')
+  addon.CreateReminder('noRelease', 'DONT RELEASE')
+
+  table.insert(enterInstanceChecks, eatFoodReminder)
+  table.insert(resurrectedChecks, eatFoodReminder)
+  table.insert(spellcastSuccessChecks, feastReminder)
+  table.insert(spellcastSuccessChecks, cauldronReminder)
+  table.insert(cleuChecks, repairReminder)
+  table.insert(cleuChecks, eatFoodReminder)
+  table.insert(deadChecks, noReleaseReminder)
+end
+
+-- Specific Reminders
+
+local feastSpells = {} -- TODO find feast spellIDs
+local cauldronSpells = {} -- TODO find cauldron spellIDs
+local repairSpells = {
+  [1] = 67826,
+  [2] = 199109,
+  [3] = 200061,
+}
+
+eatFoodReminder = function(e, _, m, ...)
+  if addon.InRaidIdle() and e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
+    local wellFedBuff = AuraUtil.FindAuraByName('Well Fed', 'player')
+    if not wellFedBuff then
+      addon.ShowReminder('eatFood')
+    else
+      addon.HideReminder('eatFood')
+      addon.HideReminder('feastDown')
+    end
+  elseif e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_AURA_APPLIED' then
+    local destGUID = select(6, ...)
+    local spellID = select(10, ...)
+    if destGUID == UnitGUID('player') then
+      local name = select(1, GetSpellInfo(spellID))
+      if name == 'Well Fed' then
+        addon.HideReminder('eatFood')
+        addon.HideReminder('feastDown')
+      end
+    end
+  else
+    addon.HideReminder('eatFood')
+    addon.HideReminder('feastDown')
+  end
+end
+
+feastReminder = function(e, ...)
+  if addon.InRaidIdle() then
+    if e == 'UNIT_SPELLCAST_SUCCEEDED' then
+      local spellID = select(3, ...)
+      for _, feastSpellID in pairs(feastSpells) do
+        if spellID == feastSpellID then
+          addon.ShowReminder('feastDown')
+          return
+        end
+      end
+    end
+  end
+  addon.HideReminder('feastDown')
+end
+
+cauldronReminder = function(e, ...)
+  if addon.InRaidIdle() then
+    if e == 'UNIT_SPELLCAST_SUCCEEDED' then
+      local spellID = select(3, ...)
+      for _, cauldronSpellID in pairs(cauldronSpells) do
+        if spellID == cauldronSpellID then
+          addon.ShowReminder('cauldronDown')
+          -- find way to hide
+          return
+        end
+      end
+    end
+  end
+  addon.HideReminder('cauldronDown')
+end
+
+repairReminder = function(e, _, m, ...)
+  if addon.InRaidIdle() then
+    if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' then
+      local spellID = select(10, ...)
+      for _, repairSpellID in pairs(repairSpells) do
+        if spellID == repairSpellID then
+          local cur, max
+          for i = 1, 18 do
+              cur, max = GetInventoryItemDurability(i);
+              if cur and max then
+                  if (cur/max) <= 0.9 then
+                    addon.ShowReminder('repairDown')
+                    return
+                  end
+              end
+              return
+          end
+        end
+      end
+    end
+  end
+  addon.HideReminder('repairDown')
+end
+
+noReleaseReminder = function(e, ...)
+  if e == 'PLAYER_DEAD' and UnitHealth('player') == 0 and StaticPopup1:IsShown() and StaticPopup1Button1:GetText() == 'Release Spirit' and addon.InRaidIdle() then
+    StaticPopup_Show('WANT_TO_RELEASE')
+    if StaticPopup1Button1:GetButtonState() == 'NORMAL' then
+      StaticPopup1Button1:Disable()
+    end
+    addon.ShowReminder('noRelease')
+  else
+    addon.HideReminder('noRelease')
+  end
 end

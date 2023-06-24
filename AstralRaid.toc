@@ -11,6 +11,7 @@ embeds.xml
 Events.lua
 Instance.lua
 Init.lua
+Dialog.lua
 Settings.lua
 Options.lua
 Communications.lua

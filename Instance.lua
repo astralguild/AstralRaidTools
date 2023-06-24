@@ -12,6 +12,10 @@ function addon.CheckInstanceType()
   addon.InstanceType = instanceType
 end
 
+function addon.InRaidIdle()
+  return addon.InInstance and addon.InstanceType == 'raid' and not addon.InEncounter
+end
+
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', addon.CheckInstanceType, 'astralRaidEnteringWorld')
 
 AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName, difficultyID, groupSize)
