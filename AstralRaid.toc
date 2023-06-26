@@ -9,11 +9,11 @@
 embeds.xml
 
 Events.lua
-Instance.lua
-Init.lua
-Dialog.lua
-Settings.lua
-Options.lua
 Communications.lua
 Player.lua
+Instance.lua
+Interface.lua
 Reminders.lua
+Settings.lua
+Options.lua
+Init.lua

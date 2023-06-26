@@ -44,11 +44,9 @@ local function LoadDefaultSettings(addonName)
 		AstralRaidSettings.new_settings_config = true
 	end
 
-	-- General options
 	addon.AddDefaultSettings('general', 'show_minimap_button', {isEnabled = true})
 	addon.AddDefaultSettings('general', 'font', {name = 'PT Sans Narrow', size = 72})
-
-	--Frame settings, collapsed, saved sorting, etc
+	addon.AddDefaultSettings('reminders', 'position', {x = 0, y = 400})
 	addon.AddDefaultSettings('frame', 'orientation', 1)
 
 	AstralRaidEvents:Unregister('ADDON_LOADED', 'LoadDefaultSettings')

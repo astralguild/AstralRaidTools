@@ -8,33 +8,36 @@ AstralRaidReminders:SetWidth(1)
 AstralRaidReminders:SetPoint('CENTER', UIParent, 'CENTER')
 AstralRaidReminders:Hide()
 
-local textReminders = {}
+local reminders = {}
 local displayed = {}
+local state = {}
+local testing = false
+local wasShownBeforeTest = false
 local wasShownBeforeCombat = false
 
 function addon.CreateReminder(name, text)
-  if textReminders[name] then
-    return textReminders[name]
+  if reminders[name] then
+    return reminders[name]
   end
 
   local fontPath = SharedMedia:Fetch('font', AstralRaidSettings.general.font.name)
 
-  textReminders[name] = AstralRaidReminders:CreateFontString(nil, 'OVERLAY', 'GameTooltipText')
-  textReminders[name]:SetPoint('CENTER', 0, 400)
-  textReminders[name]:SetFont(fontPath, AstralRaidSettings.general.font.size, 'OUTLINE')
-  textReminders[name]:SetText(text)
-  textReminders[name]:Hide()
+  reminders[name] = AstralRaidReminders:CreateFontString(nil, 'OVERLAY', 'GameTooltipText')
+  reminders[name]:SetPoint('CENTER', 0, 400)
+  reminders[name]:SetFont(fontPath, AstralRaidSettings.general.font.size, 'OUTLINE')
+  reminders[name]:SetText(text)
+  reminders[name]:Hide()
 
-  textReminders[name]:SetScript('OnShow', function(self)
+  reminders[name]:SetScript('OnShow', function(self)
     if #displayed > 0 then
-      self:SetPoint('TOP', displayed[#displayed], 'BOTTOM', 0, -20)
+      self:SetPoint('TOP', displayed[#displayed], 'BOTTOM', 0, -5)
     else
       self:SetPoint('CENTER', 0, 400)
     end
     displayed[#displayed+1] = self
   end)
 
-  textReminders[name]:SetScript('OnHide', function(self)
+  reminders[name]:SetScript('OnHide', function(self)
     local i = 0
     for j = 1, #displayed do
       if displayed[j] == self then
@@ -46,7 +49,7 @@ function addon.CreateReminder(name, text)
       if j == 1 then
         displayed[j]:SetPoint('CENTER', 0, 400)
       else
-        displayed[j]:SetPoint('TOP', displayed[j-1], 'BOTTOM', 0, -20)
+        displayed[j]:SetPoint('TOP', displayed[j-1], 'BOTTOM', 0, -5)
       end
     end
     if #displayed == 0 then
@@ -54,32 +57,52 @@ function addon.CreateReminder(name, text)
     end
   end)
 
-  return textReminders[name]
+  return reminders[name]
 end
 
-function addon.ShowReminders()
-  AstralRaidReminders:Show()
+function addon.UpdateRemindersFonts()
+  for _, r in pairs(reminders) do
+    r:SetFont(SharedMedia:Fetch('font', AstralRaidSettings.general.font.name), AstralRaidSettings.general.font.size, 'OUTLINE')
+  end
 end
 
-function addon.HideReminders()
-  AstralRaidReminders:Hide()
+function addon.TestReminders(show)
+  if show then
+    if AstralRaidReminders:IsShown() then
+      wasShownBeforeTest = true
+    else
+      AstralRaidReminders:Show()
+      wasShownBeforeTest = false
+    end
+    for name, r in pairs(reminders) do
+      state[name] = r:IsShown()
+      r:Show()
+    end
+    testing = true
+  else
+    AstralRaidReminders:SetShown(wasShownBeforeTest)
+    for name, shown in pairs(state) do
+      reminders[name]:SetShown(shown)
+    end
+    testing = false
+  end
 end
 
 function addon.ShowReminder(name)
-  if not textReminders[name] then
+  if not reminders[name] then
     return
   end
   if not AstralRaidReminders:IsShown() then
     AstralRaidReminders:Show()
   end
-  textReminders[name]:Show()
+  reminders[name]:Show()
 end
 
 function addon.HideReminder(name)
-  if not (textReminders[name] or textReminders[name]:IsShown()) then
+  if not (reminders[name] or reminders[name]:IsShown()) then
     return
   end
-  textReminders[name]:Hide()
+  reminders[name]:Hide()
 end
 
 local function hideRemindersIfShownForCombat()
@@ -99,7 +122,7 @@ end
 -- Event Wiring
 -- Semi-recreating the WeakAuras scripting environment
 
-local enterInstanceChecks, resurrectedChecks, deadChecks, spellcastSuccessChecks, cleuChecks
+local enterInstanceChecks, resurrectedChecks, deadChecks, spellcastSuccessChecks, cleuChecks = {}, {}, {}, {}, {}
 local eatFoodReminder, feastReminder, cauldronReminder, repairReminder, noReleaseReminder
 
 local function enterInstance(...)
@@ -142,10 +165,6 @@ AstralRaidEvents:Register('PLAYER_ENTER_COMBAT', hideRemindersIfShownForCombat, 
 AstralRaidEvents:Register('PLAYER_LEAVE_COMBAT', showRemindersIfShownAfterCombat, 'astralRaidLeaveCombatShowReminders')
 
 function addon.InitReminders()
-  enterInstanceChecks = {}
-  resurrectedChecks = {}
-  deadChecks = {}
-
   addon.CreateReminder('eatFood', 'EAT FOOD')
   addon.CreateReminder('feastDown', 'FEAST DOWN')
   addon.CreateReminder('cauldronDown', 'CAULDRON DOWN')
@@ -192,7 +211,7 @@ eatFoodReminder = function(e, _, m, ...)
         addon.HideReminder('feastDown')
       end
     end
-  else
+  elseif not testing then
     addon.HideReminder('eatFood')
     addon.HideReminder('feastDown')
   end
@@ -210,7 +229,9 @@ feastReminder = function(e, ...)
       end
     end
   end
-  addon.HideReminder('feastDown')
+  if not testing then
+    addon.HideReminder('feastDown')
+  end
 end
 
 cauldronReminder = function(e, ...)
@@ -226,7 +247,9 @@ cauldronReminder = function(e, ...)
       end
     end
   end
-  addon.HideReminder('cauldronDown')
+  if not testing then
+    addon.HideReminder('cauldronDown')
+  end
 end
 
 repairReminder = function(e, _, m, ...)
@@ -250,7 +273,9 @@ repairReminder = function(e, _, m, ...)
       end
     end
   end
-  addon.HideReminder('repairDown')
+  if not testing then
+    addon.HideReminder('repairDown')
+  end
 end
 
 noReleaseReminder = function(e, ...)

@@ -1,6 +1,11 @@
-local ADDON_NAME, addon = ...
+local _, addon = ...
 
-local BNSendGameData, SendAddonMessage, SendChatMessage = BNSendGameData, C_ChatInfo.SendAddonMessage, SendChatMessage
+local SendAddonMessage, SendChatMessage = C_ChatInfo.SendAddonMessage, SendChatMessage
+local LibDeflate = LibStub:GetLibrary("LibDeflate")
+
+-- Protocol constants
+local PREFIX = 'ASTRAL_RAID'
+local SENDER_VERSION, DATA_VERSION = 1, 1
 
 -- Interval times for syncing keys between clients
 -- Two different time settings for in a raid or otherwise
@@ -22,8 +27,7 @@ local msgs, newMsg, delMsg
 AstralRaidComms = CreateFrame('FRAME', 'AstralRaidComms')
 
 function AstralRaidComms:Init()
-	self:RegisterEvent('CHAT_MSG_ADDON')
-	self:RegisterEvent('BN_CHAT_MSG_ADDON')
+	C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
 
 	self:SetScript('OnEvent', self.OnEvent)
 	self:SetScript('OnUpdate', self.OnUpdate)
@@ -35,8 +39,10 @@ function AstralRaidComms:Init()
 	self.delay = 0
 	self.loadDelay = 0
 	self.versionPrint = false
+	self.runningText = {}
+
+	self:RegisterEvent('CHAT_MSG_ADDON')
 end
-AstralRaidComms:Init()
 
 function AstralRaidComms:RegisterPrefix(channel, prefix, f)
 	channel = channel or 'RAID'
@@ -75,9 +81,10 @@ function AstralRaidComms:IsPrefixRegistered(channel, prefix)
 end
 
 function AstralRaidComms:OnEvent(event, prefix, msg, channel, sender)
-	if not (prefix == ADDON_NAME) then return end
-	if event == 'BN_CHAT_MSG_ADDON' then channel = 'BNET' end
-	local objs = AstralRaidComms.dtbl[channel]
+	if event ~= 'CHAT_MSG_ADDON' then return end
+	if prefix ~= PREFIX then return end
+	print(prefix, msg, channel)
+	local objs = self.dtbl[channel]
 	if not objs then return end
 	local arg, content = msg:match("^(%S*)%s*(.-)$")
 	for _, obj in pairs(objs) do
@@ -122,25 +129,17 @@ function AstralRaidComms:NewMessage(prefix, text, channel, target)
 	end
 
 	if channel == 'RAID' then
-		if not IsInGroup() then
+		if not IsInRaid() then
 			return
 		end
 	end
 
 	local msg = newMsg()
-
-	if channel == 'BNET' then
-		msg.method = BNSendGameData
-		msg[1] = target
-		msg[2] = prefix
-		msg[3] = text
-	else
-		msg.method = SendAddonMessage
-		msg[1] = prefix
-		msg[2] = text
-		msg[3] = channel
-		msg[4] = channel == 'WHISPER' and target or ''
-	end
+	msg.method = SendAddonMessage
+	msg[1] = prefix
+	msg[2] = text
+	msg[3] = channel
+	msg[4] = channel == 'WHISPER' and target or ''
 
 	--Let's add it to queue
 	self.queue[#self.queue + 1] = msg
@@ -152,11 +151,7 @@ end
 
 function AstralRaidComms:SendMessage()
 	local msg = table.remove(self.queue, 1)
-	if msg[3] == 'BNET' then
-		if select(3, BNGetGameAccountInfo(msg[4])) == 'WoW' and BNConnected() then -- Are they logged into WoW and are we connected to BNET?
-			msg.method(unpack(msg, 1, #msg))
-		end
-	elseif msg[3] == 'WHISPER' then
+	if msg[3] == 'WHISPER' then
 		if addon.IsFriendOnline(msg[4]) then -- Are they still logged into that toon
 			msg.method(unpack(msg, 1, #msg))
 		end
@@ -166,20 +161,52 @@ function AstralRaidComms:SendMessage()
 	end
 end
 
-local function waRequest(channel, ...)
-	local msg, _ = ...
-	wipe(addon.WeakAuraList)
+function AstralRaidComms:SendChunkedAddonMessages(prefix, prefix2, message, ...)
+	local compressed = LibDeflate:CompressDeflate(message, {level = 9})
+	local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
+	encoded = encoded .. "##F##"
+	local parts = ceil(#encoded / 240)
+	for i = 1, parts do
+		local msg = encoded:sub((i-1)*240+1 , i*240)
+		SendAddonMessage(prefix, prefix2 .. ' ' .. msg, ...)
+	end
+end
 
-	local resp = 'waPush ' .. addon.PlayerClass
-
-	addon.GetWeakAuras()
-	for wa, url in string.gmatch(msg, '("[%w%s]+"):("[%w%s]+")') do
-		if not addon.WeakAuraList[wa] or not addon.WeakAuraList[wa] == url then
-			resp = resp .. string.format(' "%s":"%s"', wa, addon.WeakAuraList[wa])
-		end
+function AstralRaidComms:DecodeChunkedAddonMessages(sender, message, func)
+	if self.runningText[sender] and type(self.runningText[sender]) == 'string' then
+		self.runningText[sender] = self.runningText[sender] .. message
+	else
+		self.runningText[sender] = message
 	end
 
-	SendAddonMessage(ADDON_NAME, resp, channel)
+	if self.runningText[sender] and type(self.runningText[sender]) == 'string' and self.runningText[sender]:find("##F##$") then
+		local str = self.runningText[sender]:sub(1,-6)
+		local decoded = LibDeflate:DecodeForWoWAddonChannel(str)
+		local decompressed = LibDeflate:DecompressDeflate(decoded)
+		func(decompressed)
+		self.runningText[sender] = nil
+	end
+end
+
+-- Version/Addon/WA Checking
+
+local function waRequest(channel, ...)
+	local msg, sender = ...
+	AstralRaidComms:DecodeChunkedAddonMessages(sender, string.sub(msg, 11), function(m)
+		local resp = addon.PlayerClass
+
+		addon.GetWeakAuras()
+		for wa, url in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+			if not addon.WeakAuraList[wa] or addon.WeakAuraList[wa] ~= url then
+				local u = ''
+				if addon.WeakAuraList[wa] then
+					u = addon.WeakAuraList[wa]
+				end
+				resp = resp .. string.format(' "%s":"%s"', wa, u)
+			end
+		end
+		AstralRaidComms:SendChunkedAddonMessages(PREFIX, 'waPush', resp, channel)
+	end)
 end
 
 local function addonRequest(channel, ...)
@@ -187,19 +214,27 @@ local function addonRequest(channel, ...)
 
 	local resp = 'addonPush ' .. addon.PlayerClass
 
-	for a, v in string.gmatch(msg, '("[%w%s]+"):("[%w%s]+")') do
-		if not addon.AddonList[a] or not addon.AddonList[a] == v then
+	for a, v in string.gmatch(msg, '"([^"]+)":"([^"]+)"') do
+		if not addon.AddonList[a] or addon.AddonList[a] ~= v then
 			resp = resp .. string.format(' "%s":"%s"', a, addon.AddonList[a])
 		end
 	end
 
-	SendAddonMessage(ADDON_NAME, resp, channel)
+	AstralRaidComms:SendChunkedAddonMessages(PREFIX, 'addonPush', resp, channel)
 end
 
+local function versionRequest(channel, ...)
+	local resp = 'versionPush ' .. string.format('%s:%s', addon.CLIENT_VERSION, addon.PlayerClass)
+	SendAddonMessage(PREFIX, resp, channel)
+end
+
+AstralRaidComms:Init()
 AstralRaidComms:RegisterPrefix('RAID', 'waRequest', function(...) waRequest('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'waRequest', function(...) waRequest('GUILD', ...) end)
 AstralRaidComms:RegisterPrefix('RAID', 'addonRequest', function(...) addonRequest('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'addonRequest', function(...) addonRequest('GUILD', ...) end)
+AstralRaidComms:RegisterPrefix('RAID', 'versionRequest', function(...) versionRequest('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('GUILD', 'versionRequest', function(...) versionRequest('GUILD', ...) end)
 
 -- Message handling
 

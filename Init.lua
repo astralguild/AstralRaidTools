@@ -1,6 +1,8 @@
-local _, addon = ...
+local ADDON_NAME, addon = ...
 
 LibStub("AceAddon-3.0"):NewAddon(addon, "AstralRaid", "AceConsole-3.0")
+
+addon.CLIENT_VERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
 
 -- local ldb = LibStub("LibDataBroker-1.1"):NewDataObject("AstralRaid", {
 -- 	type = "data source",
@@ -22,4 +24,5 @@ LibStub("AceAddon-3.0"):NewAddon(addon, "AstralRaid", "AceConsole-3.0")
 
 AstralRaidEvents:Register('PLAYER_LOGIN', function()
   -- addon.GetAddons()
+  addon.InitReminders()
 end, 'init')
