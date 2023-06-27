@@ -5,6 +5,7 @@ local LibDeflate = LibStub:GetLibrary("LibDeflate")
 
 -- Protocol constants
 local PREFIX = 'ASTRAL_RAID'
+local CHUNKED_EOL = '##F##$'
 local SENDER_VERSION, DATA_VERSION = 1, 1
 
 -- Interval times for syncing keys between clients
@@ -50,11 +51,9 @@ function AstralRaidComms:RegisterPrefix(channel, prefix, f)
 	if self:IsPrefixRegistered(channel, prefix) then return end -- Did we register something to the same channel with the same name?
 
 	if not self.dtbl[channel] then self.dtbl[channel] = {} end
-
 	local obj = {}
 	obj.method = f
 	obj.prefix = prefix
-
 	table.insert(self.dtbl[channel], obj)
 end
 
@@ -83,7 +82,6 @@ end
 function AstralRaidComms:OnEvent(event, prefix, msg, channel, sender)
 	if event ~= 'CHAT_MSG_ADDON' then return end
 	if prefix ~= PREFIX then return end
-	print(prefix, msg, channel)
 	local objs = self.dtbl[channel]
 	if not objs then return end
 	local arg, content = msg:match("^(%S*)%s*(.-)$")
@@ -109,7 +107,6 @@ function AstralRaidComms:OnUpdate(elapsed)
 			SEND_INTERVAL_SETTING = 2
 		end
 		self.versionPrint = false
-		addon.PrintCheckResults()
 	end
 
 	self.delay = 0
@@ -161,27 +158,26 @@ function AstralRaidComms:SendMessage()
 	end
 end
 
-function AstralRaidComms:SendChunkedAddonMessages(prefix, prefix2, message, ...)
+function AstralRaidComms:SendChunkedAddonMessages(prefix2, message, ...)
 	local compressed = LibDeflate:CompressDeflate(message, {level = 9})
 	local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
 	encoded = encoded .. "##F##"
 	local parts = ceil(#encoded / 240)
 	for i = 1, parts do
-		local msg = encoded:sub((i-1)*240+1 , i*240)
-		SendAddonMessage(prefix, prefix2 .. ' ' .. msg, ...)
+		local msg = encoded:sub((i-1)*240+1, i*240)
+		SendAddonMessage(PREFIX, string.format('%s %s', prefix2, msg), ...)
 	end
 end
 
 function AstralRaidComms:DecodeChunkedAddonMessages(sender, message, func)
-	if self.runningText[sender] and type(self.runningText[sender]) == 'string' then
+	if self.runningText[sender] then
 		self.runningText[sender] = self.runningText[sender] .. message
 	else
 		self.runningText[sender] = message
 	end
 
-	if self.runningText[sender] and type(self.runningText[sender]) == 'string' and self.runningText[sender]:find("##F##$") then
-		local str = self.runningText[sender]:sub(1,-6)
-		local decoded = LibDeflate:DecodeForWoWAddonChannel(str)
+	if self.runningText[sender] and self.runningText[sender]:find(CHUNKED_EOL) then
+		local decoded = LibDeflate:DecodeForWoWAddonChannel(self.runningText[sender]:gsub(CHUNKED_EOL, ''))
 		local decompressed = LibDeflate:DecompressDeflate(decoded)
 		func(decompressed)
 		self.runningText[sender] = nil
@@ -192,7 +188,7 @@ end
 
 local function waRequest(channel, ...)
 	local msg, sender = ...
-	AstralRaidComms:DecodeChunkedAddonMessages(sender, string.sub(msg, 11), function(m)
+	AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
 		local resp = addon.PlayerClass
 
 		addon.GetWeakAuras()
@@ -205,7 +201,7 @@ local function waRequest(channel, ...)
 				resp = resp .. string.format(' "%s":"%s"', wa, u)
 			end
 		end
-		AstralRaidComms:SendChunkedAddonMessages(PREFIX, 'waPush', resp, channel)
+		AstralRaidComms:SendChunkedAddonMessages('waPush', resp, channel)
 	end)
 end
 
@@ -220,7 +216,7 @@ local function addonRequest(channel, ...)
 		end
 	end
 
-	AstralRaidComms:SendChunkedAddonMessages(PREFIX, 'addonPush', resp, channel)
+	AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)
 end
 
 local function versionRequest(channel, ...)
