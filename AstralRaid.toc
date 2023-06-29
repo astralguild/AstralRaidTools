@@ -13,6 +13,7 @@ Communications.lua
 Player.lua
 Instance.lua
 Interface.lua
+Text.lua
 Reminders.lua
 Settings.lua
 Options.lua

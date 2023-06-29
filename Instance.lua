@@ -7,13 +7,7 @@ addon.InEncounter = false
 addon.Encounter = nil
 
 function addon.CheckInstanceType()
-	local inInstance, instanceType = IsInInstance()
-  addon.InInstance = inInstance
-  addon.InstanceType = instanceType
-end
-
-function addon.InRaidIdle()
-  return addon.InInstance and addon.InstanceType == 'raid' and not addon.InEncounter
+	addon.InInstance, addon.InstanceType = IsInInstance()
 end
 
 local bw, bwClear

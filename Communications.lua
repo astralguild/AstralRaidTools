@@ -6,7 +6,6 @@ local LibDeflate = LibStub:GetLibrary("LibDeflate")
 -- Protocol constants
 local PREFIX = 'ASTRAL_RAID'
 local CHUNKED_EOL = '##F##$'
-local SENDER_VERSION, DATA_VERSION = 1, 1
 
 -- Interval times for syncing keys between clients
 -- Two different time settings for in a raid or otherwise
@@ -87,6 +86,7 @@ function AstralRaidComms:OnEvent(event, prefix, msg, channel, sender)
 	local arg, content = msg:match("^(%S*)%s*(.-)$")
 	for _, obj in pairs(objs) do
 		if obj.prefix == arg then
+			addon.PrintDebug(content, sender, msg)
 			obj.method(content, sender, msg)
 		end
 	end
