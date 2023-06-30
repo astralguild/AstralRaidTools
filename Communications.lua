@@ -25,6 +25,7 @@ local SEND_INTERVAL_SETTING = 1 -- What intervel to use for sending normal infor
 local msgs, newMsg, delMsg
 
 AstralRaidComms = CreateFrame('FRAME', 'AstralRaidComms')
+AstralRaidComms.PREFIX = PREFIX
 
 function AstralRaidComms:Init()
 	C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)

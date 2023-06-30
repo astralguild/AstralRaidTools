@@ -256,6 +256,6 @@ StaticPopupDialogs["WANT_TO_RELEASE"] = {
 
 reallyRelease = function()
   if StaticPopup1:IsShown() and StaticPopup1Button1:GetButtonState() == 'NORMAL' then
-    StaticPopup1Button1:Enable()
+    StaticPopup1Button1:Show()
   end
 end

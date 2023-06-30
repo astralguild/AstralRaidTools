@@ -15,6 +15,7 @@ Instance.lua
 Interface.lua
 Text.lua
 Reminders.lua
+Alerts.lua
 Settings.lua
 Options.lua
 Init.lua

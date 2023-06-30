@@ -113,19 +113,28 @@ local events = {
   ['enterInstance'] = {},
   ['resurrected'] = {},
   ['dead'] = {},
+  ['alive'] = {},
   ['spellcastSuccess'] = {},
   ['cleu'] = {},
 }
 
-local function handle(event, ...)
-  local t = texts[event.name]
+local function handle(e, event, ...)
+  local t = texts[e.name]
   if not t then return end
-  addon.PrintDebug(tostring(event.f), event)
   if (t.type == 'REMINDER' and IsInRaid() and addon.InInstance and not addon.InEncounter) or (t.type == 'ALERT' and addon.InEncounter) or addon.Debug then
-    if event.f(event, ...) then
-      addon.ShowText(event.name)
-    else
-      addon.HideText(event.name)
+    local action = e.f(event, ...)
+    if action then
+      if action == 'SHOW' then
+        if not texts[e.name]:IsShown() then
+          addon.PrintDebug('showText', t.type, e.name, event, ...)
+        end
+        addon.ShowText(e.name)
+      elseif action == 'HIDE' and not AstralRaidText.testing then
+        if texts[e.name]:IsShown() then
+          addon.PrintDebug('hideText', t.type, e.name, event, ...)
+        end
+        addon.HideText(e.name)
+      end
     end
   end
 end
@@ -142,12 +151,16 @@ local function dead(...)
   for _, e in pairs(events.dead) do handle(e, 'PLAYER_DEAD', ...) end
 end
 
+local function alive(...)
+  for _, e in pairs(events.alive) do handle(e, 'PLAYER_UNGHOST', ...) end
+end
+
 local function spellcastSuccess(...)
   for _, e in pairs(events.spellcastSuccess) do handle(e, 'UNIT_SPELLCAST_SUCCEEDED', ...) end
 end
 
 local function cleu(...)
-  for _, e in pairs(events.cleu) do handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', ...) end
+  for _, e in pairs(events.cleu) do handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', CombatLogGetCurrentEventInfo()) end
 end
 
 function addon.AddTextEventCallback(func, name, event)
@@ -162,6 +175,7 @@ end
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', enterInstance, 'astralRaidTextsEnterInstance')
 AstralRaidEvents:Register('PLAYER_ALIVE', resurrected, 'astralRaidTextsResurrected')
 AstralRaidEvents:Register('PLAYER_DEAD', dead, 'astralRaidTextsDeath')
+AstralRaidEvents:Register('PLAYER_UNGHOST', alive, 'astralRaidTextsAlive')
 AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', spellcastSuccess, 'astralRaidTextsSpellcastSuccess')
 AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidTextsCLEU')
 
