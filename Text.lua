@@ -109,14 +109,7 @@ end
 -- Event Wiring
 -- Semi-recreating the WeakAuras scripting environment
 
-local events = {
-  ['enterInstance'] = {},
-  ['resurrected'] = {},
-  ['dead'] = {},
-  ['alive'] = {},
-  ['spellcastSuccess'] = {},
-  ['cleu'] = {},
-}
+local events = {}
 
 local function handle(e, event, ...)
   local t = texts[e.name]
@@ -139,8 +132,48 @@ local function handle(e, event, ...)
   end
 end
 
+local remindersShownBeforeCombat = false
+local remindersState = {}
+
+local function hideRemindersForCombat()
+  if AstralRaidText:IsShown() then
+    for name, r in pairs(texts) do
+      if r.type == 'REMINDER' then
+        remindersState[name] = r:IsShown()
+        r:Hide()
+      end
+    end
+    remindersShownBeforeCombat = true
+  end
+end
+
+local function showRemindersAfterCombat()
+  if remindersShownBeforeCombat then
+    AstralRaidText:Show()
+    for name, shown in pairs(remindersState) do
+      texts[name]:SetShown(shown)
+    end
+    remindersShownBeforeCombat = false
+    remindersState = {}
+  end
+end
+
 local function enterInstance(...)
   for _, e in pairs(events.enterInstance) do handle(e, 'PLAYER_ENTERING_WORLD', ...) end
+end
+
+local function enterCombat(...)
+  for _, e in pairs(events.enterCombat) do
+    handle(e, 'PLAYER_ENTER_COMBAT', ...)
+    hideRemindersForCombat()
+  end
+end
+
+local function leaveCombat(...)
+  for _, e in pairs(events.leaveCombat) do
+    showRemindersAfterCombat()
+    handle(e, 'PLAYER_LEAVE_COMBAT', ...)
+  end
 end
 
 local function resurrected(...)
@@ -164,48 +197,17 @@ local function cleu(...)
 end
 
 function addon.AddTextEventCallback(func, name, event)
-  if events[event] then
-    table.insert(events[event], {
-      f = func,
-      name = name,
-    })
+  if not events[event] then
+    events[event] = {}
   end
+  table.insert(events[event], {f = func, name = name})
 end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', enterInstance, 'astralRaidTextsEnterInstance')
+AstralRaidEvents:Register('PLAYER_ENTER_COMBAT', enterCombat, 'astralRaidTextsEnterCombat')
+AstralRaidEvents:Register('PLAYER_LEAVE_COMBAT', leaveCombat, 'astralRaidTextsLeaveCombat')
 AstralRaidEvents:Register('PLAYER_ALIVE', resurrected, 'astralRaidTextsResurrected')
 AstralRaidEvents:Register('PLAYER_DEAD', dead, 'astralRaidTextsDeath')
 AstralRaidEvents:Register('PLAYER_UNGHOST', alive, 'astralRaidTextsAlive')
 AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', spellcastSuccess, 'astralRaidTextsSpellcastSuccess')
 AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidTextsCLEU')
-
-local remindersShownBeforeCombat = false
-local remindersState = {}
-
-local function hideRemindersForCombat()
-  if AstralRaidText:IsShown() then
-    for name, r in pairs(texts) do
-      if r.type == 'REMINDER' then
-        remindersState[name] = r:IsShown()
-        r:Hide()
-      end
-    end
-    remindersShownBeforeCombat = true
-  end
-end
-
-local function showRemindersAfterCombat()
-  if remindersShownBeforeCombat then
-    AstralRaidText:Show()
-    for name, shown in pairs(remindersState) do
-      if texts[name].type == 'REMINDER' then
-        texts[name]:SetShown(shown)
-      end
-    end
-    remindersShownBeforeCombat = false
-    remindersState = {}
-  end
-end
-
-AstralRaidEvents:Register('PLAYER_ENTER_COMBAT', hideRemindersForCombat, 'astralRaidEnterCombatHideReminders')
-AstralRaidEvents:Register('PLAYER_LEAVE_COMBAT', showRemindersAfterCombat, 'astralRaidLeaveCombatShowReminders')

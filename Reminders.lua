@@ -12,6 +12,20 @@ local function lowDurability()
   end
 end
 
+local function notFullHealthstones()
+  return GetItemCount(5512, false, true) < 3
+end
+
+local function untrigger(r, func)
+  if addon.InEncounter or (not func()) then
+    addon.HideText(r)
+    return
+  end
+  C_Timer.After(3, function()
+    untrigger(r, func)
+  end)
+end
+
 -- Reminders
 
 local cauldronSpells = {} -- TODO find cauldron spellIDs
@@ -24,7 +38,7 @@ local repairSpells = {
 local function eatFoodReminder(e, _, m, ...)
   if e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
     local wellFedBuff = AuraUtil.FindAuraByName('Well Fed', 'player')
-    if not wellFedBuff then
+    if (not wellFedBuff) and UnitHealth('player') > 0 then
       return 'SHOW'
     else
       return 'HIDE'
@@ -60,9 +74,24 @@ local function repairReminder(e, _, m, ...)
     local spellID = select(10, ...)
     for _, repairSpellID in pairs(repairSpells) do
       if spellID == repairSpellID then
+        untrigger('repairDown', lowDurability)
         return 'SHOW'
       end
     end
+  elseif not lowDurability() then
+    return 'HIDE'
+  end
+end
+
+local function healthstoneReminder(e, _, m, ...)
+  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and notFullHealthstones() then
+    local spellID = select(10, ...)
+    if spellID == 29893 then
+      untrigger('healthstones', notFullHealthstones)
+      return 'SHOW'
+    end
+  elseif not notFullHealthstones() then
+    return 'HIDE'
   end
 end
 
@@ -88,11 +117,14 @@ function addon.InitReminders()
   addon.CreateText('noRelease', 'DONT RELEASE', 'REMINDER')
 
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'enterInstance')
+  addon.AddTextEventCallback(repairReminder, 'repairDown', 'enterInstance')
+  addon.AddTextEventCallback(repairReminder, 'repairDown', 'enterCombat')
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'resurrected')
   addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'dead')
   addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'resurrected')
   addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'alive')
   addon.AddTextEventCallback(cauldronReminder, 'cauldronDown', 'spellcastSuccess')
   addon.AddTextEventCallback(repairReminder, 'repairDown', 'cleu')
+  addon.AddTextEventCallback(healthstoneReminder, 'healthstones', 'cleu')
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'cleu')
 end
