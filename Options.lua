@@ -1,78 +1,164 @@
-local _, addon = ...
+local ADDON_NAME, addon = ...
 
-local SharedMedia = LibStub("LibSharedMedia-3.0")
+addon.SharedMedia = LibStub('LibSharedMedia-3.0')
 
-AstralRaidOptionsFrame = AstralUI:OptionsFrame('AstralRaidOptionsFrame', 'planet')
-local contentFrame = AstralRaidOptionsFrame.contentFrame
+addon.Options = {}
 
-local generalHeader = contentFrame:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal')
-generalHeader:SetText('General Options')
-generalHeader:SetPoint('TOPLEFT', contentFrame, 'TOPLEFT')
+AstralRaidOptionsFrame = AstralUI:Template('AstralOptionsFrame', UIParent)
+AstralRaidOptionsFrame:Hide()
+AstralRaidOptionsFrame:SetPoint('CENTER', 0, 0)
+AstralRaidOptionsFrame.HeaderText:SetText('Astral Raid')
+AstralRaidOptionsFrame:SetMovable(true)
+AstralRaidOptionsFrame:RegisterForDrag('LeftButton')
+AstralRaidOptionsFrame:SetScript('OnDragStart', function(self) self:StartMoving() end)
+AstralRaidOptionsFrame:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
+AstralRaidOptionsFrame:SetDontSavePosition(true)
+AstralRaidOptionsFrame.MenuBar.Icon:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\planet.png')
 
-local showMinimap = AstralUI:Checkbox(contentFrame, 'Show Minimap Button')
-showMinimap:SetPoint('TOPLEFT', generalHeader, 'BOTTOMLEFT', 10, -10)
-showMinimap:SetScript('OnClick', function(self)
-	AstralRaidSettings.general.show_minimap_button.isEnabled = self:GetChecked()
-	-- if AstralRaidSettings.general.show_minimap_button.isEnabled then
-	-- 	addon.icon:Show('AstralKeys')
-	-- else
-	-- 	addon.icon:Hide('AstralKeys')
-	-- end
-	-- if IsAddOnLoaded('ElvUI_Enhanced') then -- Update the layout for the minimap buttons
-	-- 	ElvUI[1]:GetModule('MinimapButtons'):UpdateLayout()
-	-- end
+-- Paging
+
+local options = AstralRaidOptionsFrame or {}
+
+local framesList = AstralUI:ScrollList(options):LineHeight(24):Size(options.ListWidth - 1, options.Height):Point('TOPLEFT', options.MenuBar, 'TOPRIGHT', 0, 0):HideBorders()
+framesList.SCROLL_WIDTH = 10
+framesList.LINE_PADDING_LEFT = 7
+framesList.LINE_TEXTURE = 'Interface\\Addons\\' .. ADDON_NAME .. '\\media\\White'
+framesList.LINE_TEXTURE_IGNOREBLEND = true
+framesList.LINE_TEXTURE_HEIGHT = 24
+framesList.LINE_TEXTURE_COLOR_HL = {1, 1, 1, .5}
+framesList.LINE_TEXTURE_COLOR_P = {1, .82, 0, .6}
+framesList.EnableHoverAnimation = true
+
+framesList.Frame.ScrollBar:Size(8, 0):Point('TOPRIGHT', 0, 0):Point('BOTTOMRIGHT', 0, 0)
+framesList.Frame.ScrollBar.thumb:SetHeight(100)
+framesList.Frame.ScrollBar.buttonUP:Hide()
+framesList.Frame.ScrollBar.buttonDown:Hide()
+
+options.Frames = {}
+
+options:SetScript('OnShow', function(self)
+  self:SetPropagateKeyboardInput(true)
+  addon.InitializeOptionSettings()
+	framesList:Update()
+	if options.CurrentFrame and options.CurrentFrame.AdditionalOnShow then
+		options.CurrentFrame:AdditionalOnShow()
+	end
+	if type(options.CurrentFrame.OnShow) == 'function' then
+		options.CurrentFrame:OnShow()
+	end
 end)
 
-local remindersHeader = contentFrame:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal')
-remindersHeader:SetText('Reminders Options')
-remindersHeader:SetPoint('TOPLEFT', showMinimap, 'BOTTOMLEFT', -10, -20)
+function options:SetPage(page)
+	if options.CurrentFrame then
+		options.CurrentFrame:Hide()
+	end
+	options.CurrentFrame = page
+	if options.CurrentFrame.AdditionalOnShow then
+		options.CurrentFrame:AdditionalOnShow()
+	end
 
-local fonts = SharedMedia:List('font')
-local fontDropdown = AstralUI:Dropdown(contentFrame, 'Font', 200)
-fontDropdown:SetPoint('TOPLEFT', remindersHeader, 'BOTTOMLEFT', 10, -10)
+	options.CurrentFrame:Show()
 
-local fontSizeSlider = AstralUI:Slider(contentFrame, 'Font Size'):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(5,120)
+	if options.CurrentFrame.isWide and options.nowWide ~= options.CurrentFrame.isWide then
+		local frameWidth = type(options.CurrentFrame.isWide)=='number' and options.CurrentFrame.isWide or 850
+		options:SetWidth(frameWidth+options.ListWidth)
+		options.nowWide = options.CurrentFrame.isWide
+	elseif not options.CurrentFrame.isWide and options.nowWide then
+		options:SetWidth(options.Width)
+		options.nowWide = nil
+	end
 
-local testReminders = false
-local testRemindersButton = CreateFrame('BUTTON', 'AstralRaidsTestRemindersButton', contentFrame, "UIPanelButtonTemplate")
-testRemindersButton:SetPoint('TOPLEFT', fontDropdown, 'BOTTOMLEFT', 0, -10)
-testRemindersButton:SetSize(200, 20)
-testRemindersButton:SetText('Test Reminders')
-testRemindersButton:SetScript('OnClick', function()
-	testReminders = not testReminders
-	addon.TestTexts(testReminders, 5)
+	if options.CurrentFrame.isWide then
+		options.CurrentFrame:SetWidth(type(options.CurrentFrame.isWide)=='number' and options.CurrentFrame.isWide or 850)
+	end
+
+	if type(options.CurrentFrame.OnShow) == 'function' then
+		options.CurrentFrame:OnShow()
+	end
+end
+
+function framesList:SetListValue(index)
+	options:SetPage(options.Frames[index])
+end
+
+function options:Add(moduleName,frameName)
+	local self = CreateFrame('FRAME', 'AstralRaidOptions' .. moduleName, options)
+	self:SetSize(options.Width - options.ListWidth, options.Height - 16)
+	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 5, -45)
+	local pos = #options.Frames + 1
+	framesList.L[pos] = frameName or moduleName
+  self.moduleName = moduleName
+  self.name = frameName or moduleName
+	options.Frames[pos] = self
+
+	if options:IsShown() then
+		framesList:Update()
+	end
+	self:Hide()
+
+	return self
+end
+
+addon.Options = options
+
+local generalPage = options:Add('General', 'General')
+framesList:SetListValue(1)
+framesList.selected = 1
+framesList:Update()
+
+local showMinimap = AstralUI:Checkbox(generalPage, 'Show Minimap Button')
+showMinimap:SetPoint('TOPLEFT', 10, -10)
+showMinimap:SetScript('OnClick', function(self)
+	AstralRaidSettings.general.show_minimap_button.isEnabled = self:GetChecked()
+	if AstralRaidSettings.general.show_minimap_button.isEnabled then
+		addon.icon:Show(ADDON_NAME)
+	else
+		addon.icon:Hide(ADDON_NAME)
+	end
+	if IsAddOnLoaded('ElvUI_Enhanced') then -- Update the layout for the minimap buttons
+		ElvUI[1]:GetModule('MinimapButtons'):UpdateLayout()
+	end
 end)
 
 -- Initializations
 
 function addon.InitializeOptionSettings()
   showMinimap:SetChecked(AstralRaidSettings.general.show_minimap_button.isEnabled)
-
-	AstralUI:InitializeDropdown(fontDropdown, fonts, AstralRaidSettings.general.font.name, function(val)
-		AstralRaidSettings.general.font.name = val
-		addon.UpdateTextsFonts()
-	end)
-
-	fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)
-		event = event - event%1
-		AstralRaidSettings.general.font.size = event
-		addon.UpdateTextsFonts()
-		self.tooltipText = event
-		self:tooltipReload(self)
-	end)
-
-	AstralRaidOptionsFrame.guildText:SetFormattedText('Astral - Area 52 (US) %s', addon.CLIENT_VERSION)
+	AstralRaidOptionsFrame.GuildText:SetFormattedText('Astral - Area 52 (US) %s', addon.CLIENT_VERSION)
 end
 
 AstralRaidEvents:Register('PLAYER_LOGIN', addon.InitializeOptionSettings, 'astralRaidInitOptions')
 
-AstralRaidOptionsFrame:SetScript('OnShow', function(self)
-  self:SetPropagateKeyboardInput(true)
-  addon.InitializeOptionSettings()
-end)
 
 local function toggle()
 	AstralRaidOptionsFrame:SetShown(not AstralRaidOptionsFrame:IsShown())
+end
+
+local ldb = LibStub('LibDataBroker-1.1'):NewDataObject('AstralRaid', {
+	type = 'data source',
+	text = 'AstralRaid',
+	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\planet.png',
+	OnClick = function(_, button)
+		if button == 'LeftButton' then
+			toggle()
+		end
+	end,
+	OnTooltipShow = function(tooltip)
+		tooltip:AddLine('Astral Raid')
+		tooltip:AddLine('Left click to toggle options window')
+	end,
+})
+addon.icon = LibStub('LibDBIcon-1.0')
+
+function addon:OnInitialize()
+	self.db = LibStub('AceDB-3.0'):New('AstralRaidMinimap', {
+		profile = {
+			minimap = {
+				hide = not AstralRaidSettings.general.show_minimap_button.isEnabled,
+			},
+		},
+	})
+	addon.icon:Register(ADDON_NAME, ldb, self.db.profile.minimap)
 end
 
 SLASH_ASTRALRAID1 = '/astralraid'

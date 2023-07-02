@@ -3,19 +3,21 @@
 ## Notes: Internal guild raid companion
 ## Author: Astral
 ## Version: 0.1
-## SavedVariables: AstralRaidSettings
+## SavedVariables: AstralRaidSettings, AstralRaidMinimap
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
 
 embeds.xml
 
 Events.lua
+Settings.lua
 Communications.lua
+ClassData.lua
 Player.lua
 Instance.lua
 Interface.lua
+Core.lua
+Options.lua
 Text.lua
 Reminders.lua
 Alerts.lua
-Settings.lua
-Options.lua
-Init.lua
+Roster.lua

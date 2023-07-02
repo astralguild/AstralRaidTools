@@ -47,8 +47,22 @@ local function LoadDefaultSettings(addonName)
 	addon.AddDefaultSettings('general', 'debug', {isEnabled = false})
 	addon.AddDefaultSettings('general', 'show_minimap_button', {isEnabled = true})
 	addon.AddDefaultSettings('general', 'font', {name = 'PT Sans Narrow', size = 72})
+	addon.AddDefaultSettings('wa', 'required', {})
 	addon.AddDefaultSettings('texts', 'position', {x = 0, y = 400})
 	addon.AddDefaultSettings('frame', 'orientation', 1)
+	addon.AddDefaultSettings('frame', 'rank_filter',
+	{
+		[1] = true,
+		[2] = true,
+		[3] = true,
+		[4] = true,
+		[5] = true,
+		[6] = true,
+		[7] = true,
+		[8] = true,
+		[9] = true,
+		[10] = true,
+	})
 
 	addon.Debug = AstralRaidSettings.general.debug.isEnabled
 

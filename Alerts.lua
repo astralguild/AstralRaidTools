@@ -4,7 +4,7 @@ local SendAddonMessage = C_ChatInfo.SendAddonMessage
 
 local alert
 
-function addon.InitAlerts()
+local function initAlerts()
   alert = addon.CreateText('alertPrimary', 'LOREM IPSUM', 'ALERT')
 end
 
@@ -41,3 +41,5 @@ end
 
 AstralRaidComms:RegisterPrefix('RAID', 'alertShow', function(...) showAlert('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('RAID', 'alertHide', function(...) hideAlert('RAID', ...) end)
+
+AstralRaidEvents:Register('PLAYER_LOGIN', initAlerts, 'astralRaidInitAlerts')

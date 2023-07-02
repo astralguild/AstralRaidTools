@@ -135,7 +135,7 @@ local function noReleaseReminder(e, ...)
   end
 end
 
-function addon.InitReminders()
+AstralRaidEvents:Register('PLAYER_LOGIN', function()
   addon.CreateText('eatFood', 'EAT FOOD', 'REMINDER')
   addon.CreateText('cauldronDown', 'CAULDRON DOWN', 'REMINDER')
   addon.CreateText('repairDown', 'REPAIR', 'REMINDER')
@@ -156,4 +156,41 @@ function addon.InitReminders()
   addon.AddTextEventCallback(healthstoneReminder, 'healthstones', 'cleu')
   addon.AddTextEventCallback(healingPotionsReminder, 'healingPotions', 'cleu')
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'cleu')
+end, 'astralRaidInitReminders')
+
+local module = addon:New('Reminders', 'Reminders')
+local fontDropdown, fontSizeSlider
+
+local fonts = addon.SharedMedia:List('font')
+
+function module.options:Load()
+  fontDropdown = AstralUI:Dropdown(self, 'Font', 200)
+  fontDropdown:SetPoint('TOPLEFT')
+
+  fontSizeSlider = AstralUI:Slider(self, 'Font Size'):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(5,120)
+
+  local testReminders = false
+  local testRemindersButton = CreateFrame('BUTTON', 'AstralRaidsTestRemindersButton', self, 'UIPanelButtonTemplate')
+  testRemindersButton:SetPoint('TOPLEFT', fontDropdown, 'BOTTOMLEFT', 0, -10)
+  testRemindersButton:SetSize(200, 20)
+  testRemindersButton:SetText('Test Reminders')
+  testRemindersButton:SetScript('OnClick', function()
+    testReminders = not testReminders
+    addon.TestTexts(testReminders, 5)
+  end)
+end
+
+function module.options:OnShow()
+  AstralUI:InitializeDropdown(fontDropdown, fonts, AstralRaidSettings.general.font.name, function(val)
+		AstralRaidSettings.general.font.name = val
+		addon.UpdateTextsFonts()
+	end)
+
+	fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)
+		event = event - event%1
+		AstralRaidSettings.general.font.size = event
+		addon.UpdateTextsFonts()
+		self.tooltipText = event
+		self:tooltipReload(self)
+	end)
 end
