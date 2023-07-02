@@ -1,0 +1,4 @@
+- Addon Checker (notificaion back?)
+- Downloader
+- Missing enchants
+- Missing hpot, combat pot

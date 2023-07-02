@@ -12,12 +12,8 @@ local function lowDurability()
   end
 end
 
-local function notFullHealthstones()
-  return GetItemCount(5512, false, true) < 3
-end
-
 local function untrigger(r, func)
-  if addon.InEncounter or (not func()) then
+  if not func() then
     addon.HideText(r)
     return
   end
@@ -26,14 +22,33 @@ local function untrigger(r, func)
   end)
 end
 
+local function hideAfter(r, time)
+  C_Timer.After(time, function()
+    addon.HideText(r)
+  end)
+end
+
 -- Reminders
 
+local guildBankSpell = 83958
+local hsSpell = 29893
+local healthstoneItem = 5512
+local hpPotionItem = 191380
 local cauldronSpells = {} -- TODO find cauldron spellIDs
 local repairSpells = {
   [1] = 67826,
   [2] = 199109,
   [3] = 200061,
 }
+
+local function notFullHealthstones()
+  return GetItemCount(healthstoneItem, false, true) < 3
+end
+
+local function noHealthPotions()
+  return GetItemCount(hpPotionItem) == 0
+end
+
 
 local function eatFoodReminder(e, _, m, ...)
   if e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
@@ -62,7 +77,7 @@ local function cauldronReminder(e, ...)
     local spellID = select(3, ...)
     for _, cauldronSpellID in pairs(cauldronSpells) do
       if spellID == cauldronSpellID then
-        -- find way to hide
+        hideAfter('cauldronDown', 20)
         return 'SHOW'
       end
     end
@@ -86,11 +101,23 @@ end
 local function healthstoneReminder(e, _, m, ...)
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and notFullHealthstones() then
     local spellID = select(10, ...)
-    if spellID == 29893 then
+    if spellID == hsSpell then
       untrigger('healthstones', notFullHealthstones)
       return 'SHOW'
     end
   elseif not notFullHealthstones() then
+    return 'HIDE'
+  end
+end
+
+local function healingPotionsReminder(e, _, m, ...)
+  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and noHealthPotions() then
+    local spellID = select(10, ...)
+    if spellID == guildBankSpell then
+      untrigger('healthstones', noHealthPotions)
+      return 'SHOW'
+    end
+  elseif not noHealthPotions() then
     return 'HIDE'
   end
 end
@@ -113,6 +140,7 @@ function addon.InitReminders()
   addon.CreateText('cauldronDown', 'CAULDRON DOWN', 'REMINDER')
   addon.CreateText('repairDown', 'REPAIR', 'REMINDER')
   addon.CreateText('healthstones', 'GRAB HEALTHSTONES', 'REMINDER')
+  addon.CreateText('healingPotions', 'GRAB HEALING POTIONS', 'REMINDER')
   addon.CreateText('infiniteRune', 'RUNE UP', 'REMINDER')
   addon.CreateText('noRelease', 'DONT RELEASE', 'REMINDER')
 
@@ -126,5 +154,6 @@ function addon.InitReminders()
   addon.AddTextEventCallback(cauldronReminder, 'cauldronDown', 'spellcastSuccess')
   addon.AddTextEventCallback(repairReminder, 'repairDown', 'cleu')
   addon.AddTextEventCallback(healthstoneReminder, 'healthstones', 'cleu')
+  addon.AddTextEventCallback(healingPotionsReminder, 'healingPotions', 'cleu')
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'cleu')
 end

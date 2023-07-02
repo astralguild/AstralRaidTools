@@ -1,22 +1,24 @@
 local ADDON_NAME, addon = ...
 
+AstralUI = {}
+
 function addon.PrintDebug(...)
   if addon.Debug then
     print('ASTRAL_RAID_DEBUG', ...)
   end
 end
 
-function addon.TextureToText(textureName, widthInText, heightInText, textureWidth, textureHeight, l, r, t, b)
+function AstralUI:TextureToText(textureName, widthInText, heightInText, textureWidth, textureHeight, l, r, t, b)
 	return "|T"..textureName..":"..(widthInText or 0)..":"..(heightInText or 0)..":0:0:"..textureWidth..":"..textureHeight..":"..
 		format("%d",l*textureWidth)..":"..format("%d",r*textureWidth)..":"..format("%d",t*textureHeight)..":"..format("%d",b*textureHeight).."|t"
 end
 
-function addon.GetRaidTargetText(icon, size)
+function AstralUI:GetRaidTargetText(icon, size)
 	size = size or 0
-	return addon.TextureToText([[Interface\TargetingFrame\UI-RaidTargetingIcons]],size,size,256,256,((icon-1)%4)/4,((icon-1)%4+1)/4,floor((icon-1)/4)/4,(floor((icon-1)/4)+1)/4)
+	return AstralUI:TextureToText([[Interface\TargetingFrame\UI-RaidTargetingIcons]],size,size,256,256,((icon-1)%4)/4,((icon-1)%4+1)/4,floor((icon-1)/4)/4,(floor((icon-1)/4)+1)/4)
 end
 
-function addon.LinkItem(itemID, itemLink)
+function AstralUI:LinkItem(itemID, itemLink)
 	if not itemLink then
 		if not itemID then
 			return
@@ -37,9 +39,176 @@ function addon.LinkItem(itemID, itemLink)
 	end
 end
 
+-- Large amount of code copied and modified from ExRT Functions, Library
+
+local templates = {}
+
+local Mod = nil
+do
+	local function Widget_SetPoint(self,arg1,arg2,arg3,arg4,arg5)
+		if arg1 == 'x' then arg1 = self:GetParent() end
+		if arg2 == 'x' then arg2 = self:GetParent() end
+
+		if type(arg1) == 'number' and type(arg2) == 'number' then
+			arg1, arg2, arg3 = 'TOPLEFT', arg1, arg2
+		end
+
+		if type(arg1) == 'table' and not arg2 then
+			self:SetAllPoints(arg1)
+			return self
+		end
+
+		if arg5 then
+			self:SetPoint(arg1,arg2,arg3,arg4,arg5)
+		elseif arg4 then
+			self:SetPoint(arg1,arg2,arg3,arg4)
+		elseif arg3 then
+			self:SetPoint(arg1,arg2,arg3)
+		elseif arg2 then
+			self:SetPoint(arg1,arg2)
+		else
+			self:SetPoint(arg1)
+		end
+
+		return self
+	end
+	local function Widget_SetSize(self,...)
+		self:SetSize(...)
+		return self
+	end
+	local function Widget_SetNewPoint(self,...)
+		self:ClearAllPoints()
+		self:Point(...)
+		return self
+	end
+	local function Widget_SetScale(self,...)
+		self:SetScale(...)
+		return self
+	end
+	local function Widget_OnClick(self, func)
+		self:SetScript('OnClick',func)
+		return self
+	end
+	local function Widget_OnShow(self, func, disableFirstRun)
+		if not func then
+			self:SetScript('OnShow',nil)
+			return self
+		end
+		self:SetScript('OnShow', func)
+		if not disableFirstRun then
+			func(self)
+		end
+		return self
+	end
+	local function Widget_Run(self, func, ...)
+		func(self,...)
+		return self
+	end
+	local function Widget_Shown(self, bool)
+		if bool then
+			self:Show()
+		else
+			self:Hide()
+		end
+		return self
+	end
+	local function Widget_OnEnter(self, func)
+		self:SetScript('OnEnter',func)
+		return self
+	end
+	local function Widget_OnLeave(self, func)
+		self:SetScript('OnLeave',func)
+		return self
+	end
+	function Mod(self,...)
+		self.Point = Widget_SetPoint
+		self.Size = Widget_SetSize
+		self.NewPoint = Widget_SetNewPoint
+		self.Scale = Widget_SetScale
+		self.OnClick = Widget_OnClick
+		self.OnShow = Widget_OnShow
+		self.Run = Widget_Run
+		self.Shown = Widget_Shown
+		self.OnEnter = Widget_OnEnter
+		self.OnLeave = Widget_OnLeave
+
+		for i = 1, select('#', ...) do
+			if i % 2 == 1 then
+				local funcName,func = select(i, ...)
+				self[funcName] = func
+			end
+		end
+	end
+	AstralUI.ModObjFuncs = Mod
+end
+
+do
+	local function OnEnter(self)
+		if ( self:IsEnabled() ) then
+			if ( self.tooltipText ) then
+				GameTooltip:SetOwner(self, self.tooltipOwnerPoint or "ANCHOR_RIGHT")
+				GameTooltip:SetText(self.tooltipText, nil, nil, nil, nil, true)
+			end
+			if ( self.tooltipRequirement ) then
+				GameTooltip:AddLine(self.tooltipRequirement, 1.0, 1.0, 1.0, 1.0)
+				GameTooltip:Show()
+			end
+		end
+	end
+	local function OnLeave(self)
+		GameTooltip:Hide()
+	end
+	function templates:AstralSliderTemplate(parent)
+		local self = CreateFrame("Slider",nil,parent, BackdropTemplateMixin and "BackdropTemplate")
+		self:SetOrientation("HORIZONTAL")
+		self:SetSize(144,17)
+		self:SetHitRectInsets(0, 0, -10, -10)
+
+		self:SetBackdrop({
+			bgFile="Interface\\Buttons\\UI-SliderBar-Background",
+			edgeFile="Interface\\Buttons\\UI-SliderBar-Border",
+			tile = true,
+			insets = {
+				left = 3,
+				right = 3,
+				top = 6,
+				bottom = 6,
+			},
+			tileSize = 8,
+			edgeSize = 8,
+		})
+
+		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlight")
+		self.Text:SetPoint("BOTTOM",self,"TOP")
+
+		self.Low = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.Low:SetPoint("TOPLEFT",self,"BOTTOMLEFT",-4,3)
+
+		self.High = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.High:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",4,3)
+
+		self.Thumb = self:CreateTexture()
+		self.Thumb:SetTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+		self.Thumb:SetSize(32,32)
+		self:SetThumbTexture(self.Thumb)
+
+		self:SetScript("OnEnter",OnEnter)
+		self:SetScript("OnLeave",OnLeave)
+
+		return self
+	end
+end
+
 -- Frames
 
-function addon.OptionsFrame(name)
+function AstralUI:Template(name, parent)
+	if not templates[name] then
+		return
+	end
+	return templates[name](nil, parent)
+end
+
+function AstralUI:OptionsFrame(name, iconFileName)
 	local options = CreateFrame('FRAME', name, UIParent)
 
 	options:SetFrameStrata('DIALOG')
@@ -67,11 +236,19 @@ function addon.OptionsFrame(name)
 	menuBar.texture:SetColorTexture(33/255, 33/255, 33/255, 0.8)
 	options.menuBar = menuBar
 
+	local icon = menuBar:CreateTexture(nil, 'ARTWORK')
+	icon:SetAlpha(0.8)
+	icon:SetSize(24, 24)
+	icon:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\' .. iconFileName .. '.png')
+	icon:SetPoint('TOPLEFT', menuBar, 'TOPLEFT', 13, -10)
+	menuBar.icon = icon
+
 	local logo = menuBar:CreateTexture(nil, 'ARTWORK')
 	logo:SetAlpha(0.8)
 	logo:SetSize(32, 32)
 	logo:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\Logo@2x')
 	logo:SetPoint('BOTTOMLEFT', menuBar, 'BOTTOMLEFT', 10, 10)
+	menuBar.logo = logo
 
 	local closeButton = CreateFrame('BUTTON', '$parentCloseButton', options)
 	closeButton:SetNormalTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\baseline-close-24px@2x.tga')
@@ -91,7 +268,7 @@ function addon.OptionsFrame(name)
 	contentFrame:SetSize(550, 360)
 	options.contentFrame = contentFrame
 
-	options.guildInfo, options.guildText = addon.GuildInfo(options)
+	options.guildInfo, options.guildText = AstralUI:GuildInfo(options)
 
 	options:SetScript('OnDragStart', function(self) self:StartMoving() end)
 	options:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
@@ -107,7 +284,7 @@ end
 
 -- Widgets
 
-function addon.Dropdown(parent, label, width)
+function AstralUI:Dropdown(parent, label, width)
   local dropdown = CreateFrame('FRAME', nil, parent, "UIDropDownMenuTemplate")
 	dropdown.label = label
 	UIDropDownMenu_SetWidth(dropdown, width)
@@ -115,7 +292,7 @@ function addon.Dropdown(parent, label, width)
 	return dropdown
 end
 
-function addon.InitializeDropdown(dropdown, list, default, func)
+function AstralUI:InitializeDropdown(dropdown, list, default, func)
 	UIDropDownMenu_SetText(dropdown, dropdown.label .. ': ' .. default)
 	UIDropDownMenu_Initialize(dropdown, function(frame, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()
@@ -131,7 +308,94 @@ function addon.InitializeDropdown(dropdown, list, default, func)
 	end)
 end
 
-function addon.Checkbox(parent, label, width)
+do
+	local function SliderOnMouseWheel(self,delta)
+		if tonumber(self:GetValue()) == nil then
+			return
+		end
+		if self.isVertical then
+			delta = -delta
+		end
+		self:SetValue(tonumber(self:GetValue())+delta)
+	end
+	local function SliderTooltipShow(self)
+		local text = self.text:GetText()
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText(self.tooltipText or "")
+		GameTooltip:AddLine(text or "",1,1,1)
+		GameTooltip:Show()
+	end
+	local function SliderTooltipReload(self)
+		if GameTooltip:IsVisible() then
+			self:tooltipHide()
+			self:tooltipShow()
+		end
+	end
+	local function Widget_Range(self,minVal,maxVal,hideRange)
+		self.Low:SetText(minVal)
+		self.High:SetText(maxVal)
+		self:SetMinMaxValues(minVal, maxVal)
+		if not self.isVertical then
+			self.Low:SetShown(not hideRange)
+			self.High:SetShown(not hideRange)
+		end
+		return self
+	end
+	local function Widget_Size(self,size)
+		if self:GetOrientation() == "VERTICAL" then
+			self:SetHeight(size)
+		else
+			self:SetWidth(size)
+		end
+		return self
+	end
+	local function Widget_SetTo(self,value)
+		if not value then
+			local min,max = self:GetMinMaxValues()
+			value = max
+		end
+		self.tooltipText = value
+		self:SetValue(value)
+		return self
+	end
+	local function Widget_OnChange(self,func)
+		self:SetScript("OnValueChanged",func)
+		return self
+	end
+	local function Widget_SetTooltip(self,tooltipText)
+		self.tooltipText = tooltipText
+		return self
+	end
+	local function Widget_SetObey(self,bool)
+		self:SetObeyStepOnDrag(bool)
+		return self
+	end
+
+	function AstralUI:Slider(parent, text)
+		local self = AstralUI:Template('AstralSliderTemplate', parent)
+		self.text = self.Text
+		self.text:SetText(text or '')
+		self:SetOrientation('HORIZONTAL')
+		self:SetValueStep(1)
+		self:SetScript("OnMouseWheel", SliderOnMouseWheel)
+		self.tooltipShow = SliderTooltipShow
+		self.tooltipHide = GameTooltip_Hide
+		self.tooltipReload = SliderTooltipReload
+		self:SetScript("OnEnter", self.tooltipShow)
+		self:SetScript("OnLeave", self.tooltipHide)
+
+		Mod(self)
+		self.Size = Widget_Size
+		self.Range = Widget_Range
+		self.SetTo = Widget_SetTo
+		self.OnChange = Widget_OnChange
+		self.Tooltip = Widget_SetTooltip
+		self.SetObey = Widget_SetObey
+		return self
+	end
+end
+
+function AstralUI:Checkbox(parent, label, width)
 	local checkbox = CreateFrame('CheckButton', nil, parent, "BackdropTemplate")
 	checkbox:SetSize(width or 200, 20)
 	checkbox:SetBackdrop(nil)
@@ -161,7 +425,7 @@ function addon.Checkbox(parent, label, width)
 	return checkbox
 end
 
-function addon.GuildInfo(frame)
+function AstralUI:GuildInfo(frame)
 	local backdropButton = {
 		bgFile = nil,
 		edgeFile = "Interface\\ChatFrame\\ChatFrameBackground", tile = true, tileSize = 16, edgeSize = 1,

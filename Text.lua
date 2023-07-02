@@ -13,7 +13,9 @@ AstralRaidText.testing = false
 local texts = {}
 local displayed = {}
 local state = {}
+local remindersState = {}
 local wasShownBeforeTest = false
+local remindersShownBeforeCombat = false
 
 function addon.CreateText(name, text, type)
   if texts[name] then
@@ -67,7 +69,7 @@ function addon.UpdateTextsFonts()
   end
 end
 
-function addon.TestTexts(show)
+function addon.TestTexts(show, numToShow)
   if show then
     if AstralRaidText:IsShown() then
       wasShownBeforeTest = true
@@ -75,9 +77,14 @@ function addon.TestTexts(show)
       AstralRaidText:Show()
       wasShownBeforeTest = false
     end
+    local count = 0
     for name, r in pairs(texts) do
+      if count >= numToShow then
+        break
+      end
       state[name] = r:IsShown()
       r:Show()
+      count = count + 1
     end
     AstralRaidText.testing = true
   else
@@ -95,6 +102,8 @@ function addon.ShowText(name)
   end
   if not AstralRaidText:IsShown() then
     AstralRaidText:Show()
+    state[name] = true
+    remindersState[name] = true
   end
   texts[name]:Show()
 end
@@ -104,6 +113,8 @@ function addon.HideText(name)
     return
   end
   texts[name]:Hide()
+  state[name] = false
+  remindersState[name] = false
 end
 
 -- Event Wiring
@@ -131,9 +142,6 @@ local function handle(e, event, ...)
     end
   end
 end
-
-local remindersShownBeforeCombat = false
-local remindersState = {}
 
 local function hideRemindersForCombat()
   if AstralRaidText:IsShown() then
