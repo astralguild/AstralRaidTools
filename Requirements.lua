@@ -1,7 +1,7 @@
 local _, addon = ...
 
-local waModule = addon:New('WA Requirements', 'WeakAuras')
-local addonModule = addon:New('Addon Requirements', 'Addons')
+local waModule = addon:New('WA Requirements', 'WeakAuras', true)
+local addonModule = addon:New('Addon Requirements', 'Addons', true)
 
 addon.WeakAuraResponses = {}
 addon.AddonResponses = {}
@@ -127,7 +127,7 @@ function addon.DelUnitNameServer(unitName)
 	return unitName
 end
 
-local waHeader, waList, noWAs, addonHeader, addonList, notInRaidTextWA, notInRaidTextAddons
+local waHeader, waList, noWAs, addonHeader, addonList
 
 local function updateWeakAuraList()
   local weakAuras = addon.GetWeakAuras()
@@ -225,30 +225,19 @@ function waModule.options:Load()
   end)
 
   waList:Update()
-
-  notInRaidTextWA = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
-	notInRaidTextWA:SetText('You must be a guild officer to use this panel.')
-	notInRaidTextWA:SetPoint('CENTER', -50, 100)
-	notInRaidTextWA:Hide()
 end
 
 function waModule.options:OnShow()
   if WeakAurasSaved then
     addon.GetWeakAuras()
+    waHeader:Show()
+    waList:Show()
+    noWAs:Hide()
   else
     waHeader:Hide()
     waList:Hide()
     noWAs:Show()
     return
-  end
-  if not addon.IsOfficer() then
-    waHeader:Hide()
-    waList:Hide()
-    notInRaidTextWA:Show()
-  else
-    waHeader:Show()
-    waList:Show()
-    notInRaidTextWA:Hide()
   end
 end
 
@@ -323,22 +312,8 @@ function addonModule.options:Load()
   end)
 
   addonList:Update()
-
-  notInRaidTextAddons = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
-	notInRaidTextAddons:SetText('You must be a guild officer to use this panel.')
-	notInRaidTextAddons:SetPoint('CENTER', -50, 100)
-	notInRaidTextAddons:Hide()
 end
 
 function addonModule.options:OnShow()
-  if not addon.IsOfficer() then
-    addonHeader:Hide()
-    addonList:Hide()
-    notInRaidTextAddons:Show()
-  else
-    addonHeader:Show()
-    addonList:Show()
-    notInRaidTextAddons:Hide()
-  end
   addon.GetAddons()
 end

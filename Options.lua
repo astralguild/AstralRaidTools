@@ -36,10 +36,20 @@ framesList.Frame.ScrollBar.buttonUP:Hide()
 framesList.Frame.ScrollBar.buttonDown:Hide()
 
 options.Frames = {}
+options._Frames = {}
 
 options:SetScript('OnShow', function(self)
-  self:SetPropagateKeyboardInput(true)
+	self:SetPropagateKeyboardInput(true)
   addon.InitializeOptionSettings()
+	options.Frames = {}
+	for _, f in pairs(options._Frames) do
+		if (f.leadProtected and addon.IsRaidLead() or addon.IsOfficer()) or not f.leadProtected then
+			local pos = #options.Frames + 1
+			framesList.L[pos] = f.name
+			options.Frames[pos] = f
+			addon.PrintDebug(f.name)
+		end
+	end
 	framesList:Update()
 	if options.CurrentFrame and options.CurrentFrame.AdditionalOnShow then
 		options.CurrentFrame:AdditionalOnShow()
@@ -82,15 +92,15 @@ function framesList:SetListValue(index)
 	options:SetPage(options.Frames[index])
 end
 
-function options:Add(moduleName,frameName)
+function options:Add(moduleName, frameName, leadProtected)
 	local self = CreateFrame('FRAME', 'AstralRaidOptions' .. moduleName, options)
 	self:SetSize(options.ContentWidth - 12, options.Height - 16 - 45)
 	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 12, -45)
-	local pos = #options.Frames + 1
-	framesList.L[pos] = frameName or moduleName
   self.moduleName = moduleName
   self.name = frameName or moduleName
-	options.Frames[pos] = self
+	self.leadProtected = leadProtected
+	options._Frames[#options._Frames+1] = self
+	options.Frames[#options.Frames+1] = self
 
 	if options:IsShown() then
 		framesList:Update()
@@ -167,5 +177,6 @@ end
 
 SLASH_ASTRALRAID1 = '/astralraid'
 SLASH_ASTRALRAID2 = '/ar'
+SLASH_ASTRALRAID3 = '/art'
 
 SlashCmdList['ASTRALRAID'] = toggle

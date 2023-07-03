@@ -1,6 +1,6 @@
 local ADDON_NAME, addon = ...
 
-local module = addon:New('Roster', 'Roster View')
+local module = addon:New('Roster', 'Roster View', true)
 
 local statusIcons = {
 	[1] = "Interface\\RaidFrame\\ReadyCheck-Waiting",
@@ -283,13 +283,13 @@ function module.options:Load()
 	end)
 
 	notInRaidText = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
-	notInRaidText:SetText('You must be in a raid group and be assist or raid lead to inspect the raid roster.')
+	notInRaidText:SetText('You must be in a raid group to inspect the raid roster.')
 	notInRaidText:SetPoint('CENTER', -50, 100)
 	notInRaidText:Hide()
 end
 
 function module.options:OnShow()
-	if not addon.IsRaidLead() then
+	if not IsInRaid() then
 		roster:Hide()
 		raidSlider:Hide()
 		raidNames:Hide()

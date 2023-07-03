@@ -16,9 +16,7 @@ local SEND_VARIANCE = ((-1)^math.random(1,2)) * math.random(1, 100)/ 10^3 -- ran
 local SEND_INTERVAL = {}
 SEND_INTERVAL[1] = 0.2 + SEND_VARIANCE
 SEND_INTERVAL[2] = 1 + SEND_VARIANCE
-
--- Current setting to be used
-local SEND_INTERVAL_SETTING = 2
+local SEND_INTERVAL_SETTING = 1
 
 local msgs, newMsg, delMsg
 

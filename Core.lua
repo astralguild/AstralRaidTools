@@ -24,21 +24,19 @@ do
 		this.Load = nil
 		this.isLoaded = true
 	end
-	function addon:New(moduleName, title, disableOptions)
+	function addon:New(moduleName, title, leadProtected)
 		if addon.A[moduleName] then
 			return false
 		end
 		local m = {}
 		for k,v in pairs(addon.mod) do m[k] = v end
 
-		if not disableOptions then
-			m.options = addon.Options:Add(moduleName, title)
-			m.options:Hide()
-			m.options.moduleName = moduleName
-			m.options.name = title or moduleName
-			m.options:SetScript('OnShow', mod_LoadOptions)
-			addon.ModulesOptions[#addon.ModulesOptions + 1] = m.options
-		end
+		m.options = addon.Options:Add(moduleName, title, leadProtected)
+		m.options:Hide()
+		m.options.moduleName = moduleName
+		m.options.name = title or moduleName
+		m.options:SetScript('OnShow', mod_LoadOptions)
+		addon.ModulesOptions[#addon.ModulesOptions + 1] = m.options
 
 		m.main = CreateFrame('FRAME', nil)
 		m.main.events = {}
