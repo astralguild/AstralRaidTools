@@ -48,6 +48,7 @@ local function LoadDefaultSettings(addonName)
 	addon.AddDefaultSettings('general', 'show_minimap_button', {isEnabled = true})
 	addon.AddDefaultSettings('general', 'font', {name = 'PT Sans Narrow', size = 72})
 	addon.AddDefaultSettings('wa', 'required', {})
+	addon.AddDefaultSettings('addons', 'required', {})
 	addon.AddDefaultSettings('texts', 'position', {x = 0, y = 400})
 	addon.AddDefaultSettings('frame', 'orientation', 1)
 	addon.AddDefaultSettings('frame', 'rank_filter',

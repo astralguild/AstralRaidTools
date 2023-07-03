@@ -2,113 +2,46 @@ local ADDON_NAME, addon = ...
 
 local module = addon:New('Roster', 'Roster View')
 
-module.WeakAuras = {}
-module.WeakAuraResponses = {}
+local statusIcons = {
+	[1] = "Interface\\RaidFrame\\ReadyCheck-Waiting",
+	[2] = "Interface\\RaidFrame\\ReadyCheck-Ready",
+	[3] = "Interface\\RaidFrame\\ReadyCheck-NotReady",
+	[4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
+}
 
-local function waPush(channel, ...)
-	local msg, sender = ...
-	AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
-		local player = Ambiguate(sender, 'short')
-		module.WeakAuraResponses[player] = {}
-		for wa, _ in pairs(AstralRaidSettings.wa.required) do
-			module.WeakAuraResponses[player][wa] = true
-		end
-		for wa, url in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-			module.WeakAuraResponses[player][wa] = url
-		end
-		module.UpdateRosterPage()
-	end)
-end
+local notInRaidText, roster, raidSlider, raidNames, updateButton
+local cdRequest = 5
+local lastRequest = nil
 
-local function envPush(msg, sender)
-	print(msg)
-end
-
-AstralRaidComms:RegisterPrefix('RAID', 'versionPush', envPush)
-AstralRaidComms:RegisterPrefix('RAID', 'addonPush', envPush)
-AstralRaidComms:RegisterPrefix('RAID', 'waPush', function(...) waPush('RAID', ...) end)
-
-local function sendRequest(request, msg, channel)
-	AstralRaidComms:SendChunkedAddonMessages(request, msg, channel)
-	AstralRaidComms.versionPrint = true
-	AstralRaidComms.delay = 0
-	AstralRaidComms:Show()
-end
-
-function module.SendWeakAuraRequest()
-	if not IsInRaid() then return end
-
-	local req = ''
-	for wa, val in pairs(AstralRaidSettings.wa.required) do
-		if val then
-			req = req .. string.format(' "%s":"%s"', wa, tostring(module.WeakAuras[wa].url))
-		end
-	end
-
-	sendRequest('waRequest', req, 'RAID')
-end
-
-function addon.IterateRoster(maxGroup, index)
-	index = (index or 0) + 1
-	maxGroup = maxGroup or 8
-
-	if IsInRaid() then
-		if index > GetNumGroupMembers() then
-			return
-		end
-		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(index)
-		if subgroup > maxGroup then
-			return addon.IterateRoster(maxGroup,index)
-		end
-		local guid = UnitGUID(name or ("raid"..index))
-		name = name or ""
-		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
+local function checkButtonCooldown(self)
+	if (GetTime() - lastRequest) >= cdRequest then
+		self:SetText('Update')
+		self:Enable()
 	else
-		local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _
-		local unit = index == 1 and "player" or "party"..(index-1)
-		local guid = UnitGUID(unit)
-		if not guid then
-			return
-		end
-		subgroup = 1
-		name, _ = UnitName(unit)
-		name = name or ""
-		if _ then
-			name = name .. "-" .. _
-		end
-		class, fileName = UnitClass(unit)
-		if UnitIsGroupLeader(unit) then
-			rank = 2
-		else
-			rank = 1
-		end
-		level = UnitLevel(unit)
-		if UnitIsConnected(unit) then
-			online = true
-		end
-		if UnitIsDeadOrGhost(unit) then
-			isDead = true
-		end
-		combatRole = UnitGroupRolesAssigned(unit)
-		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
+		self:SetText('Update (' .. cdRequest - floor(GetTime() - lastRequest) .. ')')
+		C_Timer.After(1, function()
+			checkButtonCooldown(self)
+		end)
 	end
-end
-
-function addon.DelUnitNameServer(unitName)
-	unitName = strsplit("-", unitName)
-	return unitName
 end
 
 function module.options:Load()
 	local LISTFRAME_WIDTH = 610
-	local LISTFRAME_HEIGHT = 480
+	local LISTFRAME_HEIGHT = 400
 	local VERTICALNAME_WIDTH = 20
 	local VERTICALNAME_COUNT = 24
-	local LINE_HEIGHT, LINE_NAME_WIDTH = 16, 100
+	local LINE_HEIGHT, LINE_NAME_WIDTH = 16, 150
 
-	local roster = AstralUI:ScrollFrame(self):Point(0, -80):Size(LISTFRAME_WIDTH, LISTFRAME_HEIGHT)
-	self.updateButton = AstralUI:Button(self, UPDATE):Point('BOTTOMRIGHT', -75, 45):Size(130,20):OnClick(function()
-		module.SendWeakAuraRequest()
+	roster = AstralUI:ScrollFrame(self):Point(0, -80):Size(LISTFRAME_WIDTH, LISTFRAME_HEIGHT)
+	updateButton = AstralUI:Button(self, UPDATE):Point('BOTTOMRIGHT', -75, 45):Size(130,20):OnClick(function(self)
+		addon.AddonResponses = {}
+		addon.WeakAuraResponses = {}
+		addon.SendWeakAuraRequest()
+		addon.SendAddonsRequest()
+
+		lastRequest = GetTime()
+		self:Disable()
+		checkButtonCooldown(self)
 	end)
 
 	AstralUI:Border(roster, 0)
@@ -116,7 +49,7 @@ function module.options:Load()
 	roster.prevPlayerCol = 0
 	roster.ScrollBar:ClickRange(32)
 
-	local raidSlider = AstralUI:Slider(self, ''):Point("TOPLEFT", roster,"BOTTOMLEFT", LINE_NAME_WIDTH + 15,-3):Range(0,25):Size(VERTICALNAME_WIDTH*VERTICALNAME_COUNT):SetTo(0):OnChange(function(self, value)
+	raidSlider = AstralUI:Slider(self, ''):Point("TOPLEFT", roster,"BOTTOMLEFT", LINE_NAME_WIDTH + 15,-3):Range(0,25):Size(VERTICALNAME_WIDTH*VERTICALNAME_COUNT):SetTo(0):OnChange(function(self, value)
 		local currPlayerCol = floor(value)
 		if currPlayerCol ~= roster.prevPlayerCol then
 			roster.prevPlayerCol = currPlayerCol
@@ -136,18 +69,18 @@ function module.options:Load()
 	function roster:SetIcon(self, type)
 		if not type or type == 0 then
 			self:SetAlpha(0)
-		elseif type == 1 then -- x
-			self:SetTexCoord(0.5,0.5625,0.5,0.625)
-			self:SetVertexColor(.8,0,0,1)
-		elseif type == 2 then -- green check
-			self:SetTexCoord(0.5625,0.625,0.5,0.625)
-			self:SetVertexColor(0,.8,0,1)
-		elseif type == 3 then -- yellow check
-			self:SetTexCoord(0.5625,0.625,0.5,0.625)
-			self:SetVertexColor(.8,.8,0,1)
-		elseif type == 4 then -- ellipsis
-			self:SetTexCoord(0.875,0.9375,0.5,0.625)
-			self:SetVertexColor(.8,.8,0,1)
+		elseif type == 1 then
+			self:SetTexture(statusIcons[3])
+			self:SetVertexColor(1,1,1,1)
+		elseif type == 2 then
+			self:SetTexture(statusIcons[2])
+			self:SetVertexColor(1,1,1,1)
+		elseif type == 3 then
+			self:SetTexture(statusIcons[1])
+			self:SetVertexColor(1,1,1,1)
+		elseif type == 4 then
+			self:SetTexture(statusIcons[4])
+			self:SetVertexColor(0.6,0.6,0.6,1)
 		end
 	end
 
@@ -157,7 +90,7 @@ function module.options:Load()
 		line:SetPoint("TOPLEFT",0,-(i-1)*LINE_HEIGHT)
 		line:SetPoint("TOPRIGHT",0,-(i-1)*LINE_HEIGHT)
 		line:SetSize(0,LINE_HEIGHT)
-		line.name = AstralUI:Text(line):Size(LINE_NAME_WIDTH-LINE_HEIGHT/2,LINE_HEIGHT):Point('LEFT', 2, 0):Shadow():Tooltip("ANCHOR_LEFT",true)
+		line.name = AstralUI:Text(line):Size(LINE_NAME_WIDTH-LINE_HEIGHT/2,LINE_HEIGHT):Point('LEFT', 2, 0):Shadow():Tooltip("ANCHOR_LEFT",true):FontSize(9)
 		line.icons = {}
 		local iconSize = min(VERTICALNAME_WIDTH,LINE_HEIGHT)
 		for j=1,VERTICALNAME_COUNT do
@@ -165,8 +98,18 @@ function module.options:Load()
 			line.icons[j] = icon
 			icon:SetPoint("CENTER",line,"LEFT",LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(j-1) + VERTICALNAME_WIDTH / 2,0)
 			icon:SetSize(iconSize,iconSize)
-			icon:SetTexture('Interface\\AddOns\\'.. ADDON_NAME ..'\\media\\DiesalGUIcons16x256x128')
 			roster:SetIcon(icon,(i+j)%4)
+
+			local f = CreateFrame('FRAME', nil, line)
+			f:SetPoint('TOPLEFT', icon, 'TOPLEFT', 0, 0)
+			f:SetSize(iconSize,iconSize)
+			f:SetScript("OnEnter", function(self)
+				if self.icon.t and self.icon.t ~= "" then
+					AstralUI.Tooltip.Show(self, "ANCHOR_LEFT", self.icon.t)
+				end
+			end)
+			f:SetScript("OnLeave", AstralUI.Tooltip.Hide)
+			f.icon = icon
 		end
 		line.t = line:CreateTexture(nil, 'BACKGROUND')
 		line.t:SetAllPoints()
@@ -174,7 +117,7 @@ function module.options:Load()
 		line:Hide()
 	end
 
-	local raidNames = CreateFrame('FRAME', nil, self)
+	raidNames = CreateFrame('FRAME', nil, self)
 	for i=1,VERTICALNAME_COUNT do
 		raidNames[i] = AstralUI:Text(raidNames,'raid'..i,10):Point('BOTTOMLEFT', roster,'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1),0):Color(1,1,1)
 		local f = CreateFrame('FRAME', nil, self)
@@ -214,6 +157,19 @@ function module.options:Load()
 	end
 
 	function roster:Update()
+		local l = {}
+		for wa, data in pairs(AstralRaidSettings.wa.required) do
+			if data then
+				l[#l+1] = {wa, 'WeakAura'}
+			end
+		end
+		for a, data in pairs(AstralRaidSettings.addons.required) do
+			if data then
+				l[#l+1] = {a, 'Addon'}
+			end
+		end
+		roster.list = l
+
 		local scroll = self.ScrollBar:GetValue()
 		self:SetVerticalScroll(scroll % LINE_HEIGHT)
 		local start = floor(scroll / LINE_HEIGHT) + 1
@@ -252,40 +208,59 @@ function module.options:Load()
 			raidNames[i].t:SetAlpha(0)
 		end
 
+		local weakAuras = addon.GetWeakAuras()
+		local addons = addon.GetAddons()
+
 		local list = self.list
 		local lineCount = 1
 		local backgroundLineStatus = (roster.prevTopLine % 2) == 1
 		for i = start, #list do
-			local data = list[i]
+			local data, t = unpack(list[i])
+			local name = data .. string.format(' (|cfff5e4a8%s|r)', t)
 			local line = self.lines[lineCount]
 			lineCount = lineCount + 1
 			if not line then
 				break
 			end
-			line.name:SetText(data)
+			line.name:SetText(name)
 			line.data = data
 			line:Show()
 
 			line.t:SetShown(backgroundLineStatus)
+			local ll, yy
+			if t == 'WeakAura' then
+				ll = addon.WeakAuraResponses
+				yy = weakAuras
+			else
+				ll = addon.AddonResponses
+				yy = addons
+			end
 			for j = 1, VERTICALNAME_COUNT do
-				local pname = namesList2[j] or "-"
-				local d
-				for name, dat in pairs(module.WeakAuraResponses) do
-					if name == pname then
-						d = dat
-						break
-					end
-				end
-				if not d then -- no data, no icon
+				local pname = namesList2[j]
+				if lastRequest and (not pname) then
 					roster:SetIcon(line.icons[j], 0)
-				elseif d[data] and d[data] == true then -- has WA
-					roster:SetIcon(line.icons[j], 2)
-				elseif type(d[data]) == 'string' then -- URL different
-					roster:SetIcon(line.icons[j], 3)
-				elseif d then
-					roster:SetIcon(line.icons[j], 4)
+					line.icons[j].t = ''
 				else
-					roster:SetIcon(line.icons[j], 1)
+					local d = ll[pname]
+					if lastRequest and (not d) then
+						roster:SetIcon(line.icons[j], 4)
+						line.icons[j].t = 'No Response'
+					elseif not d then
+						roster:SetIcon(line.icons[j], 0)
+						line.icons[j].t = ''
+					elseif d[data] and d[data] == true then -- has WA/Addon
+						roster:SetIcon(line.icons[j], 2)
+						line.icons[j].t = ''
+					elseif type(d[data]) == 'string' then -- data different
+						roster:SetIcon(line.icons[j], 3)
+						line.icons[j].t = string.format('Your Version: %s\nTheir Version: %s', tostring(yy[data].version), d[data])
+					elseif d and not d[data] then
+						roster:SetIcon(line.icons[j], 4)
+						line.icons[j].t = ''
+					else
+						roster:SetIcon(line.icons[j], 1)
+						line.icons[j].t = ''
+					end
 				end
 			end
 		end
@@ -294,10 +269,6 @@ function module.options:Load()
 		end
 
 		self:Height(LINE_HEIGHT * #list)
-	end
-
-	function module.options:OnShow()
-		roster:Update()
 	end
 
 	roster.ScrollBar.slider:SetScript("OnValueChanged", function(self, value)
@@ -310,4 +281,30 @@ function module.options:Load()
 		end
 		self:UpdateButtons()
 	end)
+
+	notInRaidText = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
+	notInRaidText:SetText('You must be in a raid group and be assist or raid lead to inspect the raid roster.')
+	notInRaidText:SetPoint('CENTER', -50, 100)
+	notInRaidText:Hide()
+end
+
+function module.options:OnShow()
+	if not addon.IsRaidLead() then
+		roster:Hide()
+		raidSlider:Hide()
+		raidNames:Hide()
+		updateButton:Hide()
+		notInRaidText:Show()
+	else
+		roster:Show()
+		raidSlider:Show()
+		raidNames:Show()
+		updateButton:Show()
+		notInRaidText:Hide()
+		roster:Update()
+	end
+end
+
+function addon.UpdateRosterPage()
+	roster:Update()
 end

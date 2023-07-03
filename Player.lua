@@ -1,7 +1,5 @@
 local _, addon = ...
 
-addon.AddonList = {}
-addon.WeakAuraList = {}
 addon.PlayerClass = select(2, UnitClass('player'))
 addon.PlayerNameRealm = UnitName('player') .. '-' .. GetRealmName():gsub("%s+", "")
 
@@ -31,11 +29,32 @@ end
 
 function addon.GetWeakAuras()
 	if not WeakAurasSaved then
-		return
+		return {}
 	end
-	addon.AddonList['WeakAuras'] = true
-
+	local wa = {}
 	for waName, waData in pairs(WeakAurasSaved.displays) do
-		addon.WeakAuraList[waName] = waData.url
+		wa[waName] = waData
 	end
+	return wa
+end
+
+function addon.GetAddons()
+	local addons = {}
+	for i = 1, GetNumAddOns() do
+		local name, title, _, _, _, _, _ = GetAddOnInfo(i)
+		addons[name] = {
+			name = name,
+			title = title,
+			version = C_AddOns.GetAddOnMetadata(name, 'Version') or '',
+		}
+	end
+	return addons
+end
+
+function addon.IsRaidLead()
+	return (IsInRaid() and (UnitIsGroupAssistant('player') or UnitIsGroupLeader('player'))) or addon.Debug
+end
+
+function addon.IsOfficer()
+	return C_GuildInfo.IsGuildOfficer() or addon.Debug
 end

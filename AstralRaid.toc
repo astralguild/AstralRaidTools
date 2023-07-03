@@ -1,10 +1,12 @@
 ## Interface: 100100
-## Title: Astral Raid
+## Title: Astral |cfff5e4a8Raid|r
 ## Notes: Internal guild raid companion
 ## Author: Astral
 ## Version: 0.1
 ## SavedVariables: AstralRaidSettings, AstralRaidMinimap
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
+## IconTexture: Interface\AddOns\AstralRaid\Media\icon.png
+## AddonCompartmentFunc: OpenAstralRaidWindow
 
 embeds.xml
 
@@ -20,4 +22,5 @@ Options.lua
 Text.lua
 Reminders.lua
 Alerts.lua
+Requirements.lua
 Roster.lua

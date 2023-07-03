@@ -14,13 +14,11 @@ local CHUNKED_EOL = '##F##$'
 -- Borrowed from Astral Keys Communications.lua
 local SEND_VARIANCE = ((-1)^math.random(1,2)) * math.random(1, 100)/ 10^3 -- random number to space out messages being sent between clients
 local SEND_INTERVAL = {}
-SEND_INTERVAL[1] = 0.2 + SEND_VARIANCE -- Normal operations
-SEND_INTERVAL[2] = 1 + SEND_VARIANCE -- Used when in a non-raiding environment
-SEND_INTERVAL[3] = 2 -- Used for version checks
+SEND_INTERVAL[1] = 0.2 + SEND_VARIANCE
+SEND_INTERVAL[2] = 1 + SEND_VARIANCE
 
 -- Current setting to be used
--- Changes when player enters a raid instance or not
-local SEND_INTERVAL_SETTING = 1 -- What intervel to use for sending normal information
+local SEND_INTERVAL_SETTING = 2
 
 local msgs, newMsg, delMsg
 
@@ -39,7 +37,8 @@ function AstralRaidComms:Init()
 	self:Hide()
 	self.delay = 0
 	self.loadDelay = 0
-	self.versionPrint = false
+	self.sendIndex = 0
+	self.recIndex = {}
 	self.runningText = {}
 
 	self:RegisterEvent('CHAT_MSG_ADDON')
@@ -84,11 +83,10 @@ function AstralRaidComms:OnEvent(event, prefix, msg, channel, sender)
 	if prefix ~= PREFIX then return end
 	local objs = self.dtbl[channel]
 	if not objs then return end
-	local arg, content = msg:match("^(%S*)%s*(.-)$")
+	local arg, _ = strsplit(' ', msg, 2)
 	for _, obj in pairs(objs) do
 		if obj.prefix == arg then
-			addon.PrintDebug(content, sender, msg)
-			obj.method(content, sender, msg)
+			obj.method(msg, sender)
 		end
 	end
 end
@@ -99,23 +97,11 @@ function AstralRaidComms:OnUpdate(elapsed)
 		return
 	end
 	self.loadDelay = 0
-
-	if self.versionPrint then
-		AstralRaidComms.loadDelay = 3
-		if addon.InInstance and addon.InstanceType == 'raid' then
-			SEND_INTERVAL_SETTING = 1
-		else
-			SEND_INTERVAL_SETTING = 2
-		end
-		self.versionPrint = false
-	end
-
 	self.delay = 0
 	if #self.queue < 1 then -- Don't have any messages to send
 		self:Hide()
 		return
 	end
-
 	self:SendMessage()
 end
 
@@ -128,6 +114,12 @@ function AstralRaidComms:NewMessage(prefix, text, channel, target)
 
 	if channel == 'RAID' then
 		if not IsInRaid() then
+			return
+		end
+	end
+
+	if channel == 'PARTY' then
+		if not IsInGroup() then
 			return
 		end
 	end
@@ -163,25 +155,38 @@ function AstralRaidComms:SendChunkedAddonMessages(prefix2, message, ...)
 	local compressed = LibDeflate:CompressDeflate(message, {level = 9})
 	local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
 	encoded = encoded .. "##F##"
+
+	local index = 0
+	while self.sendIndex ~= index do
+		index = math.random(100, 999)
+	end
+	self.sendIndex = index
+
 	local parts = ceil(#encoded / 240)
 	for i = 1, parts do
 		local msg = encoded:sub((i-1)*240+1, i*240)
-		SendAddonMessage(PREFIX, string.format('%s %s', prefix2, msg), ...)
+		AstralRaidComms:NewMessage(PREFIX, string.format('%s %d %s', prefix2, index, msg), ...)
 	end
 end
 
 function AstralRaidComms:DecodeChunkedAddonMessages(sender, message, func)
-	if self.runningText[sender] then
-		self.runningText[sender] = self.runningText[sender] .. message
-	else
-		self.runningText[sender] = message
+	if not self.runningText[sender] then
+		self.runningText[sender] = {}
 	end
 
-	if self.runningText[sender] and self.runningText[sender]:find(CHUNKED_EOL) then
-		local decoded = LibDeflate:DecodeForWoWAddonChannel(self.runningText[sender]:gsub(CHUNKED_EOL, ''))
+	local prefix2, index, msg = strsplit(' ', message, 3)
+	if self.runningText[sender][prefix2] and self.recIndex[prefix2] == index then
+		self.runningText[sender][prefix2] = self.runningText[sender][prefix2] .. msg
+	else
+		self.runningText[sender][prefix2] = msg
+	end
+	self.recIndex[prefix2] = index
+
+	if self.runningText[sender][prefix2] and self.runningText[sender][prefix2]:find(CHUNKED_EOL) then
+		local decoded = LibDeflate:DecodeForWoWAddonChannel(self.runningText[sender][prefix2]:gsub(CHUNKED_EOL, ''))
 		local decompressed = LibDeflate:DecompressDeflate(decoded)
+		self.runningText[sender][prefix2] = nil
 		func(decompressed)
-		self.runningText[sender] = nil
 	end
 end
 
@@ -189,35 +194,52 @@ end
 
 local function waRequest(channel, ...)
 	local msg, sender = ...
+	local weakAuras = addon.GetWeakAuras()
 	AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
+		addon.PrintDebug('waRequest', m)
 		local resp = addon.PlayerClass
-
-		addon.GetWeakAuras()
-		for wa, url in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-			if not addon.WeakAuraList[wa] or addon.WeakAuraList[wa] ~= url then
-				local u = ''
-				if addon.WeakAuraList[wa] then
-					u = addon.WeakAuraList[wa]
+		for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+			local mine = ''
+			if weakAuras[wa] then
+				mine = weakAuras[wa].version
+			end
+			addon.PrintDebug('wa', wa, v, mine)
+			if not weakAuras[wa] or tostring(weakAuras[wa].version) ~= v then
+				local d = ''
+				if weakAuras[wa] then
+					d = tostring(weakAuras[wa].version)
 				end
-				resp = resp .. string.format(' "%s":"%s"', wa, u)
+				resp = resp .. string.format(' "%s":"%s"', wa, d)
 			end
 		end
 		AstralRaidComms:SendChunkedAddonMessages('waPush', resp, channel)
+		addon.PrintDebug('waPush', resp, channel)
 	end)
 end
 
 local function addonRequest(channel, ...)
-	local msg, _ = ...
-
-	local resp = 'addonPush ' .. addon.PlayerClass
-
-	for a, v in string.gmatch(msg, '"([^"]+)":"([^"]+)"') do
-		if not addon.AddonList[a] or addon.AddonList[a] ~= v then
-			resp = resp .. string.format(' "%s":"%s"', a, addon.AddonList[a])
+	local msg, sender = ...
+	local addons = addon.GetAddons()
+	AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
+		addon.PrintDebug('addonRequest', m)
+		local resp = addon.PlayerClass
+		for a, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+			local mine = ''
+			if addons[a] then
+				mine = addons[a].version
+			end
+			addon.PrintDebug('addon', a, v, mine)
+			if not addons[a] or addons[a].version ~= v then
+				local d = ''
+				if addons[a] then
+					d = addons[a].version
+				end
+				resp = resp .. string.format(' "%s":"%s"', a, d)
+			end
 		end
-	end
-
-	AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)
+		AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)
+		addon.PrintDebug('addonPush', resp, channel)
+	end)
 end
 
 local function versionRequest(channel, ...)

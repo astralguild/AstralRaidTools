@@ -1,17 +1,5 @@
 local _, addon = ...
 
-local function lowDurability()
-  local cur, max
-  for i = 1, 18 do
-      cur, max = GetInventoryItemDurability(i)
-      if cur and max then
-          if (cur/max) <= 0.9 then
-            return true
-          end
-      end
-  end
-end
-
 local function untrigger(r, func)
   if not func() then
     addon.HideText(r)
@@ -34,12 +22,42 @@ local guildBankSpell = 83958
 local hsSpell = 29893
 local healthstoneItem = 5512
 local hpPotionItem = 191380
-local cauldronSpells = {} -- TODO find cauldron spellIDs
+local combatPotionItems = {
+  [1] = 191914,
+  [2] = 191913,
+  [3] = 191912,
+  [4] = 191907,
+  [5] = 191906,
+  [6] = 191905,
+  [7] = 191383,
+  [8] = 191382,
+  [9] = 191381,
+  [10] = 191389,
+  [11] = 191388,
+  [12] = 191387,
+  [13] = 191401,
+}
+local cauldronSpells = {
+  [1] = 370668,
+  [2] = 370672, -- Ultimate Power
+}
 local repairSpells = {
   [1] = 67826,
   [2] = 199109,
   [3] = 200061,
 }
+
+local function lowDurability()
+  local cur, max
+  for i = 1, 18 do
+      cur, max = GetInventoryItemDurability(i)
+      if cur and max then
+          if (cur/max) <= 0.9 then
+            return true
+          end
+      end
+  end
+end
 
 local function notFullHealthstones()
   return GetItemCount(healthstoneItem, false, true) < 3
@@ -49,6 +67,13 @@ local function noHealthPotions()
   return GetItemCount(hpPotionItem) == 0
 end
 
+local function noCombatPotions()
+  local count = 0
+  for i = 1, #combatPotionItems do
+    count = count + GetItemCount(combatPotionItems[i])
+  end
+  return count == 0
+end
 
 local function eatFoodReminder(e, _, m, ...)
   if e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
@@ -114,7 +139,7 @@ local function healingPotionsReminder(e, _, m, ...)
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and noHealthPotions() then
     local spellID = select(10, ...)
     if spellID == guildBankSpell then
-      untrigger('healthstones', noHealthPotions)
+      hideAfter('healingPotions', 20)
       return 'SHOW'
     end
   elseif not noHealthPotions() then
@@ -122,15 +147,26 @@ local function healingPotionsReminder(e, _, m, ...)
   end
 end
 
-local function noReleaseReminder(e, ...)
-  if e == 'PLAYER_DEAD' and UnitHealth('player') == 0 and StaticPopup1:IsShown() and StaticPopup1Button1:GetText() == 'Release Spirit' then
-    StaticPopup_Show('WANT_TO_RELEASE')
-    if StaticPopup1Button1:GetButtonState() == 'NORMAL' then
-      StaticPopup1Button1:Hide()
+local function combatPotionsReminder(e, _, m, ...)
+  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and noCombatPotions() then
+    local spellID = select(10, ...)
+    if spellID == guildBankSpell then
+      hideAfter('combatPotions', 20)
+      return 'SHOW'
     end
+  elseif not noCombatPotions() then
+    return 'HIDE'
+  end
+end
+
+local function noReleaseReminder(e, ...)
+  if UnitHealth('player') == 0 then
+    StaticPopup_Show('WANT_TO_RELEASE_ASTRAL')
+    if StaticPopup1:IsShown() and StaticPopup1Button1:GetText() == 'Release Spirit' then StaticPopup1Button1:Hide() end
     return 'SHOW'
   else
-    StaticPopup_Hide('WANT_TO_RELEASE')
+    StaticPopup_Hide('WANT_TO_RELEASE_ASTRAL')
+    if StaticPopup1:IsShown() and StaticPopup1Button1:GetText() == 'Release Spirit' then StaticPopup1Button1:Show() end
     return 'HIDE'
   end
 end
@@ -141,6 +177,7 @@ AstralRaidEvents:Register('PLAYER_LOGIN', function()
   addon.CreateText('repairDown', 'REPAIR', 'REMINDER')
   addon.CreateText('healthstones', 'GRAB HEALTHSTONES', 'REMINDER')
   addon.CreateText('healingPotions', 'GRAB HEALING POTIONS', 'REMINDER')
+  addon.CreateText('combatPotions', 'GRAB COMBAT POTIONS', 'REMINDER')
   addon.CreateText('infiniteRune', 'RUNE UP', 'REMINDER')
   addon.CreateText('noRelease', 'DONT RELEASE', 'REMINDER')
 
@@ -148,6 +185,7 @@ AstralRaidEvents:Register('PLAYER_LOGIN', function()
   addon.AddTextEventCallback(repairReminder, 'repairDown', 'enterInstance')
   addon.AddTextEventCallback(repairReminder, 'repairDown', 'enterCombat')
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'resurrected')
+  addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'leaveCombat')
   addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'dead')
   addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'resurrected')
   addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'alive')
@@ -155,6 +193,7 @@ AstralRaidEvents:Register('PLAYER_LOGIN', function()
   addon.AddTextEventCallback(repairReminder, 'repairDown', 'cleu')
   addon.AddTextEventCallback(healthstoneReminder, 'healthstones', 'cleu')
   addon.AddTextEventCallback(healingPotionsReminder, 'healingPotions', 'cleu')
+  addon.AddTextEventCallback(combatPotionsReminder, 'combatPotions', 'cleu')
   addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'cleu')
 end, 'astralRaidInitReminders')
 
@@ -164,16 +203,18 @@ local fontDropdown, fontSizeSlider
 local fonts = addon.SharedMedia:List('font')
 
 function module.options:Load()
+  local generalHeader = AstralUI:Text(self, 'Reminders Options'):Point('TOPLEFT', 0, 0):Shadow()
+
   fontDropdown = AstralUI:Dropdown(self, 'Font', 200)
-  fontDropdown:SetPoint('TOPLEFT')
+  fontDropdown:SetPoint('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10)
 
   fontSizeSlider = AstralUI:Slider(self, 'Font Size'):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(5,120)
 
   local testReminders = false
   local testRemindersButton = CreateFrame('BUTTON', 'AstralRaidsTestRemindersButton', self, 'UIPanelButtonTemplate')
-  testRemindersButton:SetPoint('TOPLEFT', fontDropdown, 'BOTTOMLEFT', 0, -10)
-  testRemindersButton:SetSize(200, 20)
+  testRemindersButton:SetSize(175, 20)
   testRemindersButton:SetText('Test Reminders')
+  testRemindersButton:SetPoint('BOTTOMRIGHT', -15, -5)
   testRemindersButton:SetScript('OnClick', function()
     testReminders = not testReminders
     addon.TestTexts(testReminders, 5)

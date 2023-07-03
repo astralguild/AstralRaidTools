@@ -8,6 +8,7 @@ AstralRaidOptionsFrame = AstralUI:Template('AstralOptionsFrame', UIParent)
 AstralRaidOptionsFrame:Hide()
 AstralRaidOptionsFrame:SetPoint('CENTER', 0, 0)
 AstralRaidOptionsFrame.HeaderText:SetText('Astral Raid')
+AstralRaidOptionsFrame.HeaderText:SetTextColor(1, .82, 0, 1)
 AstralRaidOptionsFrame:SetMovable(true)
 AstralRaidOptionsFrame:RegisterForDrag('LeftButton')
 AstralRaidOptionsFrame:SetScript('OnDragStart', function(self) self:StartMoving() end)
@@ -22,7 +23,7 @@ local options = AstralRaidOptionsFrame or {}
 local framesList = AstralUI:ScrollList(options):LineHeight(24):Size(options.ListWidth - 1, options.Height):Point('TOPLEFT', options.MenuBar, 'TOPRIGHT', 0, 0):HideBorders()
 framesList.SCROLL_WIDTH = 10
 framesList.LINE_PADDING_LEFT = 7
-framesList.LINE_TEXTURE = 'Interface\\Addons\\' .. ADDON_NAME .. '\\media\\White'
+framesList.LINE_TEXTURE = 'Interface\\Addons\\' .. ADDON_NAME .. '\\Media\\White'
 framesList.LINE_TEXTURE_IGNOREBLEND = true
 framesList.LINE_TEXTURE_HEIGHT = 24
 framesList.LINE_TEXTURE_COLOR_HL = {1, 1, 1, .5}
@@ -83,8 +84,8 @@ end
 
 function options:Add(moduleName,frameName)
 	local self = CreateFrame('FRAME', 'AstralRaidOptions' .. moduleName, options)
-	self:SetSize(options.Width - options.ListWidth, options.Height - 16)
-	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 5, -45)
+	self:SetSize(options.ContentWidth - 12, options.Height - 16 - 45)
+	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 12, -45)
 	local pos = #options.Frames + 1
 	framesList.L[pos] = frameName or moduleName
   self.moduleName = moduleName
@@ -106,9 +107,9 @@ framesList:SetListValue(1)
 framesList.selected = 1
 framesList:Update()
 
-local showMinimap = AstralUI:Checkbox(generalPage, 'Show Minimap Button')
-showMinimap:SetPoint('TOPLEFT', 10, -10)
-showMinimap:SetScript('OnClick', function(self)
+local generalHeader = AstralUI:Text(generalPage, 'General Options'):Point('TOPLEFT', 0, 0):Shadow()
+
+local showMinimap = AstralUI:Check(generalPage):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
 	AstralRaidSettings.general.show_minimap_button.isEnabled = self:GetChecked()
 	if AstralRaidSettings.general.show_minimap_button.isEnabled then
 		addon.icon:Show(ADDON_NAME)
@@ -119,6 +120,8 @@ showMinimap:SetScript('OnClick', function(self)
 		ElvUI[1]:GetModule('MinimapButtons'):UpdateLayout()
 	end
 end)
+AstralUI:Text(generalPage):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point('LEFT', showMinimap, 'RIGHT', 5, 0):Shadow():SetText('Show Minimap Button')
+showMinimap.CheckedTexture:SetVertexColor(0.2,1,0.2,1)
 
 -- Initializations
 
@@ -129,15 +132,16 @@ end
 
 AstralRaidEvents:Register('PLAYER_LOGIN', addon.InitializeOptionSettings, 'astralRaidInitOptions')
 
-
 local function toggle()
 	AstralRaidOptionsFrame:SetShown(not AstralRaidOptionsFrame:IsShown())
 end
 
+OpenAstralRaidWindow = toggle
+
 local ldb = LibStub('LibDataBroker-1.1'):NewDataObject('AstralRaid', {
 	type = 'data source',
 	text = 'AstralRaid',
-	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\planet.png',
+	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\icon.png',
 	OnClick = function(_, button)
 		if button == 'LeftButton' then
 			toggle()

@@ -158,6 +158,8 @@ do
 		self.Width = 850
 		self.Height = 650
 		self.ListWidth = 165
+		self.MenuBarWidth = 50
+		self.ContentWidth = self.Width - self.ListWidth - self.MenuBarWidth
 
 		self.HeaderText = self:CreateFontString(nil, 'ARTWORK', 'InterUIBold_Normal')
 		self.HeaderText:SetPoint('TOP', 0, -14)
@@ -168,7 +170,7 @@ do
 		self.background:SetColorTexture(33/255, 33/255, 33/255, 0.5)
 
 		local menuBar = CreateFrame('FRAME', nil, self)
-		menuBar:SetWidth(50)
+		menuBar:SetWidth(self.MenuBarWidth)
 		menuBar:SetHeight(self.Height)
 		menuBar:SetPoint('TOPLEFT', self, 'TOPLEFT')
 		menuBar.texture = menuBar:CreateTexture(nil, 'BACKGROUND')
@@ -575,37 +577,6 @@ do
 		return self
 	end
 end
-
-function AstralUI:Checkbox(parent, label, width)
-	local checkbox = CreateFrame('CheckButton', nil, parent, "BackdropTemplate")
-	checkbox:SetSize(width or 200, 20)
-	checkbox:SetBackdrop(nil)
-	checkbox:SetBackdropBorderColor(85/255, 85/255, 85/255)
-	checkbox:SetNormalFontObject(InterUIRegular_Normal)
-	checkbox:SetText(label)
-
-	checkbox:SetBackdropColor(0, 0, 0)
-
-	checkbox:SetPushedTextOffset(1,-1)
-
-	local tex = checkbox:CreateTexture('PUSHED_TEXTURE_BOX', 'BACKGROUND')
-	tex:SetSize(12, 12)
-	tex:SetPoint('LEFT', checkbox, 'LEFT', -2, 0)
-	tex:SetTexture('Interface\\AddOns\\AstralKeys\\Media\\box2.tga')
-	tex:SetVertexColor(0.3, 0.3, 0.3)
-
-	checkbox.t = checkbox:CreateTexture('PUSHEDTEXTURE', 'BACKGROUND')
-	checkbox.t:SetSize(12, 12)
-	checkbox.t:SetPoint('CENTER', tex, 'CENTER', 0, 0)
-	checkbox.t:SetTexture('Interface\\AddOns\\AstralKeys\\Media\\Texture\\baseline-done-small@2x.tga')
-	checkbox:SetCheckedTexture(checkbox.t)
-
-	if label then
-		checkbox:GetFontString():SetPoint('LEFT', tex, 'RIGHT', 5, 0)
-	end
-	return checkbox
-end
-
 
 do
 	local function CheckBoxOnEnter(self)
@@ -1862,6 +1833,10 @@ do
 		self:_Disable()
 		return self
 	end
+	local function Widget_Enable(self)
+		self:_Enable()
+		return self
+	end
 	local function Widget_GetTextObj(self)
 		for i=1,self:GetNumRegions() do
 			local obj = select(i,self:GetRegions())
@@ -1909,7 +1884,10 @@ do
 		Mod(self,
 			'Tooltip',Widget_Tooltip
 		)
-		self._Disable = self.Disable	self.Disable = Widget_Disable
+		self._Disable = self.Disable
+		self.Disable = Widget_Disable
+		self._Enable = self.Enable
+		self.Enable = Widget_Enable
 		self.GetTextObj = Widget_GetTextObj
 		self.FontSize = Widget_SetFontSize
 		self.SetVertical = Widget_SetVertical
@@ -2483,13 +2461,11 @@ end
 
 -- Dialogs
 
-StaticPopupDialogs["WANT_TO_RELEASE"] = {
+StaticPopupDialogs["WANT_TO_RELEASE_ASTRAL"] = {
   text = 'Do you want to release your spirit?',
   button1 = 'Ok',
   OnAccept = function()
-		if StaticPopup1:IsShown() then
-			StaticPopup1Button1:Show()
-		end
+		StaticPopup1Button1:Show()
   end,
   timeout = 0,
   whileDead = true,
