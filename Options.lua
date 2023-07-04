@@ -13,6 +13,12 @@ AstralRaidOptionsFrame:SetMovable(true)
 AstralRaidOptionsFrame:RegisterForDrag('LeftButton')
 AstralRaidOptionsFrame:SetScript('OnDragStart', function(self) self:StartMoving() end)
 AstralRaidOptionsFrame:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
+AstralRaidOptionsFrame:SetScript('OnKeyDown', function (self, key)
+	if key == 'ESCAPE' then
+		self:SetPropagateKeyboardInput(false)
+		AstralRaidOptionsFrame:Hide()
+	end
+end)
 AstralRaidOptionsFrame:SetDontSavePosition(true)
 AstralRaidOptionsFrame.MenuBar.Icon:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\planet.png')
 
@@ -30,6 +36,7 @@ framesList.LINE_TEXTURE_COLOR_HL = {1, 1, 1, .5}
 framesList.LINE_TEXTURE_COLOR_P = {1, .82, 0, .6}
 framesList.EnableHoverAnimation = true
 
+framesList.LDisabled = {}
 framesList.Frame.ScrollBar:Size(8, 0):Point('TOPRIGHT', 0, 0):Point('BOTTOMRIGHT', 0, 0)
 framesList.Frame.ScrollBar.thumb:SetHeight(100)
 framesList.Frame.ScrollBar.buttonUP:Hide()
@@ -43,12 +50,10 @@ options:SetScript('OnShow', function(self)
   addon.InitializeOptionSettings()
 	options.Frames = {}
 	for _, f in pairs(options._Frames) do
-		if (f.leadProtected and addon.IsRaidLead() or addon.IsOfficer()) or not f.leadProtected then
-			local pos = #options.Frames + 1
-			framesList.L[pos] = f.name
-			options.Frames[pos] = f
-			addon.PrintDebug(f.name)
-		end
+		local pos = #options.Frames + 1
+		framesList.L[pos] = f.name
+		framesList.LDisabled[pos] = f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer())
+		options.Frames[pos] = f
 	end
 	framesList:Update()
 	if options.CurrentFrame and options.CurrentFrame.AdditionalOnShow then
@@ -165,6 +170,8 @@ local ldb = LibStub('LibDataBroker-1.1'):NewDataObject('AstralRaid', {
 addon.icon = LibStub('LibDBIcon-1.0')
 
 function addon:OnInitialize()
+	addon.LoadDefaultSettings()
+
 	self.db = LibStub('AceDB-3.0'):New('AstralRaidMinimap', {
 		profile = {
 			minimap = {

@@ -39,7 +39,7 @@ function addon.LinkItem(itemID, itemLink)
 	end
 end
 
--- Large amount of code copied and modified from ExRT Functions, Library
+-- Large amount of code copied and modified from Astral Functions, Library
 
 local templates = {}
 
@@ -354,6 +354,7 @@ do
 
 		self.HideBorders = HideBorders
 	end
+	AstralUI.Templates_Border = templates.Border
 end
 
 function templates:AstralCheckButtonTemplate(parent)
@@ -402,6 +403,7 @@ function templates:AstralCheckButtonTemplate(parent)
 
 	return self
 end
+
 
 do
 	local function OnEnter(self)
@@ -458,6 +460,497 @@ do
 
 		return self
 	end
+	function templates:AstralSliderModernTemplate(parent)
+		local self = CreateFrame("Slider",nil,parent)
+		self:SetOrientation("HORIZONTAL")
+		self:SetSize(144,10)
+
+		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlight")
+		self.Text:SetPoint("BOTTOM",self,"TOP",0,1)
+
+		self.Low = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.Low:SetPoint("TOPLEFT",self,"BOTTOMLEFT",0,-1)
+
+		self.High = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.High:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",0,-1)
+
+		templates:Border(self,0.24,0.25,0.3,1,1,1,0)
+
+		self.Thumb = self:CreateTexture()
+		self.Thumb:SetColorTexture(0.44,0.45,0.50,0.7)
+		self.Thumb:SetSize(16,8)
+		self:SetThumbTexture(self.Thumb)
+
+		self:SetScript("OnEnter",OnEnter)
+		self:SetScript("OnLeave",OnLeave)
+
+		return self
+	end
+	function templates:AstralSliderModernVerticalTemplate(parent)
+		local self = CreateFrame("Slider",nil,parent)
+		self:SetOrientation("VERTICAL")
+		self:SetSize(10,144)
+
+		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlight")
+		self.Text:SetPoint("BOTTOM",self,"TOP",0,1)
+
+		self.Low = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.Low:SetPoint("TOPLEFT",self,"TOPRIGHT",1,-1)
+
+		self.High = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.High:SetPoint("BOTTOMLEFT",self,"BOTTOMRIGHT",1,1)
+
+		templates:Border(self,0.24,0.25,0.3,1,1,0,1)
+
+		self.Thumb = self:CreateTexture()
+		self.Thumb:SetColorTexture(0.44,0.45,0.50,0.7)
+		self.Thumb:SetSize(8,16)
+		self:SetThumbTexture(self.Thumb)
+
+		self:SetScript("OnEnter",OnEnter)
+		self:SetScript("OnLeave",OnLeave)
+
+		return self
+	end
+end
+
+do
+	local function OnClick(self)
+		self:Hide()
+	end
+	local function OnShow(self)
+		self:SetFrameLevel(1000)
+		if self.OnShow then
+			self:OnShow()
+		end
+	end
+	local function OnUpdate(self, elapsed)
+		AstralUI.ScrollDropDown.Update(self, elapsed)
+	end
+	function templates:AstralDropDownListTemplate(parent)
+		local self = CreateFrame("Button",nil,parent)
+		self:SetFrameStrata("TOOLTIP")
+		self:EnableMouse(true)
+		self:Hide()
+
+		self.Backdrop = CreateFrame("Frame",nil,self, BackdropTemplateMixin and "BackdropTemplate")
+		self.Backdrop:SetAllPoints()
+		self.Backdrop:SetBackdrop({
+			bgFile="Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+			edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",
+			tile = true,
+			insets = {
+				left = 11,
+				right = 12,
+				top = 11,
+				bottom = 9,
+			},
+			tileSize = 32,
+			edgeSize = 32,
+		})
+
+		self:SetScript("OnClick",OnClick)
+		self:SetScript("OnShow",OnShow)
+		self:SetScript("OnUpdate",OnUpdate)
+		return self
+	end
+	function templates:AstralDropDownListModernTemplate(parent)
+		local self = CreateFrame("Button",nil,parent)
+		self:SetFrameStrata("TOOLTIP")
+		self:EnableMouse(true)
+		self:Hide()
+
+		templates:Border(self,0,0,0,1,1)
+
+		self.Background = self:CreateTexture(nil,"BACKGROUND")
+		self.Background:SetColorTexture(0,0,0,.9)
+		self.Background:SetPoint("TOPLEFT")
+		self.Background:SetPoint("BOTTOMRIGHT")
+
+		self:SetScript("OnClick",OnClick)
+		self:SetScript("OnShow",OnShow)
+		self:SetScript("OnUpdate",OnUpdate)
+		return self
+	end
+end
+
+do
+	local function OnEnter(self)
+		local parent = self:GetParent()
+		local myscript = parent:GetScript("OnEnter")
+		if myscript then
+			myscript(parent)
+		end
+	end
+	local function OnLeave(self)
+		local parent = self:GetParent()
+		local myscript = parent:GetScript("OnLeave")
+		if myscript then
+			myscript(parent)
+		end
+	end
+	local function OnClick(self)
+		ToggleDropDownMenu(nil, nil, self:GetParent())
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+	function templates:AstralUIChatDownButtonTemplate(parent)
+		local self = CreateFrame("Button",nil,parent)
+		self:SetSize(24,24)
+
+		self.NormalTexture = self:CreateTexture()
+		self.NormalTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up")
+		self.NormalTexture:SetSize(24,24)
+		self.NormalTexture:SetPoint("RIGHT")
+		self:SetNormalTexture(self.NormalTexture)
+
+		self.PushedTexture = self:CreateTexture()
+		self.PushedTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Down")
+		self.PushedTexture:SetSize(24,24)
+		self.PushedTexture:SetPoint("RIGHT")
+		self:SetPushedTexture(self.PushedTexture)
+
+		self.DisabledTexture = self:CreateTexture()
+		self.DisabledTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Disabled")
+		self.DisabledTexture:SetSize(24,24)
+		self.DisabledTexture:SetPoint("RIGHT")
+		self:SetDisabledTexture(self.DisabledTexture)
+
+		self.HighlightTexture = self:CreateTexture()
+		self.HighlightTexture:SetTexture("Interface\\Buttons\\UI-Common-MouseHilight")
+		self.HighlightTexture:SetSize(24,24)
+		self.HighlightTexture:SetPoint("RIGHT")
+		self:SetHighlightTexture(self.HighlightTexture,"ADD")
+
+		self:SetScript("OnEnter",OnEnter)
+		self:SetScript("OnLeave",OnLeave)
+		self:SetScript("OnClick",OnClick)
+		return self
+	end
+end
+
+
+do
+	local function OnHide(self)
+		CloseDropDownMenus()
+	end
+	function templates:AstralDropDownMenuTemplate(parent)
+		local self = CreateFrame("Frame",nil,parent)
+		self:SetSize(40,32)
+
+		self.Left = self:CreateTexture(nil,"ARTWORK")
+		self.Left:SetPoint("TOPLEFT",0,17)
+		self.Left:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
+		self.Left:SetSize(25,64)
+		self.Left:SetTexCoord(0,0.1953125,0,1)
+
+		self.Middle = self:CreateTexture(nil,"ARTWORK")
+		self.Middle:SetPoint("LEFT",self.Left,"RIGHT")
+		self.Middle:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
+		self.Middle:SetSize(115,64)
+		self.Middle:SetTexCoord(0.1953125,0.8046875,0,1)
+
+		self.Right = self:CreateTexture(nil,"ARTWORK")
+		self.Right:SetPoint("LEFT",self.Middle,"RIGHT")
+		self.Right:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
+		self.Right:SetSize(25,64)
+		self.Right:SetTexCoord(0.8046875,1,0,1)
+
+		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.Text:SetWordWrap(false)
+		self.Text:SetJustifyH("RIGHT")
+		self.Text:SetSize(0,10)
+		self.Text:SetPoint("RIGHT",self.Right,-43,2)
+
+		self.Icon = self:CreateTexture(nil,"OVERLAY")
+		self.Icon:Hide()
+		self.Icon:SetPoint("LEFT",30,2)
+		self.Icon:SetSize(16,16)
+
+		self.Button = AstralUI:Template("AstralUIChatDownButtonTemplate",self)
+		self.Button:SetPoint("TOPRIGHT",self.Right,-16,-18)
+		self.Button:SetMotionScriptsWhileDisabled(true)
+
+		self:SetScript("OnHide",OnHide)
+
+		return self
+	end
+	function templates:AstralDropDownButtonModernTemplate(parent)
+		local self = AstralUI:Template("AstralUIChatDownButtonTemplate",parent)
+		self:SetSize(16,16)
+		self:SetMotionScriptsWhileDisabled(true)
+
+		self.NormalTexture:SetTexture("Interface\\AddOns\\"..ADDON_NAME.."\\media\\DiesalGUIcons16x256x128")
+		self.NormalTexture:SetTexCoord(0.25,0.3125,0.5,0.625)
+		self.NormalTexture:SetVertexColor(1,1,1,.7)
+		self.NormalTexture:SetSize(0,0)
+		self.NormalTexture:ClearAllPoints()
+		self.NormalTexture:SetPoint("TOPLEFT",-5,2)
+		self.NormalTexture:SetPoint("BOTTOMRIGHT",5,-2)
+
+		self.PushedTexture:SetTexture("Interface\\AddOns\\"..ADDON_NAME.."\\media\\DiesalGUIcons16x256x128")
+		self.PushedTexture:SetTexCoord(0.25,0.3125,0.5,0.625)
+		self.PushedTexture:SetVertexColor(1,1,1,1)
+		self.PushedTexture:SetSize(0,0)
+		self.PushedTexture:ClearAllPoints()
+		self.PushedTexture:SetPoint("TOPLEFT",-5,1)
+		self.PushedTexture:SetPoint("BOTTOMRIGHT",5,-3)
+
+		self.DisabledTexture:SetTexture("Interface\\AddOns\\"..ADDON_NAME.."\\media\\DiesalGUIcons16x256x128")
+		self.DisabledTexture:SetTexCoord(0.25,0.3125,0.5,0.625)
+		self.DisabledTexture:SetVertexColor(.4,.4,.4,1)
+		self.DisabledTexture:SetSize(0,0)
+		self.DisabledTexture:ClearAllPoints()
+		self.DisabledTexture:SetPoint("TOPLEFT",-5,2)
+		self.DisabledTexture:SetPoint("BOTTOMRIGHT",5,-2)
+
+		self.HighlightTexture:SetColorTexture(1,1,1,.3)
+		self.HighlightTexture:SetSize(0,0)
+		self.HighlightTexture:ClearAllPoints()
+		self.HighlightTexture:SetPoint("TOPLEFT")
+		self.HighlightTexture:SetPoint("BOTTOMRIGHT")
+		self:SetHighlightTexture(self.HighlightTexture)
+
+		templates:Border(self,0.24,0.25,0.30,1,1)
+
+		self.Background = self:CreateTexture(nil,"BACKGROUND")
+		self.Background:SetColorTexture(0,0,0,.3)
+		self.Background:SetPoint("TOPLEFT")
+		self.Background:SetPoint("BOTTOMRIGHT")
+
+		return self
+	end
+	function templates:AstralDropDownMenuModernTemplate(parent)
+		local self = CreateFrame("Frame",nil,parent)
+		self:SetSize(40,20)
+
+		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.Text:SetWordWrap(false)
+		self.Text:SetJustifyH("RIGHT")
+		self.Text:SetJustifyV("MIDDLE")
+		self.Text:SetSize(0,20)
+		self.Text:SetPoint("RIGHT",-24,0)
+		self.Text:SetPoint("LEFT",4,0)
+
+		templates:Border(self,0.24,0.25,0.30,1,1)
+
+		self.Background = self:CreateTexture(nil,"BACKGROUND")
+		self.Background:SetColorTexture(0,0,0,.3)
+		self.Background:SetPoint("TOPLEFT")
+		self.Background:SetPoint("BOTTOMRIGHT")
+
+		self.Button = AstralUI:Template("AstralDropDownButtonModernTemplate",self)
+		self.Button:SetPoint("RIGHT",-2,0)
+
+		self:SetScript("OnHide",OnHide)
+
+		return self
+	end
+end
+
+do
+	local function OnEnter(self)
+		self.Highlight:Show()
+		if ( self.tooltipTitle ) then
+			if ( self.tooltipOnButton ) then
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+				GameTooltip:AddLine(self.tooltipTitle, 1.0, 1.0, 1.0)
+				GameTooltip:AddLine(self.tooltipText)
+				GameTooltip:Show()
+			else
+				GameTooltip_AddNewbieTip(self, self.tooltipTitle, 1.0, 1.0, 1.0, self.tooltipText, true)
+			end
+		end
+		if ( self.NormalText:IsTruncated() ) then
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:AddLine(self.NormalText:GetText())
+			GameTooltip:Show()
+		end
+		AstralUI.ScrollDropDown.OnButtonEnter(self)
+	end
+	local function OnLeave(self)
+		self.Highlight:Hide()
+		GameTooltip:Hide()
+		AstralUI.ScrollDropDown.OnButtonLeave(self)
+	end
+	local function OnClick(self, button, down)
+		AstralUI.ScrollDropDown.OnClick(self, button, down)
+	end
+	local function OnLoad(self)
+		self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
+	end
+	function templates:AstralDropDownMenuButtonTemplate(parent)
+		local self = CreateFrame("Button",nil,parent)
+		self:SetSize(100,16)
+
+		self.Highlight = self:CreateTexture(nil,"BACKGROUND")
+		self.Highlight:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+		self.Highlight:SetAllPoints()
+		self.Highlight:SetBlendMode("ADD")
+		self.Highlight:Hide()
+
+		self.Texture = self:CreateTexture(nil,"BACKGROUND",nil,-8)
+		self.Texture:Hide()
+		self.Texture:SetAllPoints()
+
+		self.Icon = self:CreateTexture(nil,"ARTWORK")
+		self.Icon:SetSize(16,16)
+		self.Icon:SetPoint("LEFT")
+		self.Icon:Hide()
+
+		self.Arrow = self:CreateTexture(nil,"ARTWORK")
+		self.Arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+		self.Arrow:SetSize(16,16)
+		self.Arrow:SetPoint("RIGHT")
+		self.Arrow:Hide()
+
+		self.NormalText = self:CreateFontString()
+		self.NormalText:SetPoint("LEFT")
+
+		self:SetFontString(self.NormalText)
+
+		self:SetNormalFontObject("GameFontHighlightSmallLeft")
+		self:SetHighlightFontObject("GameFontHighlightSmallLeft")
+		self:SetDisabledFontObject("GameFontDisableSmallLeft")
+
+		self:SetPushedTextOffset(1,-1)
+
+		self:SetScript("OnEnter",OnEnter)
+		self:SetScript("OnLeave",OnLeave)
+		self:SetScript("OnClick",OnClick)
+		self:SetScript("OnLoad",OnLoad)
+		return self
+	end
+end
+
+function templates:AstralRadioButtonModernTemplate(parent)
+	local self = CreateFrame("CheckButton",nil,parent)
+	self:SetSize(16,16)
+
+	self.text = self:CreateFontString(nil,"BACKGROUND","GameFontNormalSmall")
+	self.text:SetPoint("LEFT",self,"RIGHT",5,0)
+
+	self:SetFontString(self.text)
+
+	self.NormalTexture = self:CreateTexture()
+	self.NormalTexture:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\Media\\radioModern")
+	self.NormalTexture:SetAllPoints()
+	self.NormalTexture:SetTexCoord(0,0.25,0,1)
+	self:SetNormalTexture(self.NormalTexture)
+
+	self.HighlightTexture = self:CreateTexture()
+	self.HighlightTexture:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\Media\\radioModern")
+	self.HighlightTexture:SetAllPoints()
+	self.HighlightTexture:SetTexCoord(0.5,0.75,0,1)
+	self:SetHighlightTexture(self.HighlightTexture)
+
+	self.CheckedTexture = self:CreateTexture()
+	self.CheckedTexture:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\Media\\radioModern")
+	self.CheckedTexture:SetAllPoints()
+	self.CheckedTexture:SetTexCoord(0.25,0.5,0,1)
+	self:SetCheckedTexture(self.CheckedTexture)
+
+	return self
+end
+
+
+do
+	local function OnMouseDown(self)
+		local parent = self:GetParent()
+		parent.Icon:SetPoint("TOPLEFT", parent, "TOPLEFT", 8, -8)
+		parent.IconOverlay:Show()
+	end
+	local function OnMouseUp(self)
+		local parent = self:GetParent()
+		parent.Icon:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, -6)
+		parent.IconOverlay:Hide()
+	end
+	function templates:AstralTrackingButtonModernTemplate(parent)
+		local self = CreateFrame("Frame",nil,parent)
+		self:SetSize(32,32)
+		self:SetHitRectInsets(0, 0, -10, -10)
+
+		self.Icon = self:CreateTexture(nil,"ARTWORK")
+		self.Icon:SetPoint("TOPLEFT",6,-6)
+		self.Icon:SetTexture("Interface\\Minimap\\Tracking\\None")
+		self.Icon:SetSize(20,20)
+
+		self.IconOverlay = self:CreateTexture(nil,"ARTWORK")
+		self.IconOverlay:SetPoint("TOPLEFT",self.Icon)
+		self.IconOverlay:SetPoint("BOTTOMRIGHT",self.Icon)
+		self.IconOverlay:SetColorTexture(0,0,0,0.5)
+
+		self.Button = CreateFrame("Button",nil,self)
+		self.Button:SetSize(32,32)
+		self.Button:SetPoint("TOPLEFT")
+
+		self.Button.Border = self.Button:CreateTexture(nil,"BORDER")
+		self.Button.Border:SetPoint("TOPLEFT")
+		self.Button.Border:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\media\\radioModern")
+		self.Button.Border:SetSize(32,32)
+		self.Button.Border:SetTexCoord(0,0.25,0,1)
+
+		self.Button.Shine = self.Button:CreateTexture(nil,"OVERLAY")
+		self.Button.Shine:SetPoint("TOPLEFT",2,-2)
+		self.Button.Shine:SetTexture("Interface\\ComboFrame\\ComboPoint")
+		self.Button.Shine:SetBlendMode("ADD")
+		self.Button.Shine:Hide()
+		self.Button.Shine:SetSize(27,27)
+		self.Button.Shine:SetTexCoord(0.5625,1,0,1)
+
+		self.Button:SetScript("OnMouseDown",OnMouseDown)
+		self.Button:SetScript("OnMouseUp",OnMouseUp)
+
+		self.Button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight","ADD")
+
+		return self
+	end
+end
+
+function templates:AstralCheckButtonModernTemplate(parent)
+	local self = CreateFrame("CheckButton",nil,parent)
+	self:SetSize(20,20)
+
+	self.text = self:CreateFontString(nil,"ARTWORK","GameFontNormalSmall")
+	self.text:SetPoint("TOPLEFT",self,"TOPRIGHT",4,0)
+	self.text:SetPoint("BOTTOMLEFT",self,"BOTTOMRIGHT",4,0)
+	self.text:SetJustifyV("MIDDLE")
+
+	self:SetFontString(self.text)
+
+	templates:Border(self,0.24,0.25,0.3,1,1)
+
+	self.Texture = self:CreateTexture(nil,"BACKGROUND")
+	self.Texture:SetColorTexture(0,0,0,.3)
+	self.Texture:SetPoint("TOPLEFT")
+	self.Texture:SetPoint("BOTTOMRIGHT")
+
+	self.CheckedTexture = self:CreateTexture()
+	self.CheckedTexture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+	self.CheckedTexture:SetPoint("TOPLEFT",-4,4)
+	self.CheckedTexture:SetPoint("BOTTOMRIGHT",4,-4)
+	self:SetCheckedTexture(self.CheckedTexture)
+
+	self.PushedTexture = self:CreateTexture()
+	self.PushedTexture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+	self.PushedTexture:SetPoint("TOPLEFT",-4,4)
+	self.PushedTexture:SetPoint("BOTTOMRIGHT",4,-4)
+	self.PushedTexture:SetVertexColor(0.8,0.8,0.8,0.5)
+	self.PushedTexture:SetDesaturated(true)
+	self:SetPushedTexture(self.PushedTexture)
+
+	self.DisabledTexture = self:CreateTexture()
+	self.DisabledTexture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check-Disabled")
+	self.DisabledTexture:SetPoint("TOPLEFT",-4,4)
+	self.DisabledTexture:SetPoint("BOTTOMRIGHT",4,-4)
+	self:SetDisabledTexture(self.DisabledTexture)
+
+	self.HighlightTexture = self:CreateTexture()
+	self.HighlightTexture:SetColorTexture(1,1,1,.3)
+	self.HighlightTexture:SetPoint("TOPLEFT")
+	self.HighlightTexture:SetPoint("BOTTOMRIGHT")
+	self:SetHighlightTexture(self.HighlightTexture)
+
+	return self
 end
 
 function AstralUI:Template(name, parent)
@@ -467,33 +960,23 @@ function AstralUI:Template(name, parent)
 	return templates[name](nil, parent)
 end
 
-function AstralUI:Dropdown(parent, label, width)
-  local dropdown = CreateFrame('FRAME', nil, parent, 'UIDropDownMenuTemplate')
-	dropdown.label = label
-	UIDropDownMenu_SetWidth(dropdown, width)
-	UIDropDownMenu_SetText(dropdown, label)
-	return dropdown
-end
+do
+	function AstralUI:Shadow(parent,size,edgeSize)
+		local self = CreateFrame("Frame",nil,parent, BackdropTemplateMixin and "BackdropTemplate")
+		self:SetPoint("LEFT",-size,0)
+		self:SetPoint("RIGHT",size,0)
+		self:SetPoint("TOP",0,size)
+		self:SetPoint("BOTTOM",0,-size)
+		self:SetBackdrop({edgeFile="Interface/AddOns/"..ADDON_NAME.."/media/shadow",edgeSize=edgeSize or 28,insets={left=size,right=size,top=size,bottom=size}})
+		self:SetBackdropBorderColor(0,0,0,.45)
 
-function AstralUI:InitializeDropdown(dropdown, list, default, func)
-	UIDropDownMenu_SetText(dropdown, dropdown.label .. ': ' .. default)
-	UIDropDownMenu_Initialize(dropdown, function(frame, level, menuList)
-		local info = UIDropDownMenu_CreateInfo()
-		info.func = function(clicked)
-			func(clicked.value)
-			UIDropDownMenu_SetText(dropdown, dropdown.label .. ': ' .. clicked.value)
-		end
-		info.notCheckable = true
-		for i, val in pairs(list) do
-			info.text, info.arg1 = val, i
-			UIDropDownMenu_AddButton(info)
-		end
-	end)
+		return self
+	end
 end
 
 do
 	local function SliderOnMouseWheel(self,delta)
-		if tonumber(self:GetValue()) == nil then
+		if tonumber(self:GetValue()) == nil then 
 			return
 		end
 		if self.isVertical then
@@ -554,13 +1037,29 @@ do
 		return self
 	end
 
-	function AstralUI:Slider(parent, text)
-		local self = AstralUI:Template('AstralSliderTemplate', parent)
+	function AstralUI:Slider(parent,text,isVertical,template)
+		if template == 0 then
+			template = "AstralSliderTemplate"
+		elseif not template then
+			template = isVertical and "AstralSliderModernVerticalTemplate" or "AstralSliderModernTemplate"
+		end
+		local self = AstralUI:Template(template,parent) or CreateFrame("Slider",nil,parent,template)
 		self.text = self.Text
-		self.text:SetText(text or '')
-		self:SetOrientation('HORIZONTAL')
+		self.text:SetText(text or "")
+		if isVertical then
+			self.Low:Hide()
+			self.High:Hide()
+			self.text:Hide()
+			self.isVertical = true
+		end
+		self:SetOrientation(isVertical and "VERTICAL" or "HORIZONTAL")
 		self:SetValueStep(1)
+		--self:SetObeyStepOnDrag(true)
+
+		self.isVertical = isVertical
+
 		self:SetScript("OnMouseWheel", SliderOnMouseWheel)
+
 		self.tooltipShow = SliderTooltipShow
 		self.tooltipHide = GameTooltip_Hide
 		self.tooltipReload = SliderTooltipReload
@@ -568,15 +1067,613 @@ do
 		self:SetScript("OnLeave", self.tooltipHide)
 
 		Mod(self)
-		self.Size = Widget_Size
 		self.Range = Widget_Range
 		self.SetTo = Widget_SetTo
 		self.OnChange = Widget_OnChange
 		self.Tooltip = Widget_SetTooltip
 		self.SetObey = Widget_SetObey
+
+		if template and template:find("^AstralSliderModern") then
+			self._Size = self.Size
+			self.Size = Widget_Size
+
+			self.text:SetFont(self.text:GetFont(),10,"")
+			self.Low:SetFont(self.Low:GetFont(),10,"")
+			self.High:SetFont(self.High:GetFont(),10,"")
+		end
+
+		return self
+	end
+	function AstralUI.CreateSlider(parent,width,height,x,y,minVal,maxVal,text,defVal,relativePoint,isVertical,isModern)
+		return AstralUI:Slider(parent,text,isVertical,(not isModern) and 0):Size(width,height):Point(relativePoint or "TOPLEFT",x,y):Range(minVal,maxVal):SetTo(defVal or maxVal)
+	end
+end
+
+do
+	local function DropDown_OnEnter(self)
+		if self.tooltip then
+			AstralUI.Tooltip.Show(self,nil,self.tooltip,self.Text:IsTruncated() and self.Text:GetText())
+		elseif self.Text:IsTruncated() then
+			AstralUI.Tooltip.Show(self,nil,self.Text:GetText())
+		end
+	end
+	local function DropDown_OnLeave(self)
+		GameTooltip_Hide()
+	end
+	local function ScrollDropDownOnHide(self)
+		AstralUI:DropDownClose()
+	end
+	local function Widget_SetSize(self,width)
+		if self.Middle then
+			self.Middle:SetWidth(width)
+			local defaultPadding = 25
+			self:_SetWidth(width + defaultPadding + defaultPadding)
+			self.Text:SetWidth(width - defaultPadding)
+		else
+			self:_SetWidth(width)
+		end
+		self.noResize = true
+		return self
+	end
+	local function Widget_SetText(self,text)
+		self.Text:SetText(text)
+		return self
+	end
+	local function Widget_SetTooltip(self,text)
+		self.tooltip = text
+		self:SetScript("OnEnter",DropDown_OnEnter)
+		self:SetScript("OnLeave",DropDown_OnLeave)
+		return self
+	end
+	local function Widget_AddText(self,text,size,extra_func)
+		self.labelText = AstralUI:Text(self,text,size or 10):Point("LEFT",self,"LEFT",5,0):Center():Middle():Color():Shadow()
+		if type(extra_func)=='function' then
+			self.labelText:Run(extra_func)
+		end
+		return self
+	end
+	local function Widget_Disable(self)
+		self.Button:Disable()
+		return self
+	end
+	local function Widget_Enable(self)
+		self.Button:Enable()
+		return self
+	end
+	local function DropDown_OnClick(self,...)
+		local parent = self:GetParent()
+		if parent.PreUpdate then
+			parent.PreUpdate(parent)
+		end
+		AstralUI.ScrollDropDown.ClickButton(self,...)
+	end
+
+	local function Widget_ColorBorder(self,cR,cG,cB,cA)
+		if type(cR)=="number" then
+			AstralUI:Templates_Border(self,cR,cG,cB,cA,1)
+		elseif cR then
+			AstralUI:Templates_Border(self,0.74,0.25,0.3,1,1)
+		else
+			AstralUI:Templates_Border(self,0.24,0.25,0.3,1,1)
+		end
+		return self
+	end
+
+	function AstralUI:DropDown(parent,width,lines,template)
+		template = template == 0 and "AstralDropDownMenuTemplate" or template or "AstralDropDownMenuModernTemplate"
+		local self = AstralUI:Template(template, parent) or CreateFrame("Frame", nil, parent, template)
+
+		self.Button:SetScript("OnClick",DropDown_OnClick)
+		self:SetScript("OnHide",ScrollDropDownOnHide)
+
+		self.List = {}
+		self.Width = width
+		self.Lines = lines or 10
+		if lines == -1 then
+			self.Lines = nil
+		end
+
+		if template == "AstralDropDownMenuModernTemplate" then
+			self.isModern = true
+		end
+
+		self.relativeTo = self.Left
+
+		Mod(self,
+			'SetText',Widget_SetText,
+			'Tooltip',Widget_SetTooltip,
+			'AddText',Widget_AddText,
+			'Disable',Widget_Disable,
+			'Enable',Widget_Enable,
+			'ColorBorder',Widget_ColorBorder
+		)
+
+		self._Size = self.Size
+		self.Size = Widget_SetSize
+
+		self._SetWidth = self.SetWidth
+		self.SetWidth = Widget_SetSize
+
+		return self
+	end
+
+	function AstralUI:DropDownButton(parent,defText,dropDownWidth,lines,template)
+		local self = AstralUI:Button(parent,defText,template)
+
+		self:SetScript("OnClick",AstralUI.ScrollDropDown.ClickButton)
+		self:SetScript("OnHide",ScrollDropDownOnHide)
+
+		self.List = {}
+		self.Width = dropDownWidth
+		self.Lines = lines or 10
+
+		self.isButton = true
+
 		return self
 	end
 end
+
+AstralUI.ScrollDropDown = {}
+AstralUI.ScrollDropDown.List = {}
+local ScrollDropDown_Blizzard, ScrollDropDown_Modern = {},{}
+
+for i=1,2 do
+	ScrollDropDown_Modern[i] = AstralUI:Template("AstralDropDownListModernTemplate",UIParent)
+	_G[ADDON_NAME .. "DropDownListModern"..i] = ScrollDropDown_Modern[i]
+	ScrollDropDown_Modern[i]:SetClampedToScreen(true)
+	ScrollDropDown_Modern[i].border = AstralUI:Shadow(ScrollDropDown_Modern[i],20)
+	ScrollDropDown_Modern[i].Buttons = {}
+	ScrollDropDown_Modern[i].MaxLines = 0
+	ScrollDropDown_Modern[i].isModern = true
+	do
+		ScrollDropDown_Modern[i].Animation = CreateFrame("Frame",nil,ScrollDropDown_Modern[i])
+		ScrollDropDown_Modern[i].Animation:SetSize(1,1)
+		ScrollDropDown_Modern[i].Animation:SetPoint("CENTER")
+		ScrollDropDown_Modern[i].Animation.P = 0
+		ScrollDropDown_Modern[i].Animation.parent = ScrollDropDown_Modern[i]
+		ScrollDropDown_Modern[i].Animation:SetScript("OnUpdate",function(self,elapsed)
+			self.P = self.P + elapsed
+			local P = self.P
+			if P > 2.5 then
+				P = P % 2.5
+				self.P = P
+			end
+			local color = P <= 1 and P / 2 or P <= 1.5 and 0.5 or (2.5 - P)/2
+			local parent = self.parent
+			parent.BorderTop:SetColorTexture(color,color,color,1)
+			parent.BorderLeft:SetColorTexture(color,color,color,1)
+			parent.BorderBottom:SetColorTexture(color,color,color,1)
+			parent.BorderRight:SetColorTexture(color,color,color,1)
+		end)
+	end
+
+	ScrollDropDown_Modern[i].Slider = AstralUI.CreateSlider(ScrollDropDown_Modern[i],10,170,-8,-8,1,10,"Text",1,"TOPRIGHT",true,true)
+	ScrollDropDown_Modern[i].Slider:SetScript("OnValueChanged",function (self,value)
+		value = Round(value)
+		self:GetParent().Position = value
+		AstralUI.ScrollDropDown:Reload()
+	end)
+
+	ScrollDropDown_Modern[i]:SetScript("OnMouseWheel",function (self,delta)
+		local min,max = self.Slider:GetMinMaxValues()
+		local val = self.Slider:GetValue()
+		if (val - delta) < min then
+			self.Slider:SetValue(min)
+		elseif (val - delta) > max then
+			self.Slider:SetValue(max)
+		else
+			self.Slider:SetValue(val - delta)
+		end
+	end)
+end
+
+for i=1,2 do
+	ScrollDropDown_Blizzard[i] = AstralUI:Template("AstralDropDownListTemplate",UIParent)
+	_G[ADDON_NAME .. "DropDownList"..i] = ScrollDropDown_Blizzard[i]
+	ScrollDropDown_Blizzard[i].Buttons = {}
+	ScrollDropDown_Blizzard[i].MaxLines = 0
+
+	ScrollDropDown_Blizzard[i].Slider = AstralUI.CreateSlider(ScrollDropDown_Blizzard[i],10,170,-15,-11,1,10,"Text",1,"TOPRIGHT",true)
+	ScrollDropDown_Blizzard[i].Slider:SetScript("OnValueChanged",function (self,value)
+		value = Round(value)
+		self:GetParent().Position = value
+		AstralUI.ScrollDropDown:Reload()
+	end)
+
+	ScrollDropDown_Blizzard[i]:SetScript("OnMouseWheel",function (self,delta)
+		local min,max = self.Slider:GetMinMaxValues()
+		local val = self.Slider:GetValue()
+		if (val - delta) < min then
+			self.Slider:SetValue(min)
+		elseif (val - delta) > max then
+			self.Slider:SetValue(max)
+		else
+			self.Slider:SetValue(val - delta)
+		end
+	end)
+end
+
+AstralUI.ScrollDropDown.DropDownList = ScrollDropDown_Blizzard
+
+do
+	local function CheckButtonClick(self)
+		local parent = self:GetParent()
+		self:GetParent():GetParent().List[parent.id].checkState = self:GetChecked()
+		if parent.checkFunc then
+			parent.checkFunc(parent,self:GetChecked())
+		end
+	end
+	function AstralUI.ScrollDropDown.CreateButton(i,level)
+		level = level or 1
+		local dropDown = AstralUI.ScrollDropDown.DropDownList[level]
+		if dropDown.Buttons[i] then
+			return
+		end
+		dropDown.Buttons[i] = AstralUI:Template("AstralDropDownMenuButtonTemplate",dropDown)
+		if dropDown.isModern then
+			dropDown.Buttons[i]:SetPoint("TOPLEFT",8,-8 - (i-1) * 16)
+		else
+			dropDown.Buttons[i]:SetPoint("TOPLEFT",18,-16 - (i-1) * 16)
+		end
+		dropDown.Buttons[i].NormalText:SetMaxLines(1) 
+
+		if dropDown.isModern then
+			dropDown.Buttons[i].checkButton = AstralUI:Template("AstralCheckButtonModernTemplate",dropDown.Buttons[i])
+			dropDown.Buttons[i].checkButton:SetPoint("LEFT",1,0)
+			dropDown.Buttons[i].checkButton:SetSize(12,12)
+
+			dropDown.Buttons[i].radioButton = AstralUI:Template("AstralRadioButtonModernTemplate",dropDown.Buttons[i])
+			dropDown.Buttons[i].radioButton:SetPoint("LEFT",1,0)
+			dropDown.Buttons[i].radioButton:SetSize(12,12)
+			dropDown.Buttons[i].radioButton:EnableMouse(false)
+		else
+			dropDown.Buttons[i].checkButton = CreateFrame("CheckButton",nil,dropDown.Buttons[i],"UICheckButtonTemplate")
+			dropDown.Buttons[i].checkButton:SetPoint("LEFT",-7,0)
+			dropDown.Buttons[i].checkButton:SetScale(.6)
+
+			dropDown.Buttons[i].radioButton = CreateFrame("CheckButton",nil,dropDown.Buttons[i])	-- Do not used in blizzard style
+		end
+		dropDown.Buttons[i].checkButton:SetScript("OnClick",CheckButtonClick)
+		dropDown.Buttons[i].checkButton:Hide()
+		dropDown.Buttons[i].radioButton:Hide()
+
+		dropDown.Buttons[i].Level = level
+	end
+end
+
+local function ScrollDropDown_DefaultCheckFunc(self)
+	self:Click()
+end
+
+local IsDropDownCustom
+
+function AstralUI.ScrollDropDown.ClickButton(self)
+	if AstralUI.ScrollDropDown.DropDownList[1]:IsShown() then
+		AstralUI:DropDownClose()
+		return
+	end
+	local dropDown = nil
+	if self.isButton then
+		dropDown = self
+	else
+		dropDown = self:GetParent()
+	end
+	IsDropDownCustom = nil
+	AstralUI.ScrollDropDown.ToggleDropDownMenu(dropDown)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+function AstralUI.ScrollDropDown:Reload(level)
+	for j=1,#AstralUI.ScrollDropDown.DropDownList do
+		if AstralUI.ScrollDropDown.DropDownList[j]:IsShown() or level == j then
+			local val = AstralUI.ScrollDropDown.DropDownList[j].Position
+			local count = #AstralUI.ScrollDropDown.DropDownList[j].List
+			local now = 0
+			for i=val,count do
+				local data = AstralUI.ScrollDropDown.DropDownList[j].List[i]
+
+				if not data.isHidden then
+					now = now + 1
+					local button = AstralUI.ScrollDropDown.DropDownList[j].Buttons[now]
+					local text = button.NormalText
+					local icon = button.Icon
+					local paddingLeft = data.padding or 0
+
+					if data.icon then
+						icon:SetTexture(data.icon)
+						paddingLeft = paddingLeft + 18
+						if data.iconcoord then
+							icon:SetTexCoord(unpack(data.iconcoord))
+							icon.customcoord = true
+						elseif icon.customcoord then
+							icon:SetTexCoord(0,1,0,1)
+							icon.customcoord = false
+						end
+						icon:Show()
+					else
+						icon:Hide()
+					end
+
+					if data.font then
+						local font = _G[ADDON_NAME.."DropDownListFont"..now]
+						if not font then
+							font = CreateFont(ADDON_NAME.."DropDownListFont"..now)
+						end
+						font:SetFont(data.font,12,"")
+						font:SetShadowOffset(1,-1)
+						font:SetShadowColor(0,0,0)
+						button:SetNormalFontObject(font)
+						button:SetHighlightFontObject(font)
+					else
+						button:SetNormalFontObject(GameFontHighlightSmallLeft)
+						button:SetHighlightFontObject(GameFontHighlightSmallLeft)
+					end
+
+					if data.colorCode then
+						text:SetText( data.colorCode .. (data.text or "") .. "|r" )
+					else
+						text:SetText( data.text or "" )
+					end
+
+					text:ClearAllPoints()
+					if data.checkable or data.radio then
+						text:SetPoint("LEFT", paddingLeft + 16, 0)
+					else
+						text:SetPoint("LEFT", paddingLeft, 0)
+					end
+					text:SetPoint("RIGHT", button, "RIGHT", 0, 0)
+					text:SetJustifyH(data.justifyH or "LEFT")
+
+					if data.checkable then
+						button.checkButton:SetChecked(data.checkState)
+						button.checkButton:Show()
+					else
+						button.checkButton:Hide()
+					end
+					if data.radio then
+						button.radioButton:SetChecked(data.checkState)
+						button.radioButton:Show()
+					else
+						button.radioButton:Hide()
+					end
+
+					local texture = button.Texture
+					if data.texture then
+						texture:SetTexture(data.texture)
+						texture:Show()
+					else
+						texture:Hide()
+					end
+
+					if data.subMenu then
+						button.Arrow:Show()
+					else
+						button.Arrow:Hide()
+					end
+
+					if data.isTitle then
+						button:SetEnabled(false)
+					else
+						button:SetEnabled(true)
+					end
+
+					button.id = i
+					button.arg1 = data.arg1
+					button.arg2 = data.arg2
+					button.arg3 = data.arg3
+					button.arg4 = data.arg4
+					button.func = data.func
+					button.hoverFunc = data.hoverFunc
+					button.leaveFunc = data.leaveFunc
+					button.hoverArg = data.hoverArg
+					button.checkFunc = data.checkFunc
+					button.tooltip = data.tooltip
+
+					if not data.checkFunc then
+						button.checkFunc = ScrollDropDown_DefaultCheckFunc
+					end
+
+					button.subMenu = data.subMenu
+					button.Lines = data.Lines --Max lines for second level
+
+					button.data = data
+
+					button:Show()
+
+					if now >= AstralUI.ScrollDropDown.DropDownList[j].LinesNow then
+						break
+					end
+				end
+			end
+			for i=(now+1),AstralUI.ScrollDropDown.DropDownList[j].MaxLines do
+				AstralUI.ScrollDropDown.DropDownList[j].Buttons[i]:Hide()
+			end
+		end
+	end
+end
+
+function AstralUI.ScrollDropDown.UpdateChecks()
+	local parent = AstralUI.ScrollDropDown.DropDownList[1].parent
+	if parent.additionalToggle then
+		parent.additionalToggle(parent)
+	end
+	for j=1,#AstralUI.ScrollDropDown.DropDownList do
+		for i=1,#AstralUI.ScrollDropDown.DropDownList[j].Buttons do
+			local button = AstralUI.ScrollDropDown.DropDownList[j].Buttons[i]
+			if button:IsShown() and button.data then
+				button.checkButton:SetChecked(button.data.checkState)
+			end
+		end
+	end
+end
+
+function AstralUI.ScrollDropDown.Update(self, elapsed)
+	if ( not self.showTimer or not self.isCounting ) then
+		return
+	elseif ( self.showTimer < 0 ) then
+		self:Hide()
+		self.showTimer = nil
+		self.isCounting = nil
+	else
+		self.showTimer = self.showTimer - elapsed
+	end
+end
+
+function AstralUI.ScrollDropDown.OnClick(self, button, down)
+	local func = self.func
+	if func then
+		func(self, self.arg1, self.arg2, self.arg3, self.arg4)
+	end
+end
+function AstralUI.ScrollDropDown.OnButtonEnter(self)
+	local func = self.hoverFunc
+	if func then
+		func(self,self.hoverArg)
+	end
+	if self.tooltip then
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:AddLine(self.tooltip)
+		GameTooltip:Show()
+	end
+	AstralUI.ScrollDropDown:CloseSecondLevel(self.Level)
+	if self.subMenu then
+		if IsDropDownCustom then
+			AstralUI.ScrollDropDown.ToggleDropDownMenu(self,2,self.subMenu,IsDropDownCustom)
+		else
+			AstralUI.ScrollDropDown.ToggleDropDownMenu(self,2)
+		end
+	end
+end
+function AstralUI.ScrollDropDown.OnButtonLeave(self)
+	local func = self.leaveFunc
+	if func then
+		func(self)
+	end
+	if self.tooltip then
+		GameTooltip_Hide()
+	end
+end
+
+function AstralUI.ScrollDropDown.EasyMenu(self,list,customWidth)
+	IsDropDownCustom = customWidth or 200
+	AstralUI.ScrollDropDown.ToggleDropDownMenu(self,nil,list,customWidth)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+function AstralUI.ScrollDropDown.ToggleDropDownMenu(self,level,customList,customWidth)
+	level = level or 1
+	if self.ToggleUpadte then
+		self:ToggleUpadte()
+	end
+
+	if level == 1 then
+		if self.isModern or customList then
+			AstralUI.ScrollDropDown.DropDownList = ScrollDropDown_Modern
+		else
+			AstralUI.ScrollDropDown.DropDownList = ScrollDropDown_Blizzard
+		end
+	end
+	for i=level+1,#AstralUI.ScrollDropDown.DropDownList do
+		AstralUI.ScrollDropDown.DropDownList[i]:Hide()
+	end
+	local dropDown = AstralUI.ScrollDropDown.DropDownList[level]
+
+	local dropDownWidth = customWidth or (type(self.Width)=='number' and self.Width) or (customList and 200) or IsDropDownCustom or 200
+	local isModern = self.isModern or (customList and true)
+	if level > 1 then
+		local parent = AstralUI.ScrollDropDown.DropDownList[1].parent
+		dropDownWidth = (type(parent.Width)=='number' and parent.Width) or IsDropDownCustom or 200
+		isModern = parent.isModern or (customList and true)
+	end
+
+	dropDown.List = customList or self.subMenu or self.List
+
+	local count = #dropDown.List
+
+	local maxLinesNow = self.Lines or count
+
+	for i=(dropDown.MaxLines+1),maxLinesNow do
+		AstralUI.ScrollDropDown.CreateButton(i,level)
+	end
+	dropDown.MaxLines = max(dropDown.MaxLines,maxLinesNow)
+
+	local isSliderHidden = max(count-maxLinesNow+1,1) == 1
+	if isModern then 
+		for i=1,maxLinesNow do
+			dropDown.Buttons[i]:SetSize(dropDownWidth - 16 - (isSliderHidden and 0 or 12),16)
+		end
+	else
+		for i=1,maxLinesNow do
+			dropDown.Buttons[i]:SetSize(dropDownWidth - 22 + (isSliderHidden and 16 or 0),16)
+		end
+	end
+	dropDown.Position = 1
+	dropDown.LinesNow = maxLinesNow
+	dropDown.Slider:SetValue(1)
+	if self.additionalToggle then
+		self.additionalToggle(self)
+	end
+	dropDown:ClearAllPoints()
+	dropDown:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",-16,0)
+	dropDown.Slider:SetMinMaxValues(1,max(count-maxLinesNow+1,1))
+	if isModern then 
+		dropDown:SetSize(dropDownWidth,16 + 16 * maxLinesNow)
+		dropDown.Slider:SetHeight(maxLinesNow * 16)
+	else
+		dropDown:SetSize(dropDownWidth + 32,32 + 16 * maxLinesNow)
+		dropDown.Slider:SetHeight(maxLinesNow * 16 + 10)
+	end
+	if isSliderHidden then
+		dropDown.Slider:Hide()
+	else
+		dropDown.Slider:Show()
+	end
+	dropDown:ClearAllPoints()
+	if level > 1 then
+		if dropDownWidth and dropDownWidth + AstralUI.ScrollDropDown.DropDownList[level-1]:GetRight() > GetScreenWidth() then
+			dropDown:SetPoint("TOP",self,"TOP",0,8)
+			dropDown:SetPoint("RIGHT",AstralUI.ScrollDropDown.DropDownList[level-1],"LEFT",-5,0)
+		else
+			dropDown:SetPoint("TOPLEFT",self,"TOPRIGHT",level > 1 and AstralUI.ScrollDropDown.DropDownList[level-1].Slider:IsShown() and 24 or 12,isModern and 8 or 16)
+		end
+	else
+		local toggleX = self.toggleX or -16
+		local toggleY = self.toggleY or 0
+		dropDown:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",toggleX,toggleY)
+	end
+
+	dropDown.parent = self
+
+	dropDown:Show()
+	dropDown:SetFrameLevel(0)
+
+	AstralUI.ScrollDropDown:Reload()
+end
+
+function AstralUI.ScrollDropDown.CreateInfo(self,info)
+	if info then
+		self.List[#self.List + 1] = info
+	end
+	self.List[#self.List + 1] = {}
+	return self.List[#self.List]
+end
+
+function AstralUI.ScrollDropDown.ClearData(self)
+	table.wipe(self.List)
+	return self.List
+end
+
+function AstralUI.ScrollDropDown.Close()
+	AstralUI.ScrollDropDown.DropDownList[1]:Hide()
+	AstralUI.ScrollDropDown:CloseSecondLevel()
+end
+function AstralUI.ScrollDropDown:CloseSecondLevel(level)
+	level = level or 1
+	for i=(level+1),#AstralUI.ScrollDropDown.DropDownList do
+		AstralUI.ScrollDropDown.DropDownList[i]:Hide()
+	end
+end
+AstralUI.DropDownClose = AstralUI.ScrollDropDown.Close
 
 do
 	local function CheckBoxOnEnter(self)
@@ -842,16 +1939,16 @@ do
 	local function OnTooltipEnter(self)
 		local text = self.t
 		if text.TooltipOverwrite then
-			ELib.Tooltip.Show(self,self.a,text.TooltipOverwrite)
+			AstralUI.Tooltip.Show(self,self.a,text.TooltipOverwrite)
 			return
 		end
 		if not text:IsTruncated() and not text.alwaysTooltip then
 			return
 		end
-		ELib.Tooltip.Show(self,self.a,text:GetText())
+		AstralUI.Tooltip.Show(self,self.a,text:GetText())
 	end
 	local function OnTooltipLeave(self)
-		ELib.Tooltip.Hide()
+		AstralUI.Tooltip.Hide()
 	end
 	local function Widget_Tooltip(self,anchor,isButton)
 		local f = CreateFrame(isButton and "Button" or "Frame",nil,self:GetParent())

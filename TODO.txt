@@ -2,3 +2,7 @@
 - Downloader
 - Missing enchants
 - filter for WAs, search box
+- README with known issues
+- search bar, sort lists
+- reminder sounds
+- party/dungeons option for reminders

@@ -131,6 +131,11 @@ local function handle(e, event, ...)
       if action == 'SHOW' then
         if not texts[e.name]:IsShown() then
           addon.PrintDebug('showText', t.type, e.name, event, ...)
+          local sound = AstralRaidSettings.texts.sounds[e.name] or e.sound
+          if sound and sound ~= 'None' then
+            local path = addon.SharedMedia:Fetch('sound', sound, true)
+            PlaySoundFile(path or sound, AstralRaidSettings.general.sounds.channel)
+          end
         end
         addon.ShowText(e.name)
       elseif action == 'HIDE' and not AstralRaidText.testing then
@@ -204,11 +209,11 @@ local function cleu(...)
   for _, e in pairs(events.cleu) do handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', CombatLogGetCurrentEventInfo()) end
 end
 
-function addon.AddTextEventCallback(func, name, event)
+function addon.AddTextEventCallback(func, name, event, sound)
   if not events[event] then
     events[event] = {}
   end
-  table.insert(events[event], {f = func, name = name})
+  table.insert(events[event], {f = func, name = name, sound = sound})
 end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', enterInstance, 'astralRaidTextsEnterInstance')

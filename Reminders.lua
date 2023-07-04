@@ -16,8 +16,6 @@ local function hideAfter(r, time)
   end)
 end
 
--- Reminders
-
 local guildBankSpell = 83958
 local hsSpell = 29893
 local healthstoneItem = 5512
@@ -38,8 +36,9 @@ local combatPotionItems = {
   [13] = 191401,
 }
 local cauldronSpells = {
-  [1] = 370668,
-  [2] = 370672, -- Ultimate Power
+  [1] = 371611, -- Prepare Potion Cauldron of Ultimate Power r3
+  [2] = 371606, -- Prepare Potion Cauldron of Ultimate Power r2
+  [3] = 371535, -- Prepare Potion Cauldron of Ultimate Power r1
 }
 local repairSpells = {
   [1] = 67826,
@@ -171,44 +170,73 @@ local function noReleaseReminder(e, ...)
   end
 end
 
-AstralRaidEvents:Register('PLAYER_LOGIN', function()
-  addon.CreateText('eatFood', 'EAT FOOD', 'REMINDER')
-  addon.CreateText('cauldronDown', 'CAULDRON DOWN', 'REMINDER')
-  addon.CreateText('repairDown', 'REPAIR', 'REMINDER')
-  addon.CreateText('healthstones', 'GRAB HEALTHSTONES', 'REMINDER')
-  addon.CreateText('healingPotions', 'GRAB HEALING POTIONS', 'REMINDER')
-  addon.CreateText('combatPotions', 'GRAB COMBAT POTIONS', 'REMINDER')
-  addon.CreateText('infiniteRune', 'RUNE UP', 'REMINDER')
-  addon.CreateText('noRelease', 'DONT RELEASE', 'REMINDER')
+AstralRaidReminders = {
+  ['eatFood'] = {text = 'EAT FOOD', sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu'}, func = eatFoodReminder},
+  ['cauldronDown'] = {text = 'CAULDRON DOWN', sound = 'Banana Peel Slip', callbacks = {'spellcastSuccess'}, func = cauldronReminder},
+  ['repairDown'] =  {text = 'REPAIR', sound = 2917320, callbacks = {'enterInstance', 'enterCombat', 'cleu'}, func = repairReminder},
+  ['healthstones'] = {text = 'GRAB HEALTHSTONES', sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder},
+  ['healingPotions'] = {text = 'GRAB HEALING POTIONS', sound = 'Noot Noot', callbacks = {'cleu'}, func = healingPotionsReminder},
+  ['combatPotions'] = {text = 'GRAB COMBAT POTIONS', callbacks = {'cleu'}, func = combatPotionsReminder},
+  ['infiniteRune'] = {text = 'RUNE UP', callbacks = {}},
+  ['noRelease'] = {text = 'DONT RELEASE', sound = 'Voice: Don\'t Release', callbacks = {'leaveCombat', 'dead', 'resurrected', 'alive'}, func = noReleaseReminder},
+}
 
-  addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'enterInstance')
-  addon.AddTextEventCallback(repairReminder, 'repairDown', 'enterInstance')
-  addon.AddTextEventCallback(repairReminder, 'repairDown', 'enterCombat')
-  addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'resurrected')
-  addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'leaveCombat')
-  addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'dead')
-  addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'resurrected')
-  addon.AddTextEventCallback(noReleaseReminder, 'noRelease', 'alive')
-  addon.AddTextEventCallback(cauldronReminder, 'cauldronDown', 'spellcastSuccess')
-  addon.AddTextEventCallback(repairReminder, 'repairDown', 'cleu')
-  addon.AddTextEventCallback(healthstoneReminder, 'healthstones', 'cleu')
-  addon.AddTextEventCallback(healingPotionsReminder, 'healingPotions', 'cleu')
-  addon.AddTextEventCallback(combatPotionsReminder, 'combatPotions', 'cleu')
-  addon.AddTextEventCallback(eatFoodReminder, 'eatFood', 'cleu')
+AstralRaidEvents:Register('PLAYER_LOGIN', function()
+  for name, r in pairs(AstralRaidReminders) do
+    addon.CreateText(name, r.text, 'REMINDER')
+    for i = 1, #r.callbacks do
+      addon.AddTextEventCallback(r.func, name, r.callbacks[i], r.sound)
+    end
+  end
 end, 'astralRaidInitReminders')
 
 local module = addon:New('Reminders', 'Reminders')
-local fontDropdown, fontSizeSlider
-
-local fonts = addon.SharedMedia:List('font')
+local fontDropdown, fontSizeSlider, reminderWidgets
 
 function module.options:Load()
+  local fonts = addon.SharedMedia:List('font')
+  local sounds = addon.SharedMedia:List('sound')
+
+  for _, r in pairs(AstralRaidReminders) do
+    if type(r.sound) ~= 'string' then
+      table.insert(sounds, r.sound)
+    end
+  end
+  table.insert(sounds, 'None')
+
+	local function fontDropdownSetValue(_, arg1)
+		AstralUI:DropDownClose()
+		fontDropdown:SetText(arg1)
+    AstralRaidSettings.general.font.name = arg1
+		addon.UpdateTextsFonts()
+	end
+
+	local function soundDropdownSetValue(self, arg1)
+		AstralUI:DropDownClose()
+		self:SetText(arg1)
+    if arg1 and arg1 ~= 'None' then
+      local path = addon.SharedMedia:Fetch('sound', arg1, true)
+      PlaySoundFile(path or arg1, AstralRaidSettings.general.sounds.channel)
+    end
+    AstralRaidSettings.texts.sounds[self.rname] = arg1
+	end
+
+  -- Start UI
+
   local generalHeader = AstralUI:Text(self, 'Reminders Options'):Point('TOPLEFT', 0, 0):Shadow()
 
-  fontDropdown = AstralUI:Dropdown(self, 'Font', 200)
-  fontDropdown:SetPoint('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10)
+	fontDropdown = AstralUI:DropDown(self, 350, 10):Size(320):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):AddText("|cffffce00Font:")
+	for i = 1, #fonts do
+		local info = {}
+		fontDropdown.List[i] = info
+		info.text = fonts[i]
+		info.arg1 = fonts[i]
+		info.func = fontDropdownSetValue
+		info.font = fonts[i]
+		info.justifyH = 'CENTER'
+	end
 
-  fontSizeSlider = AstralUI:Slider(self, 'Font Size'):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(5,120)
+  fontSizeSlider = AstralUI:Slider(self, 'Font Size'):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(36,120)
 
   local testReminders = false
   local testRemindersButton = CreateFrame('BUTTON', 'AstralRaidsTestRemindersButton', self, 'UIPanelButtonTemplate')
@@ -219,13 +247,39 @@ function module.options:Load()
     testReminders = not testReminders
     addon.TestTexts(testReminders, 5)
   end)
+
+  local specificHeader = AstralUI:Text(self, 'Specific Reminders'):Point('TOPLEFT', fontDropdown, 'BOTTOMLEFT', 0, -20)
+  reminderWidgets = {}
+
+  local a = specificHeader
+  for name, r in pairs(AstralRaidReminders) do
+    local t = AstralUI:Text(self, r.text):Point('TOPLEFT', a, 'BOTTOMLEFT', 0, -20):Size(200, 10):FontSize(10)
+    local s = AstralUI:DropDown(self, 250, 10):Size(320):Point('LEFT', t, 'RIGHT', 10, 0):AddText("|cffffce00Sound:")
+    for i = 1, #sounds do
+      local info = {}
+      s.List[i] = info
+      info.text = sounds[i]
+      info.arg1 = sounds[i]
+      info.func = soundDropdownSetValue
+      info.justifyH = 'CENTER'
+    end
+    reminderWidgets[name] = {text = t, soundDropdown = s}
+    a = t
+  end
 end
 
 function module.options:OnShow()
-  AstralUI:InitializeDropdown(fontDropdown, fonts, AstralRaidSettings.general.font.name, function(val)
-		AstralRaidSettings.general.font.name = val
-		addon.UpdateTextsFonts()
-	end)
+  for name, r in pairs(AstralRaidReminders) do
+    if not AstralRaidSettings.texts.sounds[name] then
+      AstralRaidSettings.texts.sounds[name] = r.sound or 'None'
+    end
+  end
+
+  fontDropdown:SetText(AstralRaidSettings.general.font.name)
+
+  for name, r in pairs(reminderWidgets) do
+    r.soundDropdown:SetText(AstralRaidSettings.texts.sounds[name] or 'None')
+  end
 
 	fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)
 		event = event - event%1

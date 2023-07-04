@@ -1,4 +1,4 @@
-local ADDON_NAME, addon = ...
+local _, addon = ...
 
 if not AstralRaidSettings then
   AstralRaidSettings = {}
@@ -37,19 +37,16 @@ function addon.AddDefaultSettings(category, name, data)
 	end
 end
 
-local function LoadDefaultSettings(addonName)
-	if addonName ~= ADDON_NAME then return end
-	if not AstralRaidSettings.new_settings_config then
-		wipe(AstralRaidSettings)
-		AstralRaidSettings.new_settings_config = true
-	end
-
+function addon.LoadDefaultSettings()
 	addon.AddDefaultSettings('general', 'debug', {isEnabled = false})
 	addon.AddDefaultSettings('general', 'show_minimap_button', {isEnabled = true})
 	addon.AddDefaultSettings('general', 'font', {name = 'PT Sans Narrow', size = 72})
+	addon.AddDefaultSettings('general', 'sounds', {channel = 'Master'})
 	addon.AddDefaultSettings('wa', 'required', {})
 	addon.AddDefaultSettings('addons', 'required', {})
 	addon.AddDefaultSettings('texts', 'position', {x = 0, y = 400})
+	addon.AddDefaultSettings('texts', 'reminders', {inRaid = true, inDungeons = false})
+	addon.AddDefaultSettings('texts', 'sounds', {})
 	addon.AddDefaultSettings('frame', 'orientation', 1)
 	addon.AddDefaultSettings('frame', 'rank_filter',
 	{
@@ -66,8 +63,4 @@ local function LoadDefaultSettings(addonName)
 	})
 
 	addon.Debug = AstralRaidSettings.general.debug.isEnabled
-
-	AstralRaidEvents:Unregister('ADDON_LOADED', 'LoadDefaultSettings')
 end
-
-AstralRaidEvents:Register('ADDON_LOADED', LoadDefaultSettings, 'LoadDefaultSettings')
