@@ -117,6 +117,29 @@ function addon.HideText(name)
   remindersState[name] = false
 end
 
+-- Basic Checks
+
+local function canShowReminder()
+  return (IsInRaid() or (IsInGroup() and AstralRaidSettings.texts.reminders.inParty)) and addon.InInstance and not addon.InEncounter and not InCombatLockdown() and AstralRaidSettings.texts.reminders.enable
+end
+
+local function canShowAlert()
+  return (IsInRaid() or IsInGroup()) and addon.InInstance and addon.InEncounter
+end
+
+local function canShowText(type)
+  if type == 'REMINDER' then
+    return canShowReminder() or addon.Debug
+  elseif type == 'ALERT' then
+    return canShowAlert() or addon.Debug
+  end
+  return true
+end
+
+local function textIsEnabled(name)
+  return AstralRaidSettings.texts.enabled[name]
+end
+
 -- Event Wiring
 -- Semi-recreating the WeakAuras scripting environment
 
@@ -125,25 +148,23 @@ local events = {}
 local function handle(e, event, ...)
   local t = texts[e.name]
   if not t then return end
-  if (t.type == 'REMINDER' and IsInRaid() and addon.InInstance and not addon.InEncounter) or (t.type == 'ALERT' and addon.InEncounter) or addon.Debug then
-    local action = e.f(event, ...)
-    if action then
-      if action == 'SHOW' then
-        if not texts[e.name]:IsShown() then
-          addon.PrintDebug('showText', t.type, e.name, event, ...)
-          local sound = AstralRaidSettings.texts.sounds[e.name] or e.sound
-          if sound and sound ~= 'None' then
-            local path = addon.SharedMedia:Fetch('sound', sound, true)
-            PlaySoundFile(path or sound, AstralRaidSettings.general.sounds.channel)
-          end
+  local action = e.f(event, ...)
+  if action then
+    if action == 'SHOW' and canShowText(t.type) and textIsEnabled(e.name) then
+      if not texts[e.name]:IsShown() then
+        addon.PrintDebug('showText', t.type, e.name, event, ...)
+        local sound = AstralRaidSettings.texts.sounds[e.name] or e.sound
+        if sound and sound ~= 'None' then
+          local path = addon.SharedMedia:Fetch('sound', sound, true)
+          PlaySoundFile(path or sound, AstralRaidSettings.general.sounds.channel)
         end
-        addon.ShowText(e.name)
-      elseif action == 'HIDE' and not AstralRaidText.testing then
-        if texts[e.name]:IsShown() then
-          addon.PrintDebug('hideText', t.type, e.name, event, ...)
-        end
-        addon.HideText(e.name)
       end
+      addon.ShowText(e.name)
+    elseif action == 'HIDE' and not AstralRaidText.testing then
+      if texts[e.name]:IsShown() then
+        addon.PrintDebug('hideText', t.type, e.name, event, ...)
+      end
+      addon.HideText(e.name)
     end
   end
 end

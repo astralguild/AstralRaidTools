@@ -360,14 +360,6 @@ end
 function templates:AstralCheckButtonTemplate(parent)
 	local self = CreateFrame("CheckButton",nil,parent)
 	self:SetSize(20,20)
-
-	self.text = self:CreateFontString(nil,"ARTWORK","GameFontNormalSmall")
-	self.text:SetPoint("TOPLEFT",self,"TOPRIGHT",4,0)
-	self.text:SetPoint("BOTTOMLEFT",self,"BOTTOMRIGHT",4,0)
-	self.text:SetJustifyV("MIDDLE")
-
-	self:SetFontString(self.text)
-
 	templates:Border(self,0.24,0.25,0.3,1,1)
 
 	self.Texture = self:CreateTexture(nil,"BACKGROUND")
@@ -477,7 +469,7 @@ do
 		templates:Border(self,0.24,0.25,0.3,1,1,1,0)
 
 		self.Thumb = self:CreateTexture()
-		self.Thumb:SetColorTexture(0.44,0.45,0.50,0.7)
+		self.Thumb:SetColorTexture(1,206/255,0,0.7)
 		self.Thumb:SetSize(16,8)
 		self:SetThumbTexture(self.Thumb)
 
@@ -852,7 +844,6 @@ function templates:AstralRadioButtonModernTemplate(parent)
 	return self
 end
 
-
 do
 	local function OnMouseDown(self)
 		local parent = self:GetParent()
@@ -958,6 +949,41 @@ function AstralUI:Template(name, parent)
 		return
 	end
 	return templates[name](nil, parent)
+end
+
+do
+	local function Widget_Icon(self,texture,cG,cB,cA)
+		if cG then
+			self.texture:SetColorTexture(texture,cG,cB,cA)
+		else
+			self.texture:SetTexture(texture)
+		end
+		return self
+	end
+	local function Widget_Tooltip(self,text)
+		self:SetScript("OnEnter", AstralUI.Tooltip.Std)
+		self:SetScript("OnLeave", AstralUI.Tooltip.Hide)
+		self.tooltipText = text
+		return self
+	end
+	function AstralUI:Icon(parent, textureIcon, size, isButton)
+		local self = CreateFrame(isButton and "Button" or "Frame",nil,parent)
+		self:SetSize(size,size)
+		self.texture = self:CreateTexture(nil, "BACKGROUND")
+		self.texture:SetAllPoints()
+		self.texture:SetTexture(textureIcon or "Interface\\Icons\\INV_MISC_QUESTIONMARK")
+		if isButton then
+	 		self:EnableMouse(true)
+			self:RegisterForClicks("LeftButtonDown")
+		end
+
+		Mod(self,
+			'Icon',Widget_Icon,
+			'Tooltip',Widget_Tooltip
+		)
+
+		return self
+	end
 end
 
 do
@@ -1746,7 +1772,8 @@ do
 			template = "AstralCheckButtonTemplate"
 		end
 		local self = AstralUI:Template(template, parent) or CreateFrame("CheckButton",nil,parent,template)
-		self.text:SetText(text or "")
+		self.text = AstralUI:Text(self):FontSize(10):Point('LEFT', self, 'RIGHT', 5, 0):Shadow()
+		self.text:SetText(text)
 		self:SetChecked(state and true or false)
 		self:SetScript("OnEnter",CheckBoxOnEnter)
 		self:SetScript("OnLeave",AstralUI.Tooltip.Hide)

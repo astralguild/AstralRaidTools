@@ -9,16 +9,67 @@ local statusIcons = {
 	[4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
 }
 
+function addon.IterateRoster(maxGroup, index)
+	index = (index or 0) + 1
+	maxGroup = maxGroup or 8
+
+	if IsInRaid() then
+		if index > GetNumGroupMembers() then
+			return
+		end
+		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(index)
+		if subgroup > maxGroup then
+			return addon.IterateRoster(maxGroup,index)
+		end
+		local guid = UnitGUID(name or ("raid"..index))
+		name = name or ""
+		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
+	else
+		local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _
+		local unit = index == 1 and "player" or "party"..(index-1)
+		local guid = UnitGUID(unit)
+		if not guid then
+			return
+		end
+		subgroup = 1
+		name, _ = UnitName(unit)
+		name = name or ""
+		if _ then
+			name = name .. "-" .. _
+		end
+		class, fileName = UnitClass(unit)
+		if UnitIsGroupLeader(unit) then
+			rank = 2
+		else
+			rank = 1
+		end
+		level = UnitLevel(unit)
+		if UnitIsConnected(unit) then
+			online = true
+		end
+		if UnitIsDeadOrGhost(unit) then
+			isDead = true
+		end
+		combatRole = UnitGroupRolesAssigned(unit)
+		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
+	end
+end
+
+function addon.DelUnitNameServer(unitName)
+	unitName = strsplit("-", unitName)
+	return unitName
+end
+
 local notInRaidText, roster, raidSlider, raidNames, updateButton
 local cdRequest = 5
 local lastRequest = nil
 
 local function checkButtonCooldown(self)
 	if (GetTime() - lastRequest) >= cdRequest then
-		self:SetText('Update')
+		self:SetText(UPDATE)
 		self:Enable()
 	else
-		self:SetText('Update (' .. cdRequest - floor(GetTime() - lastRequest) .. ')')
+		self:SetText(UPDATE .. ' (' .. cdRequest - floor(GetTime() - lastRequest) .. ')')
 		C_Timer.After(1, function()
 			checkButtonCooldown(self)
 		end)
@@ -27,13 +78,13 @@ end
 
 function module.options:Load()
 	local LISTFRAME_WIDTH = 610
-	local LISTFRAME_HEIGHT = 400
+	local LISTFRAME_HEIGHT = 455
 	local VERTICALNAME_WIDTH = 20
 	local VERTICALNAME_COUNT = 24
 	local LINE_HEIGHT, LINE_NAME_WIDTH = 16, 150
 
 	roster = AstralUI:ScrollFrame(self):Point(0, -80):Size(LISTFRAME_WIDTH, LISTFRAME_HEIGHT)
-	updateButton = AstralUI:Button(self, UPDATE):Point('BOTTOMRIGHT', -75, 45):Size(130,20):OnClick(function(self)
+	updateButton = AstralUI:Button(self, UPDATE):Point('BOTTOMRIGHT', -15, 15):Size(130, 20):OnClick(function(self)
 		addon.AddonResponses = {}
 		addon.WeakAuraResponses = {}
 		addon.SendWeakAuraRequest()
@@ -49,7 +100,7 @@ function module.options:Load()
 	roster.prevPlayerCol = 0
 	roster.ScrollBar:ClickRange(32)
 
-	raidSlider = AstralUI:Slider(self, ''):Point("TOPLEFT", roster,"BOTTOMLEFT", LINE_NAME_WIDTH + 15,-3):Range(0,25):Size(VERTICALNAME_WIDTH*VERTICALNAME_COUNT):SetTo(0):OnChange(function(self, value)
+	raidSlider = AstralUI:Slider(self, ''):Point('TOPLEFT', roster, 'BOTTOMLEFT', LINE_NAME_WIDTH + 15, -3):Range(0, 25):Size(VERTICALNAME_WIDTH*VERTICALNAME_COUNT):SetTo(0):OnChange(function(self, value)
 		local currPlayerCol = floor(value)
 		if currPlayerCol ~= roster.prevPlayerCol then
 			roster.prevPlayerCol = currPlayerCol
@@ -87,28 +138,28 @@ function module.options:Load()
 	for i = 1, ceil(LISTFRAME_HEIGHT/LINE_HEIGHT) do
 		local line = CreateFrame('FRAME', nil, roster.C)
 		roster.lines[i] = line
-		line:SetPoint("TOPLEFT",0,-(i-1)*LINE_HEIGHT)
-		line:SetPoint("TOPRIGHT",0,-(i-1)*LINE_HEIGHT)
+		line:SetPoint('TOPLEFT', 0, -(i-1)*LINE_HEIGHT)
+		line:SetPoint('TOPRIGHT', 0, -(i-1)*LINE_HEIGHT)
 		line:SetSize(0,LINE_HEIGHT)
-		line.name = AstralUI:Text(line):Size(LINE_NAME_WIDTH-LINE_HEIGHT/2,LINE_HEIGHT):Point('LEFT', 2, 0):Shadow():Tooltip("ANCHOR_LEFT",true):FontSize(9)
+		line.name = AstralUI:Text(line):Size(LINE_NAME_WIDTH-LINE_HEIGHT/2, LINE_HEIGHT):Point('LEFT', 2, 0):Shadow():Tooltip('ANCHOR_LEFT', true):FontSize(9)
 		line.icons = {}
-		local iconSize = min(VERTICALNAME_WIDTH,LINE_HEIGHT)
-		for j=1,VERTICALNAME_COUNT do
-			local icon = line:CreateTexture(nil,"ARTWORK")
+		local iconSize = min(VERTICALNAME_WIDTH, LINE_HEIGHT)
+		for j = 1, VERTICALNAME_COUNT do
+			local icon = line:CreateTexture(nil, 'ARTWORK')
 			line.icons[j] = icon
-			icon:SetPoint("CENTER",line,"LEFT",LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(j-1) + VERTICALNAME_WIDTH / 2,0)
-			icon:SetSize(iconSize,iconSize)
-			roster:SetIcon(icon,(i+j)%4)
+			icon:SetPoint('CENTER', line, 'LEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(j-1) + VERTICALNAME_WIDTH / 2, 0)
+			icon:SetSize(iconSize, iconSize)
+			roster:SetIcon(icon, (i+j)%4)
 
 			local f = CreateFrame('FRAME', nil, line)
 			f:SetPoint('TOPLEFT', icon, 'TOPLEFT', 0, 0)
 			f:SetSize(iconSize,iconSize)
-			f:SetScript("OnEnter", function(self)
-				if self.icon.t and self.icon.t ~= "" then
-					AstralUI.Tooltip.Show(self, "ANCHOR_LEFT", self.icon.t)
+			f:SetScript('OnEnter', function(self)
+				if self.icon.t and self.icon.t ~= '' then
+					AstralUI.Tooltip.Show(self, 'ANCHOR_LEFT', self.icon.t)
 				end
 			end)
-			f:SetScript("OnLeave", AstralUI.Tooltip.Hide)
+			f:SetScript('OnLeave', AstralUI.Tooltip.Hide)
 			f.icon = icon
 		end
 		line.t = line:CreateTexture(nil, 'BACKGROUND')
@@ -119,22 +170,22 @@ function module.options:Load()
 
 	raidNames = CreateFrame('FRAME', nil, self)
 	for i=1,VERTICALNAME_COUNT do
-		raidNames[i] = AstralUI:Text(raidNames,'raid'..i,10):Point('BOTTOMLEFT', roster,'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1),0):Color(1,1,1)
+		raidNames[i] = AstralUI:Text(raidNames, 'raid'..i, 10):Point('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0):Color(1, 1, 1)
 		local f = CreateFrame('FRAME', nil, self)
-		f:SetPoint('BOTTOMLEFT',roster,"TOPLEFT",LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1),0)
-		f:SetSize(VERTICALNAME_WIDTH,80)
-		f:SetScript("OnEnter", function(self)
+		f:SetPoint('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0)
+		f:SetSize(VERTICALNAME_WIDTH, 80)
+		f:SetScript('OnEnter', function(self)
 			local t = self.t:GetText()
-			if t ~= "" then
-				AstralUI.Tooltip.Show(self,"ANCHOR_LEFT",t)
+			if t ~= '' then
+				AstralUI.Tooltip.Show(self,'ANCHOR_LEFT',t)
 			end
 		end)
-		f:SetScript("OnLeave", AstralUI.Tooltip.Hide)
+		f:SetScript('OnLeave', AstralUI.Tooltip.Hide)
 		f.t = raidNames[i]
 
-		local t = roster:CreateTexture(nil, "BACKGROUND")
+		local t = roster:CreateTexture(nil, 'BACKGROUND')
 		raidNames[i].t = t
-		t:SetPoint("TOPLEFT",LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1),0)
+		t:SetPoint('TOPLEFT',LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1),0)
 		t:SetSize(VERTICALNAME_WIDTH, LISTFRAME_HEIGHT)
 		if i % 2 == 1 then
 			t:SetColorTexture(.5,.5,1,.05)
@@ -204,7 +255,7 @@ function module.options:Load()
 			end
 		end
 		for i = raidNamesUsed + 1, #raidNames do
-			raidNames[i]:SetText("")
+			raidNames[i]:SetText('')
 			raidNames[i].t:SetAlpha(0)
 		end
 
@@ -271,7 +322,7 @@ function module.options:Load()
 		self:Height(LINE_HEIGHT * #list)
 	end
 
-	roster.ScrollBar.slider:SetScript("OnValueChanged", function(self, value)
+	roster.ScrollBar.slider:SetScript('OnValueChanged', function(self, value)
 		local parent = self:GetParent():GetParent()
 		parent:SetVerticalScroll(value % LINE_HEIGHT)
 		local currTopLine = floor(value / LINE_HEIGHT)
@@ -283,7 +334,7 @@ function module.options:Load()
 	end)
 
 	notInRaidText = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
-	notInRaidText:SetText('You must be in a raid group to inspect the raid roster.')
+	notInRaidText:SetText('You must be in a raid group to inspect a raid roster.')
 	notInRaidText:SetPoint('CENTER', -50, 100)
 	notInRaidText:Hide()
 end

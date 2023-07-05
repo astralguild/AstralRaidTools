@@ -1,4 +1,4 @@
-local _, addon = ...
+local ADDON_NAME, addon = ...
 
 local waModule = addon:New('WA Requirements', 'WeakAuras', true)
 local addonModule = addon:New('Addon Requirements', 'Addons', true)
@@ -76,67 +76,44 @@ function addon.SendAddonsRequest()
 	AstralRaidComms:SendChunkedAddonMessages('addonRequest', req, 'RAID')
 end
 
-function addon.IterateRoster(maxGroup, index)
-	index = (index or 0) + 1
-	maxGroup = maxGroup or 8
-
-	if IsInRaid() then
-		if index > GetNumGroupMembers() then
-			return
-		end
-		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(index)
-		if subgroup > maxGroup then
-			return addon.IterateRoster(maxGroup,index)
-		end
-		local guid = UnitGUID(name or ("raid"..index))
-		name = name or ""
-		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
-	else
-		local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _
-		local unit = index == 1 and "player" or "party"..(index-1)
-		local guid = UnitGUID(unit)
-		if not guid then
-			return
-		end
-		subgroup = 1
-		name, _ = UnitName(unit)
-		name = name or ""
-		if _ then
-			name = name .. "-" .. _
-		end
-		class, fileName = UnitClass(unit)
-		if UnitIsGroupLeader(unit) then
-			rank = 2
-		else
-			rank = 1
-		end
-		level = UnitLevel(unit)
-		if UnitIsConnected(unit) then
-			online = true
-		end
-		if UnitIsDeadOrGhost(unit) then
-			isDead = true
-		end
-		combatRole = UnitGroupRolesAssigned(unit)
-		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
-	end
-end
-
-function addon.DelUnitNameServer(unitName)
-	unitName = strsplit("-", unitName)
-	return unitName
-end
-
 local waHeader, waList, noWAs, addonHeader, addonList
+local allWAs = nil
+local childrenWAs = {}
+local expandedWAs = {}
+
+local function getChildrenWeakAuras(weakAuras, parent)
+  local children = {}
+  for wa, data in pairs(weakAuras) do
+    if data.parent == parent then
+      children[#children+1] = wa
+    end
+  end
+  return children
+end
 
 local function updateWeakAuraList()
-  local weakAuras = addon.GetWeakAuras()
+  local weakAuras = allWAs or addon.GetWeakAuras()
   local list = {}
+
+  local function recurseChildren(name)
+    if expandedWAs[name] then
+      for _, child in pairs(childrenWAs[name]) do
+        list[#list+1] = child
+        recurseChildren(child)
+      end
+    end
+  end
+
   for wa, data in pairs(weakAuras) do
+    if not childrenWAs[wa] then
+      childrenWAs[wa] = getChildrenWeakAuras(weakAuras, wa)
+    end
     if not data.parent then
       list[#list+1] = wa
     end
+    recurseChildren(wa)
   end
+  allWAs = weakAuras
   waList.list = list
 end
 
@@ -149,9 +126,43 @@ local function updateAddonList()
   addonList.list = list
 end
 
+local function updateList(self, lineHeight, initFunc, lineFunc)
+  initFunc()
+
+  local scroll = self.ScrollBar:GetValue()
+  self:SetVerticalScroll(scroll % lineHeight)
+  local start = floor(scroll / lineHeight) + 1
+
+  local list = self.list
+  local lineCount = 1
+  for i = start, #list do
+    local data = list[i]
+    local line = self.lines[lineCount]
+    lineCount = lineCount + 1
+    if not line then
+      break
+    end
+    lineFunc(line, data)
+    line.data = data
+    line:Show()
+  end
+
+  for i = lineCount,  #self.lines do
+    self.lines[i]:Hide()
+  end
+
+  self:Height(lineHeight * #list)
+end
+
 function waModule.options:Load()
   waHeader = AstralUI:Text(self, 'Required Raider WeakAuras'):Point('TOPLEFT', 0, 0):Shadow()
   waList = AstralUI:ScrollFrame(self):Point('TOPLEFT', waHeader, 'BOTTOMLEFT', 0, -10):Size(AstralRaidOptionsFrame.ContentWidth - 30, AstralRaidOptionsFrame.Height - 100)
+
+  AstralUI:Button(self, 'Refresh'):Point('LEFT', waHeader, 'RIGHT', 10, 0):Size(100,15):OnClick(function(self)
+    allWAs = nil
+    expandedWAs = {}
+    waList:Update()
+	end)
 
 	noWAs = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
 	noWAs:SetText('WeakAuras was not found.')
@@ -174,52 +185,56 @@ function waModule.options:Load()
     end
   end
 
+  local function waOnExpand(self)
+    if expandedWAs[self:GetParent().data] then
+      expandedWAs[self:GetParent().data] = nil
+      self.texture:SetTexCoord(0.25,0.3125,0.5,0.625)
+    else
+      expandedWAs[self:GetParent().data] = true
+      self.texture:SetTexCoord(0.375,0.4375,0.5,0.625)
+    end
+    waList:Update()
+  end
+
   waList.lines = {}
   waList.list = {}
   for i = 1, ceil(589/32) do
     local line = CreateFrame('FRAME', nil, waList.C)
     waList.lines[i] = line
-    line:SetPoint("TOPLEFT",0,-(i-1)*32)
-    line:SetPoint("RIGHT",0,0)
+    line:SetPoint('TOPLEFT',0, -(i-1)*32)
+    line:SetPoint('RIGHT', 0, 0)
     line:SetHeight(32)
-    line.chk = AstralUI:Check(line):Point("LEFT",10,0):OnClick(waOnClick)
+    line.expand = AstralUI:Icon(line, 'Interface\\AddOns\\'.. ADDON_NAME ..'\\media\\DiesalGUIcons16x256x128', 18, true):Point('LEFT', 10, 0):OnClick(waOnExpand)
+    line.chk = AstralUI:Check(line):Point('LEFT', line.expand, 'RIGHT', 5, 0):OnClick(waOnClick)
     line.chk.CheckedTexture:SetVertexColor(0.2,1,0.2,1)
-    line.waName = AstralUI:Text(line):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point("LEFT",line.chk,"RIGHT",5,0):Shadow()
+    line.waName = AstralUI:Text(line):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point('LEFT',line.chk,'RIGHT',5,0):Shadow()
     line:Hide()
   end
 
   function waList:Update()
-    updateWeakAuraList()
-
-    local scroll = self.ScrollBar:GetValue()
-    self:SetVerticalScroll(scroll % 32)
-    local start = floor(scroll / 32) + 1
-
-    local list = self.list
-    local lineCount = 1
-    for i = start, #list do
-      local data = list[i]
-      local line = self.lines[lineCount]
-      lineCount = lineCount + 1
-      if not line then
-        break
-      end
+    updateList(self, 32, updateWeakAuraList, function(line, data)
       line.waName:SetText(data)
+
+      local children = childrenWAs[data]
+      if #children == 0 then
+        line.expand:Hide()
+      else
+        line.expand:Show()
+      end
+      if expandedWAs[data] then
+        line.expand.texture:SetTexCoord(0.25,0.3125,0.5,0.625)
+      else
+        line.expand.texture:SetTexCoord(0.375,0.4375,0.5,0.625)
+      end
       line.chk:SetChecked(AstralRaidSettings.wa.required[data])
-      line.data = data
-      line:Show()
-    end
-    for i=lineCount,#self.lines do
-      self.lines[i]:Hide()
-    end
-    self:Height(32 * #list)
+    end)
   end
 
   waList:SetScript('OnShow', function()
     waList:Update()
   end)
 
-  waList.ScrollBar.slider:SetScript("OnValueChanged", function(self)
+  waList.ScrollBar.slider:SetScript('OnValueChanged', function(self)
     self:GetParent():GetParent():Update()
     self:UpdateButtons()
   end)
@@ -266,47 +281,27 @@ function addonModule.options:Load()
   for i = 1, ceil(589/32) do
     local line = CreateFrame('FRAME', nil, addonList.C)
     addonList.lines[i] = line
-    line:SetPoint("TOPLEFT",0,-(i-1)*32)
-    line:SetPoint("RIGHT",0,0)
+    line:SetPoint('TOPLEFT',0,-(i-1)*32)
+    line:SetPoint('RIGHT',0,0)
     line:SetHeight(32)
-    line.chk = AstralUI:Check(line):Point("LEFT",10,0):OnClick(addonOnClick)
+    line.chk = AstralUI:Check(line):Point('LEFT',10,0):OnClick(addonOnClick)
     line.chk.CheckedTexture:SetVertexColor(0.2,1,0.2,1)
-    line.addonName = AstralUI:Text(line):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point("LEFT",line.chk,"RIGHT",5,0):Shadow()
+    line.addonName = AstralUI:Text(line):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point('LEFT',line.chk,'RIGHT',5,0):Shadow()
     line:Hide()
   end
 
   function addonList:Update()
-    updateAddonList()
-
-    local scroll = self.ScrollBar:GetValue()
-    self:SetVerticalScroll(scroll % 32)
-    local start = floor(scroll / 32) + 1
-
-    local list = self.list
-    local lineCount = 1
-    for i = start, #list do
-      local data = list[i]
-      local line = self.lines[lineCount]
-      lineCount = lineCount + 1
-      if not line or not data then
-        break
-      end
+    updateList(self, 32, updateAddonList, function(line, data)
       line.addonName:SetText(data.title or data.name)
       line.chk:SetChecked(AstralRaidSettings.addons.required[data.name])
-      line.data = data
-      line:Show()
-    end
-    for i=lineCount,#self.lines do
-      self.lines[i]:Hide()
-    end
-    self:Height(32 * #list)
+    end)
   end
 
   addonList:SetScript('OnShow', function()
     addonList:Update()
   end)
 
-  addonList.ScrollBar.slider:SetScript("OnValueChanged", function(self)
+  addonList.ScrollBar.slider:SetScript('OnValueChanged', function(self)
     self:GetParent():GetParent():Update()
     self:UpdateButtons()
   end)

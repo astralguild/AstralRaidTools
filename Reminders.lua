@@ -181,19 +181,27 @@ AstralRaidReminders = {
   ['noRelease'] = {text = 'DONT RELEASE', sound = 'Voice: Don\'t Release', callbacks = {'leaveCombat', 'dead', 'resurrected', 'alive'}, func = noReleaseReminder},
 }
 
-AstralRaidEvents:Register('PLAYER_LOGIN', function()
+AstralRaidEvents:Register('PLAYER_LOGIN', function() -- initialize all reminders
   for name, r in pairs(AstralRaidReminders) do
     addon.CreateText(name, r.text, 'REMINDER')
     for i = 1, #r.callbacks do
       addon.AddTextEventCallback(r.func, name, r.callbacks[i], r.sound)
     end
+    if not AstralRaidSettings.texts.sounds[name] then
+      AstralRaidSettings.texts.sounds[name] = r.sound or 'None'
+    end
+    if not AstralRaidSettings.texts.enabled[name] then
+      AstralRaidSettings.texts.enabled[name] = true
+    end
   end
 end, 'astralRaidInitReminders')
 
 local module = addon:New('Reminders', 'Reminders')
-local fontDropdown, fontSizeSlider, reminderWidgets
+local fontDropdown, fontSizeSlider, reminderEnableCheckbox, inPartyCheckbox, reminderWidgets
 
 function module.options:Load()
+  -- Get Shared Media
+
   local fonts = addon.SharedMedia:List('font')
   local sounds = addon.SharedMedia:List('sound')
 
@@ -232,23 +240,32 @@ function module.options:Load()
 		info.text = fonts[i]
 		info.arg1 = fonts[i]
 		info.func = fontDropdownSetValue
-		info.font = fonts[i]
+		info.font = addon.SharedMedia:Fetch('font', fonts[i], true) or fonts[i]
 		info.justifyH = 'CENTER'
 	end
 
   fontSizeSlider = AstralUI:Slider(self, 'Font Size'):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(36,120)
 
-  local testReminders = false
-  local testRemindersButton = CreateFrame('BUTTON', 'AstralRaidsTestRemindersButton', self, 'UIPanelButtonTemplate')
-  testRemindersButton:SetSize(175, 20)
-  testRemindersButton:SetText('Test Reminders')
-  testRemindersButton:SetPoint('BOTTOMRIGHT', -15, -5)
-  testRemindersButton:SetScript('OnClick', function()
-    testReminders = not testReminders
-    addon.TestTexts(testReminders, 5)
+  reminderEnableCheckbox = AstralUI:Check(self, 'Enable'):Point('LEFT', fontSizeSlider, 'RIGHT', 10, 0):OnClick(function(self)
+    AstralRaidSettings.texts.reminders.enable = self:GetChecked()
+    if not self:GetChecked() then
+      for name, _ in pairs(AstralRaidReminders) do
+        addon.HideText(name)
+      end
+    end
   end)
 
-  local specificHeader = AstralUI:Text(self, 'Specific Reminders'):Point('TOPLEFT', fontDropdown, 'BOTTOMLEFT', 0, -20)
+  inPartyCheckbox = AstralUI:Check(self, 'Show reminders in Party'):Point('TOPLEFT', fontDropdown, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
+    AstralRaidSettings.texts.reminders.inParty = self:GetChecked()
+  end)
+
+  local testReminders = false
+  AstralUI:Button(self, 'Test Reminders'):Point('LEFT', inPartyCheckbox, 'RIGHT', 445, 0):Size(130,20):OnClick(function(self)
+    testReminders = not testReminders
+    addon.TestTexts(testReminders, 5)
+	end)
+
+  local specificHeader = AstralUI:Text(self, 'Specific Reminders'):Point('TOPLEFT', inPartyCheckbox, 'BOTTOMLEFT', 0, -20)
   reminderWidgets = {}
 
   local a = specificHeader
@@ -263,22 +280,25 @@ function module.options:Load()
       info.func = soundDropdownSetValue
       info.justifyH = 'CENTER'
     end
-    reminderWidgets[name] = {text = t, soundDropdown = s}
+    local e = AstralUI:Check(self, 'Enable'):Point('LEFT', s, 'RIGHT', 10, 0):OnClick(function(self)
+      AstralRaidSettings.texts.enabled[name] = self:GetChecked()
+      if not self:GetChecked() then
+        addon.HideText(name)
+      end
+    end)
+    reminderWidgets[name] = {text = t, soundDropdown = s, enableCheck = e}
     a = t
   end
 end
 
 function module.options:OnShow()
-  for name, r in pairs(AstralRaidReminders) do
-    if not AstralRaidSettings.texts.sounds[name] then
-      AstralRaidSettings.texts.sounds[name] = r.sound or 'None'
-    end
-  end
-
   fontDropdown:SetText(AstralRaidSettings.general.font.name)
+  reminderEnableCheckbox:SetChecked(AstralRaidSettings.texts.reminders.enable)
+  inPartyCheckbox:SetChecked(AstralRaidSettings.texts.reminders.inParty)
 
   for name, r in pairs(reminderWidgets) do
     r.soundDropdown:SetText(AstralRaidSettings.texts.sounds[name] or 'None')
+    r.enableCheck:SetChecked(AstralRaidSettings.texts.enabled[name])
   end
 
 	fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)

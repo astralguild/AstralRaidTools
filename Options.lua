@@ -124,7 +124,7 @@ framesList:Update()
 
 local generalHeader = AstralUI:Text(generalPage, 'General Options'):Point('TOPLEFT', 0, 0):Shadow()
 
-local showMinimap = AstralUI:Check(generalPage):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
+local showMinimap = AstralUI:Check(generalPage, 'Show Minimap Button'):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
 	AstralRaidSettings.general.show_minimap_button.isEnabled = self:GetChecked()
 	if AstralRaidSettings.general.show_minimap_button.isEnabled then
 		addon.icon:Show(ADDON_NAME)
@@ -135,8 +135,6 @@ local showMinimap = AstralUI:Check(generalPage):Point('TOPLEFT', generalHeader, 
 		ElvUI[1]:GetModule('MinimapButtons'):UpdateLayout()
 	end
 end)
-AstralUI:Text(generalPage):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point('LEFT', showMinimap, 'RIGHT', 5, 0):Shadow():SetText('Show Minimap Button')
-showMinimap.CheckedTexture:SetVertexColor(0.2,1,0.2,1)
 
 -- Initializations
 
