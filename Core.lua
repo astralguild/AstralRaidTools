@@ -1,6 +1,6 @@
 local ADDON_NAME, addon = ...
 
-LibStub('AceAddon-3.0'):NewAddon(addon, 'AstralRaid', 'AceConsole-3.0')
+LibStub('AceAddon-3.0'):NewAddon(addon, ADDON_NAME, 'AceConsole-3.0')
 
 addon.CLIENT_VERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
 

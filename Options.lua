@@ -7,7 +7,7 @@ addon.Options = {}
 AstralRaidOptionsFrame = AstralUI:Template('AstralOptionsFrame', UIParent)
 AstralRaidOptionsFrame:Hide()
 AstralRaidOptionsFrame:SetPoint('CENTER', 0, 0)
-AstralRaidOptionsFrame.HeaderText:SetText('Astral Raid')
+AstralRaidOptionsFrame.HeaderText:SetText('Astral Raid Tools')
 AstralRaidOptionsFrame.HeaderText:SetTextColor(1, .82, 0, 1)
 AstralRaidOptionsFrame:SetMovable(true)
 AstralRaidOptionsFrame:RegisterForDrag('LeftButton')
@@ -151,9 +151,9 @@ end
 
 OpenAstralRaidWindow = toggle
 
-local ldb = LibStub('LibDataBroker-1.1'):NewDataObject('AstralRaid', {
+local ldb = LibStub('LibDataBroker-1.1'):NewDataObject(ADDON_NAME, {
 	type = 'data source',
-	text = 'AstralRaid',
+	text = ADDON_NAME,
 	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\icon.png',
 	OnClick = function(_, button)
 		if button == 'LeftButton' then
@@ -161,7 +161,7 @@ local ldb = LibStub('LibDataBroker-1.1'):NewDataObject('AstralRaid', {
 		end
 	end,
 	OnTooltipShow = function(tooltip)
-		tooltip:AddLine('Astral Raid')
+		tooltip:AddLine('Astral Raid Tools')
 		tooltip:AddLine('Left click to toggle options window')
 	end,
 })
@@ -180,8 +180,8 @@ function addon:OnInitialize()
 	addon.icon:Register(ADDON_NAME, ldb, self.db.profile.minimap)
 end
 
-SLASH_ASTRALRAID1 = '/astralraid'
-SLASH_ASTRALRAID2 = '/ar'
+SLASH_ASTRALRAID1 = '/astralraidtools'
+SLASH_ASTRALRAID2 = '/astralraid'
 SLASH_ASTRALRAID3 = '/art'
 
 SlashCmdList['ASTRALRAID'] = toggle

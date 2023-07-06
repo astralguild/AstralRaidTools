@@ -48,6 +48,8 @@ function addon.LoadDefaultSettings()
 	addon.AddDefaultSettings('texts', 'reminders', {inRaid = true, inParty = false, enable = true})
 	addon.AddDefaultSettings('texts', 'enabled', {})
 	addon.AddDefaultSettings('texts', 'sounds', {})
+	addon.AddDefaultSettings('notifiers', 'general', {isEnabled = true, toConsole = true, toOfficer = false, toRaid = false})
+	addon.AddDefaultSettings('notifiers', 'encounters', {})
 	addon.AddDefaultSettings('frame', 'orientation', 1)
 	addon.AddDefaultSettings('frame', 'rank_filter',
 	{

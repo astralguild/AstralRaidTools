@@ -1,14 +1,5 @@
 local ADDON_NAME, addon = ...
 
-local module = addon:New('Roster', 'Roster View', true)
-
-local statusIcons = {
-	[1] = "Interface\\RaidFrame\\ReadyCheck-Waiting",
-	[2] = "Interface\\RaidFrame\\ReadyCheck-Ready",
-	[3] = "Interface\\RaidFrame\\ReadyCheck-NotReady",
-	[4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
-}
-
 function addon.IterateRoster(maxGroup, index)
 	index = (index or 0) + 1
 	maxGroup = maxGroup or 8
@@ -55,11 +46,35 @@ function addon.IterateRoster(maxGroup, index)
 	end
 end
 
+function addon.ClassColorName(unit)
+  if unit and UnitExists(unit) then
+    local name = UnitName(unit)
+    local _, class = UnitClass(unit)
+    if not class then
+      return name
+    else
+      local classData = RAID_CLASS_COLORS[class]
+      local coloredName = ('|c%s%s|r'):format(classData.colorStr, name)
+      return coloredName
+    end
+  else
+    return ''
+	end
+end
+
 function addon.DelUnitNameServer(unitName)
 	unitName = strsplit("-", unitName)
 	return unitName
 end
 
+local module = addon:New('Roster', 'Roster View', true)
+
+local statusIcons = {
+	[1] = "Interface\\RaidFrame\\ReadyCheck-Waiting",
+	[2] = "Interface\\RaidFrame\\ReadyCheck-Ready",
+	[3] = "Interface\\RaidFrame\\ReadyCheck-NotReady",
+	[4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
+}
 local notInRaidText, roster, raidSlider, raidNames, updateButton
 local cdRequest = 5
 local lastRequest = nil

@@ -1,10 +1,12 @@
 local ADDON_NAME, addon = ...
 
-AstralUI = {}
+function addon.Console(...)
+	print(WrapTextInColorCode('[AR]', '008888FF'), ...)
+end
 
 function addon.PrintDebug(...)
   if addon.Debug then
-    print('ASTRAL_RAID_DEBUG', ...)
+    addon.Console('<DEBUG>', ...)
   end
 end
 
@@ -41,6 +43,7 @@ end
 
 -- Large amount of code copied and modified from Astral Functions, Library
 
+AstralUI = {}
 local templates = {}
 
 local Mod = nil
