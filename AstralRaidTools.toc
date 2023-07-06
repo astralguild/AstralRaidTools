@@ -2,7 +2,7 @@
 ## Title: Astral |cfff5e4a8Raid|r
 ## Notes: Internal guild raid companion
 ## Author: Astral
-## Version: 0.1.2
+## Version: 0.1.4
 ## SavedVariables: AstralRaidSettings, AstralRaidMinimap
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
 ## IconTexture: Interface\AddOns\AstralRaidTools\Media\icon.png

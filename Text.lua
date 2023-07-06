@@ -124,14 +124,14 @@ local function canShowReminder()
 end
 
 local function canShowAlert()
-  return (IsInRaid() or IsInGroup()) and addon.InInstance and addon.InEncounter
+  return (IsInRaid() or IsInGroup()) and addon.InInstance and addon.InEncounter and AstralRaidSettings.texts.alerts.enable
 end
 
 local function canShowText(type)
   if type == 'REMINDER' then
-    return canShowReminder() or addon.Debug
+    return canShowReminder() or (not InCombatLockdown() and AstralRaidSettings.texts.reminders.outsideInstances)
   elseif type == 'ALERT' then
-    return canShowAlert() or addon.Debug
+    return canShowAlert() or AstralRaidSettings.texts.alerts.outsideInstances
   end
   return true
 end

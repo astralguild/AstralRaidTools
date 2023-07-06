@@ -83,15 +83,28 @@ function module.options:Load()
 	encounterList.LINE_PADDING_LEFT = 2
 	encounterList.SCROLL_WIDTH = 12
 
+	local function newEncounterEntry(L)
+		local encounter = {
+			trackedAuras = {},
+		}
+		AstralRaidSettings.notifiers.encounters[#AstralRaidSettings.notifiers.encounters + 1] = encounter
+	end
+
   local function updateList()
 		encounterList.L = {}
 		for i = 1, #AstralRaidSettings.notifiers.encounters do
-			encounterList.L[i] = '|cffffff00'.. addon.GetBossName(AstralRaidSettings.notifiers.encounters[i].bossID) ..'|r'
+			if AstralRaidSettings.notifiers.encounters[i].bossID then
+				encounterList.L[i] = '|cffffff00'.. addon.GetBossName(AstralRaidSettings.notifiers.encounters[i].bossID) ..'|r'
+			else
+				encounterList.L[i] = NEW
+			end
+		end
+		if #encounterList.L == 0 then
+			newEncounterEntry()
 		end
 		encounterList.L[#encounterList.L + 1] = '|cfff5e4a8' .. ADD
 		encounterList:Update()
 	end
-	updateList()
 
   encounterList:SetScript('OnShow',function(self)
 		updateList()
@@ -104,11 +117,7 @@ function module.options:Load()
 			encounterDropdown:Disable()
 		end
 		if index == #self.L then
-      local encounter = {
-				trackedAuras = {},
-			}
-			AstralRaidSettings.notifiers.encounters[#AstralRaidSettings.notifiers.encounters + 1] = encounter
-			tinsert(self.L, #self.L - 1, NEW)
+      newEncounterEntry()
 			self:Update()
 			updateList()
 			encounterDropdown:SetText('-')
@@ -158,6 +167,8 @@ function module.options:Load()
 	encounterDropdown:SetScript('OnLeave',function(self)
 		self.Background:Hide()
 	end)
+
+	updateList()
 end
 
 function module.options:OnShow()

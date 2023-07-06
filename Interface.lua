@@ -1,12 +1,12 @@
 local ADDON_NAME, addon = ...
 
 function addon.Console(...)
-	print(WrapTextInColorCode('[AR]', '008888FF'), ...)
+	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', '008888FF'), ...)
 end
 
 function addon.PrintDebug(...)
   if addon.Debug then
-    addon.Console('<DEBUG>', ...)
+    addon.Console(WrapTextInColorCode('D', 'C1E1C1FF'), ...)
   end
 end
 

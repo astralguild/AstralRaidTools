@@ -17,7 +17,7 @@ local function hideAfter(r, time)
 end
 
 local guildBankSpell = 83958
-local hsSpell = 29893
+local healthstoneSpell = 29893
 local healthstoneItem = 5512
 local hpPotionItem = 191380
 local combatPotionItems = {
@@ -125,7 +125,7 @@ end
 local function healthstoneReminder(e, _, m, ...)
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and notFullHealthstones() then
     local spellID = select(10, ...)
-    if spellID == hsSpell then
+    if spellID == healthstoneSpell then
       untrigger('healthstones', notFullHealthstones)
       return 'SHOW'
     end
@@ -197,7 +197,7 @@ AstralRaidEvents:Register('PLAYER_LOGIN', function() -- initialize all reminders
 end, 'astralRaidInitReminders')
 
 local module = addon:New('Reminders', 'Reminders')
-local fontDropdown, fontSizeSlider, reminderEnableCheckbox, inPartyCheckbox, reminderWidgets
+local fontDropdown, fontSizeSlider, reminderEnableCheckbox, inPartyCheckbox, outsideInstancesCheckbox, reminderWidgets
 
 function module.options:Load()
   -- Get Shared Media
@@ -259,6 +259,10 @@ function module.options:Load()
     AstralRaidSettings.texts.reminders.inParty = self:GetChecked()
   end)
 
+  outsideInstancesCheckbox = AstralUI:Check(self, 'Show outside instances'):Point('LEFT', inPartyCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
+    AstralRaidSettings.texts.reminders.outsideInstances = self:GetChecked()
+  end)
+
   local testReminders = false
   AstralUI:Button(self, 'Test Reminders'):Point('LEFT', inPartyCheckbox, 'RIGHT', 445, 0):Size(130,20):OnClick(function(self)
     testReminders = not testReminders
@@ -295,6 +299,11 @@ function module.options:OnShow()
   fontDropdown:SetText(AstralRaidSettings.general.font.name)
   reminderEnableCheckbox:SetChecked(AstralRaidSettings.texts.reminders.enable)
   inPartyCheckbox:SetChecked(AstralRaidSettings.texts.reminders.inParty)
+  outsideInstancesCheckbox:SetChecked(AstralRaidSettings.texts.reminders.outsideInstances)
+
+  if not addon.Debug then
+    outsideInstancesCheckbox:Hide()
+  end
 
   for name, r in pairs(reminderWidgets) do
     r.soundDropdown:SetText(AstralRaidSettings.texts.sounds[name] or 'None')
