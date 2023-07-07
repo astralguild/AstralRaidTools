@@ -3,9 +3,10 @@ local _, addon = ...
 local module = addon:New('Notifiers', 'Notifiers', true)
 
 local enableCheckbox, toConsoleCheckbox, toOfficerCheckbox, toRaidCheckbox, encounterList, encounterDropdown
+local encounterNewAuraText, encounterNewAuraEdit, encounterNewAuraAddBtn
 local encounterWidgets = {}
 
-function module.UnitTrigger(player, spellID)
+function module.AuraTrigger(player, spellID)
   local e = {
     player = player,
     date = date('%x'),
@@ -16,45 +17,69 @@ function module.UnitTrigger(player, spellID)
   addon.Console(string.format('%s affected by %s at %s', addon.ClassColorName(player), link, e.time))
 end
 
-module.options.lastIndex = 0
-
 function module.options:PopulateEncounter(index)
 	local encounter = AstralRaidSettings.notifiers.encounters[index]
 	local last = encounterDropdown
 
-	if module.options.lastIndex > 0 then
-		for i = 1, #encounterWidgets[module.options.lastIndex] do
-			encounterWidgets[module.options.lastIndex][i].ic:Hide()
-			encounterWidgets[module.options.lastIndex][i].t:Hide()
-			encounterWidgets[module.options.lastIndex][i].e:Hide()
+	if #encounterWidgets == 0 then
+		-- Make inputs for first time
+		encounterNewAuraText = AstralUI:Text(self, 'Add Spell ID:'):FontSize(10)
+		encounterNewAuraEdit = CreateFrame('EditBox', nil, self, 'InputBoxTemplate')
+		encounterNewAuraEdit:SetSize(180, 20)
+		encounterNewAuraEdit:SetAutoFocus(false)
+		encounterNewAuraAddBtn = AstralUI:Icon(self, "Interface\\RaidFrame\\ReadyCheck-Ready", 16, true)
+	end
+
+	for i = 1, #encounterWidgets do -- clear all widgets
+		for j = 1, #encounterWidgets[i] do
+			encounterWidgets[i][j].ic:Hide()
+			encounterWidgets[i][j].t:Hide()
+			encounterWidgets[i][j].d:Hide()
 		end
 	end
 
-	if encounter.trackedAuras then
-		if encounterWidgets[index] then
-			for i = 1, #encounterWidgets[index] do
-				encounterWidgets[index][i].ic:Show()
-				encounterWidgets[index][i].t:Show()
-				encounterWidgets[index][i].e:Show()
-			end
-		else
-			encounterWidgets[index] = {}
-			for i = 1, #encounter.trackedAuras do
-				local a = encounter.trackedAuras[i]
-				local name, _, icon, _, _, _, _, _ = GetSpellInfo(a.spellID)
-				local ic = AstralUI:Icon(self, icon, 16)
-				ic:SetPoint('TOPLEFT', last, 'BOTTOMLEFT', 0, -20)
-				local t = AstralUI:Text(self, name):Point('LEFT', ic, 'RIGHT', 5, 0):Size(200, 10):FontSize(10)
-				local e = AstralUI:Check(self, 'Enable', a.isEnabled):Point('LEFT', t, 'RIGHT', 10, 0):OnClick(function(self)
-					AstralRaidSettings.notifiers.encounters[index].trackedAuras[i].isEnabled = self:GetChecked()
-				end)
-				table.insert(encounterWidgets[index], {ic = ic, t = t, e = e})
-				last = t
-			end
+	-- Tracked Auras
+	if encounterWidgets[index] then
+		for i = 1, #encounterWidgets[index] do
+			encounterWidgets[index][i].ic:Show()
+			encounterWidgets[index][i].t:Show()
+			encounterWidgets[index][i].d:Show()
+		end
+	else
+		encounterWidgets[index] = {}
+		for i = 1, #encounter.auras do
+			local a = encounter.auras[i]
+			local name, _, icon, _, _, _, _, _ = GetSpellInfo(a.spellID)
+			local ic = AstralUI:Icon(self, icon, 16)
+			ic:SetPoint('TOPLEFT', last, 'BOTTOMLEFT', 0, -20)
+			local t = AstralUI:Text(self, name):Point('LEFT', ic, 'RIGHT', 5, 0):Size(250, 10):FontSize(10)
+			local d = AstralUI:Icon(self, "Interface\\RaidFrame\\ReadyCheck-NotReady", 16, true)
+			d:SetPoint('LEFT', t, 'RIGHT', 10, 0)
+			d:SetScript('OnClick', function()
+				AstralRaidSettings.notifiers.encounters[index].auras[i] = nil
+				ic:Hide()
+				t:Hide()
+				d:Hide()
+				encounterWidgets[index][a.spellID] = nil
+				module.options:PopulateEncounter(index)
+			end)
+			encounterWidgets[index][a.spellID] = {ic = ic, t = t, d = d}
+			last = ic
 		end
 	end
-
-	module.options.lastIndex = index
+	encounterNewAuraText:SetPoint('TOPLEFT', last, 'BOTTOMLEFT', 0, -20)
+	encounterNewAuraEdit:SetPoint('LEFT', encounterNewAuraText, 'RIGHT', 10, 0)
+	encounterNewAuraAddBtn:SetPoint('LEFT', encounterNewAuraEdit, 'RIGHT', 10, 0)
+	encounterNewAuraAddBtn:SetScript('OnClick', function()
+		local id = tonumber(encounterNewAuraEdit:GetText()) or -1
+		if id > 0 and GetSpellInfo(id) then
+			AstralRaidSettings.notifiers.encounters[index].auras[#AstralRaidSettings.notifiers.encounters[index].auras+1] = {
+				spellID = id,
+			}
+			module.options:PopulateEncounter(index)
+		end
+	end)
+	encounterNewAuraEdit:SetText('')
 end
 
 function module.options:Load()
@@ -83,9 +108,11 @@ function module.options:Load()
 	encounterList.LINE_PADDING_LEFT = 2
 	encounterList.SCROLL_WIDTH = 12
 
-	local function newEncounterEntry(L)
+	local function newEncounterEntry()
 		local encounter = {
-			trackedAuras = {},
+			auras = {},
+			hps = {},
+			pows = {},
 		}
 		AstralRaidSettings.notifiers.encounters[#AstralRaidSettings.notifiers.encounters + 1] = encounter
 	end
@@ -95,6 +122,10 @@ function module.options:Load()
 		for i = 1, #AstralRaidSettings.notifiers.encounters do
 			if AstralRaidSettings.notifiers.encounters[i].bossID then
 				encounterList.L[i] = '|cffffff00'.. addon.GetBossName(AstralRaidSettings.notifiers.encounters[i].bossID) ..'|r'
+				if i == 1 then
+					encounterDropdown:SetText(addon.GetBossName(AstralRaidSettings.notifiers.encounters[i].bossID) or '-')
+					module.options:PopulateEncounter(i)
+				end
 			else
 				encounterList.L[i] = NEW
 			end

@@ -46,6 +46,8 @@ local repairSpells = {
   [3] = 200061,
 }
 
+local LOW_COMBAT_POTION_COUNT = 3
+
 local function lowDurability()
   local cur, max
   for i = 1, 18 do
@@ -71,7 +73,7 @@ local function noCombatPotions()
   for i = 1, #combatPotionItems do
     count = count + GetItemCount(combatPotionItems[i])
   end
-  return count == 0
+  return count <= LOW_COMBAT_POTION_COUNT
 end
 
 local function eatFoodReminder(e, _, m, ...)

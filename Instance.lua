@@ -635,5 +635,6 @@ addon.EJInstanceName = setmetatable({}, {__index=function (t, k)
 end})
 
 function addon.GetBossName(bossID)
+	if not bossID then return end
 	return bossID < 0 and addon.EJInstanceName[-bossID] or addon.BossName[bossID]
 end
