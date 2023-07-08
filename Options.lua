@@ -44,9 +44,7 @@ framesList.Frame.ScrollBar.buttonDown:Hide()
 options.Frames = {}
 options._Frames = {}
 
-options:SetScript('OnShow', function(self)
-	self:SetPropagateKeyboardInput(true)
-  addon.InitializeOptionSettings()
+local function updateFrames()
 	options.Frames = {}
 	for _, f in pairs(options._Frames) do
 		local pos = #options.Frames + 1
@@ -61,6 +59,12 @@ options:SetScript('OnShow', function(self)
 	if type(options.CurrentFrame.OnShow) == 'function' then
 		options.CurrentFrame:OnShow()
 	end
+end
+
+options:SetScript('OnShow', function(self)
+	self:SetPropagateKeyboardInput(true)
+  addon.InitializeOptionSettings()
+	updateFrames()
 end)
 
 function options:SetPage(page)
@@ -143,6 +147,7 @@ end)
 
 local debugShowAllMenus = AstralUI:Check(generalPage, WrapTextInColorCode('Show all menus', 'C1E1C1FF')):Point('LEFT', debugMode, 'RIGHT', 175, 0):OnClick(function (self)
 	AstralRaidSettings.general.debug.showAllMenus = self:GetChecked()
+	updateFrames()
 end)
 
 -- Initializations
@@ -158,7 +163,8 @@ function addon.InitializeOptionSettings()
 	AstralRaidOptionsFrame.GuildText:SetFormattedText('Astral - Area 52 (US) %s', addon.CLIENT_VERSION)
 end
 
-AstralRaidEvents:Register('PLAYER_LOGIN', addon.InitializeOptionSettings, 'astralRaidInitOptions')
+AstralRaidEvents:Register('GROUP_ROSTER_UPDATE', function() if options:IsShown() then updateFrames() end end, 'astralRaidGroupRosterUpdateOptions')
+AstralRaidEvents:Register('PARTY_LEADER_CHANGED', function() if options:IsShown() then updateFrames() end end, 'astralRaidPartyLeaderChangedOptions')
 
 local function toggle()
 	AstralRaidOptionsFrame:SetShown(not AstralRaidOptionsFrame:IsShown())

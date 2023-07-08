@@ -1,5 +1,8 @@
 local _, addon = ...
 
+local ABERRUS = 2166
+local NELTH = 2684
+
 local log = LibStub('AceDB-3.0'):New('AstralRaidBossModulesLog')
 
 local function getAnnounceChannel(announceType)
@@ -32,7 +35,7 @@ end
 local bdgNelthHeartMacro, bdgNealthHeartMacroPressed, bdgNelthHeartCast, bdgNelthHeartInit, bdgNelthShowHeartIcon
 
 local bossModules = {
-	[2684] = {
+	[NELTH] = {
 		events = {
 			['ENCOUNTER_START'] = bdgNelthHeartInit,
 			['UNIT_SPELLCAST_SUCCEEDED'] = bdgNelthHeartCast,
@@ -49,7 +52,7 @@ local bossModules = {
 
 bdgNelthHeartMacro = function(...)
 	local prefix, text, _, sender = ...
-	local m = bossModules[2684]
+	local m = bossModules[NELTH]
 	if addon.Encounter.difficultyID ~= 16 and (not addon.Debug) then return end
 	if prefix == 'BDG_NELTH_HEART' and text == 'heart' then
 		if m.settings.isEnabled then
@@ -69,7 +72,7 @@ bdgNelthHeartMacro = function(...)
 end
 
 bdgNealthHeartMacroPressed = function(player)
-	local m = bossModules[2684]
+	local m = bossModules[NELTH]
 	tInsertUnique(m.debuffs, player)
 	local heart = {
 		player = player,
@@ -94,7 +97,7 @@ end
 
 bdgNelthHeartCast = function(...)
 	local spellID = select(3, ...)
-	local m = bossModules[2684]
+	local m = bossModules[NELTH]
 	if spellID == 410968 then -- Volcanic Heart
 		m.lastHeartTime = GetTime()
 		m.heartSet = m.heartSet + 1
@@ -113,7 +116,7 @@ bdgNelthHeartCast = function(...)
 end
 
 bdgNelthShowHeartIcon = function()
-	local m = bossModules[2684]
+	local m = bossModules[NELTH]
 	if addon.Encounter.difficultyID ~= 16 and (not addon.Debug) then return end
 	if m.settings.showIcon and m.frame then
 		m.frame:Show()
@@ -133,17 +136,18 @@ bdgNelthHeartInit = function(...)
 		log.bdgNelthHeart.hearts = {}
 	end
 
-	local m = bossModules[2684]
+	local m = bossModules[NELTH]
 	m.heartSet = 1
 	log.bdgNelthHeart.pullCount = log.bdgNelthHeart.pullCount + 1
 	m.lastHeartTime = nil
 	m.debuffs = {}
-	m.settings = AstralRaidSettings.bossModules[2684]
+	m.settings = AstralRaidSettings.bossModules[NELTH]
 
 	if m.settings.showIcon and not m.frame then
 		m.frame = CreateFrame('FRAME', nil, UIParent)
-		m.frame:SetHeight(1)
-		m.frame:SetWidth(1)
+		m.frame:SetHeight(m.settings.iconSize)
+		m.frame:SetWidth(m.settings.iconSize)
+		m.frame:SetAlpha(0.75)
 		m.frame:SetPoint('BOTTOM', UIParent, 'CENTER', 0, 20)
 		m.frame:SetScript('OnShow', function(self)
 			m.frame.pressed = false
@@ -200,15 +204,13 @@ AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function(...) handle('C
 AstralRaidEvents:Register('ENCOUNTER_START', function(...) handle('ENCOUNTER_START', ...) end, 'astralRaidBossModulesEncounterStart')
 
 local module = addon:New('Boss Modules', 'Boss Modules')
-local instanceDropdown, encounterList
+local instanceDropdown, encounterList, setContent
 
-local ABERRUS = 2166
-local NELTH = 2684
-
-local nelthHeartMacroEnableCheckbox, nelthHeartMacroPrintCheckbox, nelthHeartMacroLogCheckbox, nelthHeartMacroAnnounceDropdown, nelthHeartIconEnableCheckbox
+local nelthHeartMacroEnableCheckbox, nelthHeartMacroPrintCheckbox, nelthHeartMacroLogCheckbox, nelthHeartMacroAnnounceDropdown, nelthHeartIconEnableCheckbox, nelthHeartIconSizeSlider
 
 local announceKinds = {[1] = 'Say', [2] = 'Group', [3] = 'Officer', [4] = 'Print', [5] = 'None'}
 local currentInstance = ABERRUS
+local currentEncounter = NELTH
 
 function module.options:Load()
 	local frames = {
@@ -229,15 +231,24 @@ function module.options:Load()
 		end
 	end
 
-	local function setContent()
+	setContent = function()
 		if not currentInstance or not frames[currentInstance] then return end
+		if not instances[currentInstance].encounters[encounterList.selected] and currentEncounter then
+			for i = 1, #instances[currentInstance].encounters do
+				local encounterID = instances[currentInstance].encounters[i]
+				if encounterID == currentEncounter then
+					encounterList.selected = i
+				end
+			end
+		end
+
 		for _, i in pairs(frames) do
 			for _, f in pairs(i) do
 				f:Hide()
 			end
 		end
 		local encounterID = instances[currentInstance].encounters[encounterList.selected]
-		addon.PrintDebug(encounterID)
+		currentEncounter = encounterID
 		if frames[currentInstance][encounterID] then
 			frames[currentInstance][encounterID]:Show()
 		end
@@ -251,7 +262,7 @@ function module.options:Load()
 		for i = 1, #instances[currentInstance].encounters do
 			local encounterID = instances[currentInstance].encounters[i]
 			if (not first) and frames[currentInstance] and frames[currentInstance][encounterID] then
-				first = encounterID
+				first = i
 			end
 			encounterList.L[i] = addon.GetBossName(encounterID)
 			encounterList.LDisabled[i] = not (frames[currentInstance] and frames[currentInstance][encounterID])
@@ -358,6 +369,8 @@ function module.options:Load()
     AstralRaidSettings.bossModules[NELTH].showIcon = self:GetChecked()
   end)
 
+  nelthHeartIconSizeSlider = AstralUI:Slider(frames[ABERRUS][NELTH], 'Icon Size'):Size(200):Point('LEFT', nelthHeartIconEnableCheckbox, 'RIGHT', 150, 0):Range(256,512)
+
 	local vhLink, _ = GetSpellLink(410953)
 	local nelthHeartIconDesc = AstralUI:Text(frames[ABERRUS][NELTH], string.format('Show an icon on %s that only hides when you press the macro.', vhLink)):Point('TOPLEFT', nelthHeartIconEnableCheckbox, 'BOTTOMLEFT', 0, -20):FontSize(9):Shadow()
 
@@ -378,4 +391,11 @@ function module.options:OnShow()
   nelthHeartMacroLogCheckbox:SetChecked(AstralRaidSettings.bossModules[NELTH].logResults)
 	nelthHeartMacroAnnounceDropdown:SetText(announceKinds[AstralRaidSettings.bossModules[NELTH].announce])
 	nelthHeartIconEnableCheckbox:SetChecked(AstralRaidSettings.bossModules[NELTH].showIcon)
+	nelthHeartIconSizeSlider:SetTo(AstralRaidSettings.bossModules[NELTH].iconSize):OnChange(function(self, event)
+		event = event - event % 1
+		AstralRaidSettings.bossModules[NELTH].iconSize = event
+		self.tooltipText = event
+		self:tooltipReload(self)
+	end)
+	setContent()
 end

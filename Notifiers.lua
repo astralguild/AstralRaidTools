@@ -224,7 +224,7 @@ function module.options:Load()
 			local index = AstralRaidSettings.notifiers.instances[currentInstance].encounters[encounterList.selected]
 			local encounter = AstralRaidSettings.notifiers.encounters[index]
 			local list = {}
-			local spells = addon.GetBossAbilities(index)
+			local spells = addon.GetBossAbilities(index) or {}
 			for i = 1, #spells do
 				local name, _, icon, _, _, _, _, _ = GetSpellInfo(spells[i])
 				list[#list+1] = {
