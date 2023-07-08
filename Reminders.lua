@@ -226,7 +226,7 @@ function module.options:Load()
 		self:SetText(arg1)
     if arg1 and arg1 ~= 'None' then
       local path = addon.SharedMedia:Fetch('sound', arg1, true)
-      PlaySoundFile(path or arg1, AstralRaidSettings.general.sounds.channel)
+      PlaySoundFile(path or arg1)
     end
     AstralRaidSettings.texts.sounds[self.rname] = arg1
 	end
@@ -261,7 +261,7 @@ function module.options:Load()
     AstralRaidSettings.texts.reminders.inParty = self:GetChecked()
   end)
 
-  outsideInstancesCheckbox = AstralUI:Check(self, 'Show outside instances'):Point('LEFT', inPartyCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
+  outsideInstancesCheckbox = AstralUI:Check(self, WrapTextInColorCode('Show outside instances', 'C1E1C1FF')):Point('LEFT', inPartyCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
     AstralRaidSettings.texts.reminders.outsideInstances = self:GetChecked()
   end)
 
@@ -283,6 +283,7 @@ function module.options:Load()
       s.List[i] = info
       info.text = sounds[i]
       info.arg1 = sounds[i]
+      info.rname = name
       info.func = soundDropdownSetValue
       info.justifyH = 'CENTER'
     end

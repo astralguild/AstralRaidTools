@@ -75,7 +75,7 @@ local statusIcons = {
 	[3] = "Interface\\RaidFrame\\ReadyCheck-NotReady",
 	[4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
 }
-local notInRaidText, roster, raidSlider, raidNames, updateButton
+local notInGroupText, roster, raidSlider, raidNames, updateButton
 local cdRequest = 5
 local lastRequest = nil
 
@@ -348,25 +348,25 @@ function module.options:Load()
 		self:UpdateButtons()
 	end)
 
-	notInRaidText = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
-	notInRaidText:SetText('You must be in a raid group to inspect a raid roster.')
-	notInRaidText:SetPoint('CENTER', -50, 100)
-	notInRaidText:Hide()
+	notInGroupText = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
+	notInGroupText:SetText('You must be in a group to inspect a group roster.')
+	notInGroupText:SetPoint('CENTER', -50, 100)
+	notInGroupText:Hide()
 end
 
 function module.options:OnShow()
-	if not IsInRaid() then
+	if not (IsInRaid() or IsInGroup()) then
 		roster:Hide()
 		raidSlider:Hide()
 		raidNames:Hide()
 		updateButton:Hide()
-		notInRaidText:Show()
+		notInGroupText:Show()
 	else
 		roster:Show()
 		raidSlider:Show()
 		raidNames:Show()
 		updateButton:Show()
-		notInRaidText:Hide()
+		notInGroupText:Hide()
 		roster:Update()
 	end
 end

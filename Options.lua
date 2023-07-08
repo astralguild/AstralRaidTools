@@ -20,7 +20,6 @@ AstralRaidOptionsFrame:SetScript('OnKeyDown', function (self, key)
 	end
 end)
 AstralRaidOptionsFrame:SetDontSavePosition(true)
-AstralRaidOptionsFrame.MenuBar.Icon:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\planet.png')
 
 -- Paging
 
@@ -52,7 +51,7 @@ options:SetScript('OnShow', function(self)
 	for _, f in pairs(options._Frames) do
 		local pos = #options.Frames + 1
 		framesList.L[pos] = f.name
-		framesList.LDisabled[pos] = f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer())
+		framesList.LDisabled[pos] = (f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer() or (f.inParty and addon.IsPartyLead()) or (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))) or f._disabled
 		options.Frames[pos] = f
 	end
 	framesList:Update()
@@ -97,13 +96,15 @@ function framesList:SetListValue(index)
 	options:SetPage(options.Frames[index])
 end
 
-function options:Add(moduleName, frameName, leadProtected)
+function options:Add(moduleName, frameName, leadProtected, inParty, disabled)
 	local self = CreateFrame('FRAME', 'AstralRaidOptions' .. moduleName, options)
 	self:SetSize(options.ContentWidth - 12, options.Height - 16 - 45)
 	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 12, -45)
   self.moduleName = moduleName
   self.name = frameName or moduleName
 	self.leadProtected = leadProtected
+	self.inParty = inParty
+	self._disabled = disabled
 	options._Frames[#options._Frames+1] = self
 	options.Frames[#options.Frames+1] = self
 
@@ -136,10 +137,24 @@ local showMinimap = AstralUI:Check(generalPage, 'Show Minimap Button'):Point('TO
 	end
 end)
 
+local debugMode = AstralUI:Check(generalPage, WrapTextInColorCode('Debug Mode', 'C1E1C1FF')):Point('LEFT', showMinimap, 'RIGHT', 175, 0):OnClick(function (self)
+	AstralRaidSettings.general.debug.isEnabled = self:GetChecked()
+end)
+
+local debugShowAllMenus = AstralUI:Check(generalPage, WrapTextInColorCode('Show all menus', 'C1E1C1FF')):Point('LEFT', debugMode, 'RIGHT', 175, 0):OnClick(function (self)
+	AstralRaidSettings.general.debug.showAllMenus = self:GetChecked()
+end)
+
 -- Initializations
 
 function addon.InitializeOptionSettings()
   showMinimap:SetChecked(AstralRaidSettings.general.show_minimap_button.isEnabled)
+  debugMode:SetChecked(AstralRaidSettings.general.debug.isEnabled)
+  debugShowAllMenus:SetChecked(AstralRaidSettings.general.debug.showAllMenus)
+	if not addon.Debug then
+		debugMode:Hide()
+		debugShowAllMenus:Hide()
+	end
 	AstralRaidOptionsFrame.GuildText:SetFormattedText('Astral - Area 52 (US) %s', addon.CLIENT_VERSION)
 end
 
@@ -154,7 +169,7 @@ OpenAstralRaidWindow = toggle
 local ldb = LibStub('LibDataBroker-1.1'):NewDataObject(ADDON_NAME, {
 	type = 'data source',
 	text = ADDON_NAME,
-	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\planet.png',
+	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\Logo@2x',
 	OnClick = function(_, button)
 		if button == 'LeftButton' then
 			toggle()

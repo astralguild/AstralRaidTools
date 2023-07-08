@@ -247,10 +247,13 @@ end
 
 AstralRaidComms:Init()
 AstralRaidComms:RegisterPrefix('RAID', 'waRequest', function(...) waRequest('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', 'waRequest', function(...) waRequest('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'waRequest', function(...) waRequest('GUILD', ...) end)
 AstralRaidComms:RegisterPrefix('RAID', 'addonRequest', function(...) addonRequest('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', 'addonRequest', function(...) addonRequest('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'addonRequest', function(...) addonRequest('GUILD', ...) end)
 AstralRaidComms:RegisterPrefix('RAID', 'versionRequest', function(...) versionRequest('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', 'versionRequest', function(...) versionRequest('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'versionRequest', function(...) versionRequest('GUILD', ...) end)
 
 -- Message handling

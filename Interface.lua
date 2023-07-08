@@ -1805,13 +1805,13 @@ function AstralUI:GuildInfo(frame)
 	guildVersionString:SetNormalFontObject(InterUIRegular_Small)
 	guildVersionString:SetSize(110, 20)
 	guildVersionString:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
-	guildVersionString:SetAlpha(0.2)
+	guildVersionString:SetAlpha(0.65)
 
 	guildVersionString:SetScript('OnEnter', function(self)
-		self:SetAlpha(.8)
+		self:SetAlpha(1)
 	end)
 	guildVersionString:SetScript('OnLeave', function(self)
-		self:SetAlpha(0.2)
+		self:SetAlpha(0.65)
 	end)
 
 	guildVersionString:SetScript('OnClick', function()
@@ -3584,6 +3584,30 @@ do
 			exportWindow.Edit.EditBox:SetFocus()
 		end
 	end
+end
+
+function AstralUI:UpdateScrollList(self, lineHeight, initFunc, lineFunc)
+  initFunc(self)
+  local scroll = self.ScrollBar:GetValue()
+  self:SetVerticalScroll(scroll % lineHeight)
+  local start = floor(scroll / lineHeight) + 1
+  local list = self.list
+  local lineCount = 1
+  for i = start, #list do
+    local data = list[i]
+    local line = self.lines[lineCount]
+    lineCount = lineCount + 1
+    if not line then
+      break
+    end
+    lineFunc(line, data)
+    line.data = data
+    line:Show()
+  end
+  for i = lineCount, #self.lines do
+    self.lines[i]:Hide()
+  end
+  self:Height(lineHeight * #list)
 end
 
 -- Dialogs

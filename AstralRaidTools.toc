@@ -1,11 +1,11 @@
 ## Interface: 100100
 ## Title: Astral |cfff5e4a8Raid|r
-## Notes: Internal guild raid companion
+## Notes: Raider utilities and raid lead roster management
 ## Author: Astral
-## Version: 0.1.4
-## SavedVariables: AstralRaidSettings, AstralRaidMinimap
+## Version: 0.2
+## SavedVariables: AstralRaidSettings, AstralRaidMinimap, AstralRaidBossModulesLog
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
-## IconTexture: Interface\AddOns\AstralRaidTools\Media\icon.png
+## IconTexture: Interface\AddOns\AstralRaidTools\Media\Logo@2x
 ## AddonCompartmentFunc: OpenAstralRaidWindow
 
 embeds.xml
@@ -21,7 +21,9 @@ Core.lua
 Options.lua
 Text.lua
 Reminders.lua
+BossModules.lua
 Alerts.lua
+EarlyPull.lua
 Notifiers.lua
 Requirements.lua
 Roster.lua

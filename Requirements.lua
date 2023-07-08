@@ -46,10 +46,14 @@ end
 
 AstralRaidComms:RegisterPrefix('RAID', 'versionPush', envPush)
 AstralRaidComms:RegisterPrefix('RAID', 'addonPush', function(...) addonPush('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', 'addonPush', function(...) addonPush('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('RAID', 'waPush', function(...) waPush('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', 'waPush', function(...) waPush('PARTY', ...) end)
 
 function addon.SendWeakAuraRequest()
-	if not IsInRaid() then return end
+	if not (IsInRaid() or IsInGroup()) then return end
+  local channel = 'RAID'
+  if IsInGroup() then channel = 'PARTY' end
 
 	local req = ''
   local weakAuras = addon.GetWeakAuras()
@@ -59,11 +63,13 @@ function addon.SendWeakAuraRequest()
 		end
 	end
 
-	AstralRaidComms:SendChunkedAddonMessages('waRequest', req, 'RAID')
+	AstralRaidComms:SendChunkedAddonMessages('waRequest', req, channel)
 end
 
 function addon.SendAddonsRequest()
-	if not IsInRaid() then return end
+	if not (IsInRaid() or IsInGroup()) then return end
+  local channel = 'RAID'
+  if IsInGroup() then channel = 'PARTY' end
 
 	local req = ''
   local addons = addon.GetAddons()
@@ -73,7 +79,7 @@ function addon.SendAddonsRequest()
 		end
 	end
 
-	AstralRaidComms:SendChunkedAddonMessages('addonRequest', req, 'RAID')
+	AstralRaidComms:SendChunkedAddonMessages('addonRequest', req, channel)
 end
 
 local waHeader, waList, noWAs, addonHeader, addonList
@@ -124,34 +130,6 @@ local function updateAddonList()
     list[#list+1] = data
   end
   addonList.list = list
-end
-
-local function updateList(self, lineHeight, initFunc, lineFunc)
-  initFunc()
-
-  local scroll = self.ScrollBar:GetValue()
-  self:SetVerticalScroll(scroll % lineHeight)
-  local start = floor(scroll / lineHeight) + 1
-
-  local list = self.list
-  local lineCount = 1
-  for i = start, #list do
-    local data = list[i]
-    local line = self.lines[lineCount]
-    lineCount = lineCount + 1
-    if not line then
-      break
-    end
-    lineFunc(line, data)
-    line.data = data
-    line:Show()
-  end
-
-  for i = lineCount,  #self.lines do
-    self.lines[i]:Hide()
-  end
-
-  self:Height(lineHeight * #list)
 end
 
 function waModule.options:Load()
@@ -212,7 +190,7 @@ function waModule.options:Load()
   end
 
   function waList:Update()
-    updateList(self, 32, updateWeakAuraList, function(line, data)
+    AstralUI:UpdateScrollList(self, 32, updateWeakAuraList, function(line, data)
       line.waName:SetText(data)
 
       local children = childrenWAs[data]
@@ -291,7 +269,7 @@ function addonModule.options:Load()
   end
 
   function addonList:Update()
-    updateList(self, 32, updateAddonList, function(line, data)
+    AstralUI:UpdateScrollList(self, 32, updateAddonList, function(line, data)
       line.addonName:SetText(data.title or data.name)
       line.chk:SetChecked(AstralRaidSettings.addons.required[data.name])
     end)

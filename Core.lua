@@ -24,14 +24,15 @@ do
 		this.Load = nil
 		this.isLoaded = true
 	end
-	function addon:New(moduleName, title, leadProtected)
+
+	function addon:New(moduleName, title, leadProtected, inParty, disabled)
 		if addon.A[moduleName] then
 			return false
 		end
 		local m = {}
 		for k,v in pairs(addon.mod) do m[k] = v end
 
-		m.options = addon.Options:Add(moduleName, title, leadProtected)
+		m.options = addon.Options:Add(moduleName, title, leadProtected, inParty, disabled)
 		m.options:Hide()
 		m.options.moduleName = moduleName
 		m.options.name = title or moduleName

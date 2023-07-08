@@ -8,6 +8,16 @@ addon.InstanceType = nil
 addon.InEncounter = false
 addon.Encounter = nil
 
+function addon.GetInstanceChannel()
+	if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and addon.InInstance then
+		return 'INSTANCE_CHAT'
+	elseif IsInRaid() then
+		return 'RAID'
+	elseif IsInGroup() then
+		return 'PARTY'
+	end
+end
+
 function addon.CheckInstanceType()
 	addon.InInstance, addon.InstanceType = IsInInstance()
 end
@@ -61,6 +71,8 @@ AstralRaidEvents:Register('ENCOUNTER_END', function()
   addon.InEncounter = false
   addon.Encounter['end'] = GetTime()
 end, 'astralRaidEndEncounter')
+
+MYTHIC_DIFFICULTY = 16
 
 addon.EncountersList = {
 	{350,652,653,654,655,656,657,658,659,660,661,662},
@@ -623,7 +635,6 @@ addon.BossName = setmetatable({}, {__index=function (t, k)
 	return encounterIDtoEJidChache[k]
 end})
 
-
 local instanceIDtoEJidChache = {
 }
 
@@ -637,4 +648,27 @@ end})
 function addon.GetBossName(bossID)
 	if not bossID then return end
 	return bossID < 0 and addon.EJInstanceName[-bossID] or addon.BossName[bossID]
+end
+
+function addon.GetBossAbilities(bossID, difficultyID)
+	if not bossID then return end
+	if not difficultyID then
+		difficultyID = MYTHIC_DIFFICULTY
+	end
+	local abilities = {}
+	EJ_SetDifficulty(difficultyID)
+	local stack, _, _, _, curSectionID = {}, EJ_GetEncounterInfo(encounterIDtoEJidData[bossID])
+	if not curSectionID then
+		return {}
+	end
+	repeat
+		local info = C_EncounterJournal.GetSectionInfo(curSectionID)
+		if info.spellID and info.spellID > 0 then
+			table.insert(abilities, info.spellID)
+		end
+		table.insert(stack, info.siblingSectionID)
+		table.insert(stack, info.firstChildSectionID)
+		curSectionID = table.remove(stack)
+	until not curSectionID
+	return abilities
 end

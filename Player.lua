@@ -52,9 +52,17 @@ function addon.GetAddons()
 end
 
 function addon.IsRaidLead()
-	return (IsInRaid() and (UnitIsGroupAssistant('player') or UnitIsGroupLeader('player'))) or addon.Debug
+	return (IsInRaid() and (UnitIsGroupAssistant('player') or UnitIsGroupLeader('player')))
+end
+
+function addon.IsPartyLead()
+	return (IsInGroup() and (UnitIsGroupAssistant('player') or UnitIsGroupLeader('player')))
 end
 
 function addon.IsOfficer()
-	return C_GuildInfo.IsGuildOfficer() or addon.Debug
+	return C_GuildInfo.IsGuildOfficer()
+end
+
+function addon.GetGroupRank()
+	return UnitIsGroupLeader('player') and 2 or UnitIsGroupAssistant('player') and 1 or 0
 end
