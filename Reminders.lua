@@ -48,6 +48,7 @@ local repairSpells = {
 }
 
 local LOW_COMBAT_POTION_COUNT = 3
+local LOW_HEALTH_POTION_COUNT = 2
 
 local function lowDurability()
   local cur, max
@@ -66,7 +67,7 @@ local function notFullHealthstones()
 end
 
 local function noHealthPotions()
-  return GetItemCount(hpPotionItem) == 0
+  return GetItemCount(hpPotionItem) <= LOW_HEALTH_POTION_COUNT
 end
 
 local function noCombatPotions()

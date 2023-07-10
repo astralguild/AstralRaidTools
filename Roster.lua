@@ -134,19 +134,19 @@ function module.options:Load()
 	roster.list = {}
 
 	function roster:SetIcon(self, type)
-		if not type or type == 0 then
+		if not type or type == 0 then -- no icon
 			self:SetAlpha(0)
 		elseif type == 1 then
-			self:SetTexture(statusIcons[3])
+			self:SetTexture(statusIcons[3]) -- not ready
 			self:SetVertexColor(1, 1, 1, 1)
 		elseif type == 2 then
-			self:SetTexture(statusIcons[2])
+			self:SetTexture(statusIcons[2]) -- ready
 			self:SetVertexColor(1, 1, 1, 1)
 		elseif type == 3 then
-			self:SetTexture(statusIcons[1])
+			self:SetTexture(statusIcons[1]) -- question mark
 			self:SetVertexColor(1, 1, 1, 1)
 		elseif type == 4 then
-			self:SetTexture(statusIcons[4])
+			self:SetTexture(statusIcons[4]) -- dash
 			self:SetVertexColor(0.6, 0.6, 0.6, 1)
 		end
 	end
@@ -154,10 +154,10 @@ function module.options:Load()
 	for i = 1, ceil(LISTFRAME_HEIGHT/LINE_HEIGHT) do
 		local line = CreateFrame('FRAME', nil, roster.C)
 		roster.lines[i] = line
-		line:SetPoint('TOPLEFT', 0, -(i-1)*LINE_HEIGHT)
-		line:SetPoint('TOPRIGHT', 0, -(i-1)*LINE_HEIGHT)
+		line:SetPoint('TOPLEFT', 0, -(i-1) * LINE_HEIGHT)
+		line:SetPoint('TOPRIGHT', 0, -(i-1) * LINE_HEIGHT)
 		line:SetSize(0,LINE_HEIGHT)
-		line.name = AstralUI:Text(line):Size(LINE_NAME_WIDTH-LINE_HEIGHT/2, LINE_HEIGHT):Point('LEFT', 2, 0):Shadow():Tooltip('ANCHOR_LEFT', true):FontSize(9)
+		line.name = AstralUI:Text(line):Size(LINE_NAME_WIDTH-LINE_HEIGHT/2, LINE_HEIGHT, 9):Point('LEFT', 2, 0):Shadow():Tooltip('ANCHOR_LEFT', true)
 		line.icons = {}
 		local iconSize = min(VERTICALNAME_WIDTH, LINE_HEIGHT)
 		for j = 1, VERTICALNAME_COUNT do
@@ -186,7 +186,7 @@ function module.options:Load()
 
 	raidNames = CreateFrame('FRAME', nil, self)
 	for i=1,VERTICALNAME_COUNT do
-		raidNames[i] = AstralUI:Text(raidNames, 'raid'..i, 10):Point('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0):Color(1, 1, 1)
+		raidNames[i] = AstralUI:Text(raidNames, 'raid'..i, 9):Point('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0):Color(1, 1, 1)
 		local f = CreateFrame('FRAME', nil, self)
 		f:SetPoint('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0)
 		f:SetSize(VERTICALNAME_WIDTH, 80)
@@ -204,7 +204,7 @@ function module.options:Load()
 		t:SetPoint('TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0)
 		t:SetSize(VERTICALNAME_WIDTH, LISTFRAME_HEIGHT)
 		if i % 2 == 1 then
-			t:SetColorTexture(.5,.5,1,.05)
+			t:SetColorTexture(.5,.5,1,.07)
 			t.Vis = true
 		end
 	end

@@ -4,4 +4,3 @@
 - README with known issues
 - search bar, sort lists
 - boss hp % (WA)
-- early pull

@@ -183,12 +183,16 @@ end
 
 local function showRemindersAfterCombat()
   if remindersShownBeforeCombat then
-    AstralRaidText:Show()
-    for name, shown in pairs(remindersState) do
-      texts[name]:SetShown(shown)
-    end
-    remindersShownBeforeCombat = false
-    remindersState = {}
+    C_Timer.After(3, function()
+      if not InCombatLockdown() then
+        AstralRaidText:Show()
+        for name, shown in pairs(remindersState) do
+          texts[name]:SetShown(shown)
+        end
+        remindersShownBeforeCombat = false
+        remindersState = {}
+      end
+    end)
   end
 end
 
