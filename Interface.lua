@@ -1,7 +1,7 @@
 local ADDON_NAME, addon = ...
 
 function addon.Console(...)
-	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', '008888FF'), ...)
+	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', 'fff5e4a8'), ...)
 end
 
 function addon.PrintDebug(...)
@@ -11,13 +11,13 @@ function addon.PrintDebug(...)
 end
 
 function addon.TextureToText(textureName, widthInText, heightInText, textureWidth, textureHeight, l, r, t, b)
-	return "|T"..textureName..":"..(widthInText or 0)..":"..(heightInText or 0)..":0:0:"..textureWidth..":"..textureHeight..":"..
-		format("%d",l*textureWidth)..":"..format("%d",r*textureWidth)..":"..format("%d",t*textureHeight)..":"..format("%d",b*textureHeight).."|t"
+	return '|T' .. textureName .. ':' .. (widthInText or 0) .. ':' .. (heightInText or 0) .. ':0:0:' .. textureWidth .. ':' .. textureHeight .. ':' ..
+		format('%d',l*textureWidth) .. ':' ..format('%d', r*textureWidth) .. ':' .. format ('%d',t*textureHeight) .. ':' .. format('%d', b*textureHeight) .. '|t'
 end
 
 function addon.GetRaidTargetText(icon, size)
 	size = size or 0
-	return addon.TextureToText([[Interface\TargetingFrame\UI-RaidTargetingIcons]],size,size,256,256,((icon-1)%4)/4,((icon-1)%4+1)/4,floor((icon-1)/4)/4,(floor((icon-1)/4)+1)/4)
+	return addon.TextureToText([[Interface\TargetingFrame\UI-RaidTargetingIcons]], size, size, 256, 256, ((icon-1)%4)/4, ((icon-1)%4+1)/4, floor((icon-1)/4)/4, (floor((icon-1)/4)+1)/4)
 end
 
 function addon.LinkItem(itemID, itemLink)
@@ -30,7 +30,7 @@ function addon.LinkItem(itemID, itemLink)
 	if not itemLink then
 		return
 	end
-	if IsModifiedClick("DRESSUP") then
+	if IsModifiedClick('DRESSUP') then
 		return DressUpItemLink(itemLink)
 	else
 		if ChatEdit_GetActiveWindow() then
@@ -41,14 +41,14 @@ function addon.LinkItem(itemID, itemLink)
 	end
 end
 
--- Large amount of code copied and modified from Astral Functions, Library
+-- Large amount of code copied and modified from ExRT Functions, Library
 
 AstralUI = {}
 local templates = {}
 
 local Mod = nil
 do
-	local function Widget_SetPoint(self,arg1,arg2,arg3,arg4,arg5)
+	local function Widget_SetPoint(self, arg1, arg2, arg3, arg4, arg5)
 		if arg1 == 'x' then arg1 = self:GetParent() end
 		if arg2 == 'x' then arg2 = self:GetParent() end
 
@@ -62,39 +62,39 @@ do
 		end
 
 		if arg5 then
-			self:SetPoint(arg1,arg2,arg3,arg4,arg5)
+			self:SetPoint(arg1, arg2, arg3, arg4, arg5)
 		elseif arg4 then
-			self:SetPoint(arg1,arg2,arg3,arg4)
+			self:SetPoint(arg1, arg2, arg3, arg4)
 		elseif arg3 then
-			self:SetPoint(arg1,arg2,arg3)
+			self:SetPoint(arg1, arg2, arg3)
 		elseif arg2 then
-			self:SetPoint(arg1,arg2)
+			self:SetPoint(arg1, arg2)
 		else
 			self:SetPoint(arg1)
 		end
 
 		return self
 	end
-	local function Widget_SetSize(self,...)
+	local function Widget_SetSize(self, ...)
 		self:SetSize(...)
 		return self
 	end
-	local function Widget_SetNewPoint(self,...)
+	local function Widget_SetNewPoint(self, ...)
 		self:ClearAllPoints()
 		self:Point(...)
 		return self
 	end
-	local function Widget_SetScale(self,...)
+	local function Widget_SetScale(self, ...)
 		self:SetScale(...)
 		return self
 	end
 	local function Widget_OnClick(self, func)
-		self:SetScript('OnClick',func)
+		self:SetScript('OnClick', func)
 		return self
 	end
 	local function Widget_OnShow(self, func, disableFirstRun)
 		if not func then
-			self:SetScript('OnShow',nil)
+			self:SetScript('OnShow', nil)
 			return self
 		end
 		self:SetScript('OnShow', func)
@@ -116,11 +116,11 @@ do
 		return self
 	end
 	local function Widget_OnEnter(self, func)
-		self:SetScript('OnEnter',func)
+		self:SetScript('OnEnter', func)
 		return self
 	end
 	local function Widget_OnLeave(self, func)
-		self:SetScript('OnLeave',func)
+		self:SetScript('OnLeave', func)
 		return self
 	end
 	function Mod(self,...)
@@ -137,7 +137,7 @@ do
 
 		for i = 1, select('#', ...) do
 			if i % 2 == 1 then
-				local funcName,func = select(i, ...)
+				local funcName, func = select(i, ...)
 				self[funcName] = func
 			end
 		end
@@ -166,7 +166,7 @@ do
 
 		self.HeaderText = self:CreateFontString(nil, 'ARTWORK', 'InterUIBold_Normal')
 		self.HeaderText:SetPoint('TOP', 0, -14)
-		self.HeaderText:SetTextColor(1,1,1,1)
+		self.HeaderText:SetTextColor(1, 1, 1, 1)
 
 		self.background = self:CreateTexture(nil, 'BACKGROUND')
 		self.background:SetAllPoints(self)
@@ -209,40 +209,40 @@ do
 end
 
 function templates:AstralButtonTransparentTemplate(parent,isSecure)
-	local self = isSecure and CreateFrame("Button",nil,parent,isSecure) or CreateFrame("Button",nil,parent)
-	self:SetSize(40,18)
+	local self = isSecure and CreateFrame('Button', nil, parent, isSecure) or CreateFrame('Button', nil, parent)
+	self:SetSize(40, 18)
 
 	self.HighlightTexture = self:CreateTexture()
-	self.HighlightTexture:SetColorTexture(1,1,1,.1)
-	self.HighlightTexture:SetPoint("TOPLEFT")
-	self.HighlightTexture:SetPoint("BOTTOMRIGHT")
+	self.HighlightTexture:SetColorTexture(1, 1, 1, .1)
+	self.HighlightTexture:SetPoint('TOPLEFT')
+	self.HighlightTexture:SetPoint('BOTTOMRIGHT')
 	self:SetHighlightTexture(self.HighlightTexture)
 
 	self.PushedTexture = self:CreateTexture()
-	self.PushedTexture:SetColorTexture(.9,.8,.1,.3)
-	self.PushedTexture:SetPoint("TOPLEFT")
-	self.PushedTexture:SetPoint("BOTTOMRIGHT")
+	self.PushedTexture:SetColorTexture(.9, .8, .1, .3)
+	self.PushedTexture:SetPoint('TOPLEFT')
+	self.PushedTexture:SetPoint('BOTTOMRIGHT')
 	self:SetPushedTexture(self.PushedTexture)
 
-	self:SetNormalFontObject("GameFontNormal")
-	self:SetHighlightFontObject("GameFontHighlight")
-	self:SetDisabledFontObject("GameFontDisable")
+	self:SetNormalFontObject('GameFontNormal')
+	self:SetHighlightFontObject('GameFontHighlight')
+	self:SetDisabledFontObject('GameFontDisable')
 
 	return self
 end
 
-function templates:AstralButtonModernTemplate(parent,isSecure)
-	local self = templates:AstralButtonTransparentTemplate(parent,isSecure)
+function templates:AstralButtonModernTemplate(parent, isSecure)
+	local self = templates:AstralButtonTransparentTemplate(parent, isSecure)
 
-	templates:Border(self,0,0,0,1,1)
-	self.Texture = self:CreateTexture(nil,"BACKGROUND")
-	self.Texture:SetColorTexture(1,1,1,.3)
-	self.Texture:SetPoint("TOPLEFT")
-	self.Texture:SetPoint("BOTTOMRIGHT")
+	templates:Border(self, 0, 0, 0, 1, 1)
+	self.Texture = self:CreateTexture(nil, 'BACKGROUND')
+	self.Texture:SetColorTexture(1, 1, 1, .3)
+	self.Texture:SetPoint('TOPLEFT')
+	self.Texture:SetPoint('BOTTOMRIGHT')
 	self.DisabledTexture = self:CreateTexture()
-	self.DisabledTexture:SetColorTexture(0.20,0.21,0.25,0.5)
-	self.DisabledTexture:SetPoint("TOPLEFT")
-	self.DisabledTexture:SetPoint("BOTTOMRIGHT")
+	self.DisabledTexture:SetColorTexture(0.20, 0.21, 0.25, 0.5)
+	self.DisabledTexture:SetPoint('TOPLEFT')
+	self.DisabledTexture:SetPoint('BOTTOMRIGHT')
 	self:SetDisabledTexture(self.DisabledTexture)
 
 	return self
@@ -251,75 +251,75 @@ end
 function templates:AstralDialogTemplate(parent)
 	local self = CreateFrame('FRAME', nil, parent)
 
-	self.TopLeft = self:CreateTexture(nil,"OVERLAY")
-	self.TopLeft:SetPoint("TOPLEFT")
-	self.TopLeft:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.TopLeft:SetSize(64,64)
-	self.TopLeft:SetTexCoord(0.501953125,0.625,0,1)
+	self.TopLeft = self:CreateTexture(nil, 'OVERLAY')
+	self.TopLeft:SetPoint('TOPLEFT')
+	self.TopLeft:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.TopLeft:SetSize(64, 64)
+	self.TopLeft:SetTexCoord(0.501953125, 0.625, 0, 1)
 
-	self.TopRight = self:CreateTexture(nil,"OVERLAY")
-	self.TopRight:SetPoint("TOPRIGHT")
-	self.TopRight:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.TopRight:SetSize(64,64)
-	self.TopRight:SetTexCoord(0.625,0.75,0,1)
+	self.TopRight = self:CreateTexture(nil, 'OVERLAY')
+	self.TopRight:SetPoint('TOPRIGHT')
+	self.TopRight:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.TopRight:SetSize(64, 64)
+	self.TopRight:SetTexCoord(0.625, 0.75, 0, 1)
 
-	self.Top = self:CreateTexture(nil,"OVERLAY")
-	self.Top:SetPoint("TOPLEFT",self.TopLeft,"TOPRIGHT")
-	self.Top:SetPoint("TOPRIGHT",self.TopRight,"TOPLEFT")
-	self.Top:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.Top:SetSize(0,64)
-	self.Top:SetTexCoord(0.25,0.369140625,0,1)
+	self.Top = self:CreateTexture(nil, 'OVERLAY')
+	self.Top:SetPoint('TOPLEFT', self.TopLeft, 'TOPRIGHT')
+	self.Top:SetPoint('TOPRIGHT', self.TopRight, 'TOPLEFT')
+	self.Top:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.Top:SetSize(0, 64)
+	self.Top:SetTexCoord(0.25, 0.369140625, 0, 1)
 
-	self.BottomLeft = self:CreateTexture(nil,"OVERLAY")
-	self.BottomLeft:SetPoint("BOTTOMLEFT")
-	self.BottomLeft:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.BottomLeft:SetSize(64,64)
-	self.BottomLeft:SetTexCoord(0.751953125,0.875,0,1)
+	self.BottomLeft = self:CreateTexture(nil, 'OVERLAY')
+	self.BottomLeft:SetPoint('BOTTOMLEFT')
+	self.BottomLeft:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.BottomLeft:SetSize(64, 64)
+	self.BottomLeft:SetTexCoord(0.751953125, 0.875, 0, 1)
 
-	self.BottomRight = self:CreateTexture(nil,"OVERLAY")
-	self.BottomRight:SetPoint("BOTTOMRIGHT")
-	self.BottomRight:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.BottomRight:SetSize(64,64)
-	self.BottomRight:SetTexCoord(0.875,1,0,1)
+	self.BottomRight = self:CreateTexture(nil, 'OVERLAY')
+	self.BottomRight:SetPoint('BOTTOMRIGHT')
+	self.BottomRight:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.BottomRight:SetSize(64, 64)
+	self.BottomRight:SetTexCoord(0.875, 1, 0, 1)
 
-	self.Bottom = self:CreateTexture(nil,"OVERLAY")
-	self.Bottom:SetPoint("BOTTOMLEFT",self.BottomLeft,"BOTTOMRIGHT")
-	self.Bottom:SetPoint("BOTTOMRIGHT",self.BottomRight,"BOTTOMLEFT")
-	self.Bottom:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.Bottom:SetSize(0,64)
-	self.Bottom:SetTexCoord(0.376953125,0.498046875,0,1)
+	self.Bottom = self:CreateTexture(nil, 'OVERLAY')
+	self.Bottom:SetPoint('BOTTOMLEFT', self.BottomLeft, 'BOTTOMRIGHT')
+	self.Bottom:SetPoint('BOTTOMRIGHT', self.BottomRight, 'BOTTOMLEFT')
+	self.Bottom:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.Bottom:SetSize(0, 64)
+	self.Bottom:SetTexCoord(0.376953125, 0.498046875, 0, 1)
 
-	self.Left = self:CreateTexture(nil,"OVERLAY")
-	self.Left:SetPoint("TOPLEFT",self.TopLeft,"BOTTOMLEFT")
-	self.Left:SetPoint("BOTTOMLEFT",self.BottomLeft,"TOPLEFT")
-	self.Left:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.Left:SetSize(64,0)
-	self.Left:SetTexCoord(0.001953125,0.125,0,1)
+	self.Left = self:CreateTexture(nil, 'OVERLAY')
+	self.Left:SetPoint('TOPLEFT', self.TopLeft, 'BOTTOMLEFT')
+	self.Left:SetPoint('BOTTOMLEFT', self.BottomLeft, 'TOPLEFT')
+	self.Left:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.Left:SetSize(64, 0)
+	self.Left:SetTexCoord(0.001953125, 0.125, 0, 1)
 
-	self.Right = self:CreateTexture(nil,"OVERLAY")
-	self.Right:SetPoint("TOPRIGHT",self.TopRight,"BOTTOMRIGHT")
-	self.Right:SetPoint("BOTTOMRIGHT",self.BottomRight,"TOPRIGHT")
-	self.Right:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
-	self.Right:SetSize(64,0)
-	self.Right:SetTexCoord(0.1171875,0.2421875,0,1)
+	self.Right = self:CreateTexture(nil, 'OVERLAY')
+	self.Right:SetPoint('TOPRIGHT', self.TopRight, 'BOTTOMRIGHT')
+	self.Right:SetPoint('BOTTOMRIGHT', self.BottomRight, 'TOPRIGHT')
+	self.Right:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Border')
+	self.Right:SetSize(64, 0)
+	self.Right:SetTexCoord(0.1171875, 0.2421875, 0, 1)
 
-	self.TitleBG = self:CreateTexture(nil,"BACKGROUND")
-	self.TitleBG:SetPoint("TOPLEFT",8,-7)
-	self.TitleBG:SetPoint("BOTTOMRIGHT",self,"TOPRIGHT",-8,-24)
-	self.TitleBG:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Title-Background")
+	self.TitleBG = self:CreateTexture(nil, 'BACKGROUND')
+	self.TitleBG:SetPoint('TOPLEFT', 8, -7)
+	self.TitleBG:SetPoint('BOTTOMRIGHT', self, 'TOPRIGHT', -8, -24)
+	self.TitleBG:SetTexture('Interface\\PaperDollInfoFrame\\UI-GearManager-Title-Background')
 
-	self.DialogBG = self:CreateTexture(nil,"BACKGROUND")
-	self.DialogBG:SetPoint("TOPLEFT",8,-24)
-	self.DialogBG:SetPoint("BOTTOMRIGHT",-6,8)
-	self.DialogBG:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-CharacterTab-L1")
-	self.DialogBG:SetTexCoord(0.255,1,0.29,1)
+	self.DialogBG = self:CreateTexture(nil, 'BACKGROUND')
+	self.DialogBG:SetPoint('TOPLEFT', 8, -24)
+	self.DialogBG:SetPoint('BOTTOMRIGHT', -6, 8)
+	self.DialogBG:SetTexture('Interface\\PaperDollInfoFrame\\UI-Character-CharacterTab-L1')
+	self.DialogBG:SetTexCoord(0.255, 1, 0.29, 1)
 
-	self.title = self:CreateFontString(nil, "OVERLAY", 'InterUIBold_Normal')
-	self.title:SetPoint("TOPLEFT",12,-8)
-	self.title:SetPoint("TOPRIGHT",-32,-24)
+	self.title = self:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal')
+	self.title:SetPoint('TOPLEFT', 12, -8)
+	self.title:SetPoint('TOPRIGHT', -32, -24)
 
-	self.Close = CreateFrame("Button",nil,self,"UIPanelCloseButton")
-	self.Close:SetPoint("TOPRIGHT",2,1)
+	self.Close = CreateFrame('Button', nil, self, 'UIPanelCloseButton')
+	self.Close:SetPoint('TOPRIGHT', 2, 1)
 
 	return self
 end
@@ -331,29 +331,29 @@ do
 		self.BorderBottom:Hide()
 		self.BorderRight:Hide()
 	end
-	function templates:Border(self,cR,cG,cB,cA,size,offsetX,offsetY)
+	function templates:Border(self, cR, cG, cB, cA, size, offsetX, offsetY)
 		offsetX = offsetX or 0
 		offsetY = offsetY or 0
 
-		self.BorderTop = self.BorderTop or self:CreateTexture(nil,"BACKGROUND")
-		self.BorderTop:SetColorTexture(cR,cG,cB,cA)
-		self.BorderTop:SetPoint("TOPLEFT",-size-offsetX,size+offsetY)
-		self.BorderTop:SetPoint("BOTTOMRIGHT",self,"TOPRIGHT",size+offsetX,offsetY)
+		self.BorderTop = self.BorderTop or self:CreateTexture(nil, 'BACKGROUND')
+		self.BorderTop:SetColorTexture(cR, cG, cB, cA)
+		self.BorderTop:SetPoint('TOPLEFT', -size-offsetX, size+offsetY)
+		self.BorderTop:SetPoint('BOTTOMRIGHT', self, 'TOPRIGHT', size+offsetX, offsetY)
 
-		self.BorderLeft = self.BorderLeft or self:CreateTexture(nil,"BACKGROUND")
-		self.BorderLeft:SetColorTexture(cR,cG,cB,cA)
-		self.BorderLeft:SetPoint("TOPLEFT",-size-offsetX,offsetY)
-		self.BorderLeft:SetPoint("BOTTOMRIGHT",self,"BOTTOMLEFT",-offsetX,-offsetY)
+		self.BorderLeft = self.BorderLeft or self:CreateTexture(nil, 'BACKGROUND')
+		self.BorderLeft:SetColorTexture(cR, cG, cB, cA)
+		self.BorderLeft:SetPoint('TOPLEFT', -size-offsetX, offsetY)
+		self.BorderLeft:SetPoint('BOTTOMRIGHT', self, 'BOTTOMLEFT', -offsetX, -offsetY)
 
-		self.BorderBottom = self.BorderBottom or self:CreateTexture(nil,"BACKGROUND")
-		self.BorderBottom:SetColorTexture(cR,cG,cB,cA)
-		self.BorderBottom:SetPoint("BOTTOMLEFT",-size-offsetX,-size-offsetY)
-		self.BorderBottom:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",size+offsetX,-offsetY)
+		self.BorderBottom = self.BorderBottom or self:CreateTexture(nil, 'BACKGROUND')
+		self.BorderBottom:SetColorTexture(cR, cG, cB, cA)
+		self.BorderBottom:SetPoint('BOTTOMLEFT', -size-offsetX, -size-offsetY)
+		self.BorderBottom:SetPoint('TOPRIGHT', self, 'BOTTOMRIGHT', size+offsetX, -offsetY)
 
-		self.BorderRight = self.BorderRight or self:CreateTexture(nil,"BACKGROUND")
-		self.BorderRight:SetColorTexture(cR,cG,cB,cA)
-		self.BorderRight:SetPoint("BOTTOMRIGHT",size+offsetX,offsetY)
-		self.BorderRight:SetPoint("TOPLEFT",self,"TOPRIGHT",offsetX,-offsetY)
+		self.BorderRight = self.BorderRight or self:CreateTexture(nil, 'BACKGROUND')
+		self.BorderRight:SetColorTexture(cR, cG, cB, cA)
+		self.BorderRight:SetPoint('BOTTOMRIGHT', size+offsetX, offsetY)
+		self.BorderRight:SetPoint('TOPLEFT', self, 'TOPRIGHT', offsetX, -offsetY)
 
 		self.HideBorders = HideBorders
 	end
@@ -361,39 +361,39 @@ do
 end
 
 function templates:AstralCheckButtonTemplate(parent)
-	local self = CreateFrame("CheckButton",nil,parent)
-	self:SetSize(20,20)
-	templates:Border(self,0.24,0.25,0.3,1,1)
+	local self = CreateFrame('CheckButton', nil, parent)
+	self:SetSize(20, 20)
+	templates:Border(self, 0.24, 0.25, 0.3, 1, 1)
 
-	self.Texture = self:CreateTexture(nil,"BACKGROUND")
-	self.Texture:SetColorTexture(0,0,0,.3)
-	self.Texture:SetPoint("TOPLEFT")
-	self.Texture:SetPoint("BOTTOMRIGHT")
+	self.Texture = self:CreateTexture(nil, 'BACKGROUND')
+	self.Texture:SetColorTexture(0, 0, 0, .3)
+	self.Texture:SetPoint('TOPLEFT')
+	self.Texture:SetPoint('BOTTOMRIGHT')
 
 	self.CheckedTexture = self:CreateTexture()
-	self.CheckedTexture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
-	self.CheckedTexture:SetPoint("TOPLEFT",-4,4)
-	self.CheckedTexture:SetPoint("BOTTOMRIGHT",4,-4)
+	self.CheckedTexture:SetTexture('Interface\\Buttons\\UI-CheckBox-Check')
+	self.CheckedTexture:SetPoint('TOPLEFT', -4, 4)
+	self.CheckedTexture:SetPoint('BOTTOMRIGHT', 4, -4)
 	self:SetCheckedTexture(self.CheckedTexture)
 
 	self.PushedTexture = self:CreateTexture()
-	self.PushedTexture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
-	self.PushedTexture:SetPoint("TOPLEFT",-4,4)
-	self.PushedTexture:SetPoint("BOTTOMRIGHT",4,-4)
-	self.PushedTexture:SetVertexColor(0.8,0.8,0.8,0.5)
+	self.PushedTexture:SetTexture('Interface\\Buttons\\UI-CheckBox-Check')
+	self.PushedTexture:SetPoint('TOPLEFT', -4, 4)
+	self.PushedTexture:SetPoint('BOTTOMRIGHT', 4, -4)
+	self.PushedTexture:SetVertexColor(0.8, 0.8, 0.8, 0.5)
 	self.PushedTexture:SetDesaturated(true)
 	self:SetPushedTexture(self.PushedTexture)
 
 	self.DisabledTexture = self:CreateTexture()
-	self.DisabledTexture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check-Disabled")
-	self.DisabledTexture:SetPoint("TOPLEFT",-4,4)
-	self.DisabledTexture:SetPoint("BOTTOMRIGHT",4,-4)
+	self.DisabledTexture:SetTexture('Interface\\Buttons\\UI-CheckBox-Check-Disabled')
+	self.DisabledTexture:SetPoint('TOPLEFT', -4, 4)
+	self.DisabledTexture:SetPoint('BOTTOMRIGHT', 4, -4)
 	self:SetDisabledTexture(self.DisabledTexture)
 
 	self.HighlightTexture = self:CreateTexture()
-	self.HighlightTexture:SetColorTexture(1,1,1,.3)
-	self.HighlightTexture:SetPoint("TOPLEFT")
-	self.HighlightTexture:SetPoint("BOTTOMRIGHT")
+	self.HighlightTexture:SetColorTexture(1, 1, 1, .3)
+	self.HighlightTexture:SetPoint('TOPLEFT')
+	self.HighlightTexture:SetPoint('BOTTOMRIGHT')
 	self:SetHighlightTexture(self.HighlightTexture)
 
 	return self
@@ -402,12 +402,12 @@ end
 
 do
 	local function OnEnter(self)
-		if ( self:IsEnabled() ) then
-			if ( self.tooltipText ) then
-				GameTooltip:SetOwner(self, self.tooltipOwnerPoint or "ANCHOR_RIGHT")
+		if (self:IsEnabled()) then
+			if (self.tooltipText) then
+				GameTooltip:SetOwner(self, self.tooltipOwnerPoint or 'ANCHOR_RIGHT')
 				GameTooltip:SetText(self.tooltipText, nil, nil, nil, nil, true)
 			end
-			if ( self.tooltipRequirement ) then
+			if (self.tooltipRequirement) then
 				GameTooltip:AddLine(self.tooltipRequirement, 1.0, 1.0, 1.0, 1.0)
 				GameTooltip:Show()
 			end
@@ -417,93 +417,88 @@ do
 		GameTooltip:Hide()
 	end
 	function templates:AstralSliderTemplate(parent)
-		local self = CreateFrame("Slider",nil,parent, BackdropTemplateMixin and "BackdropTemplate")
-		self:SetOrientation("HORIZONTAL")
-		self:SetSize(144,17)
+		local self = CreateFrame('Slider', nil, parent, BackdropTemplateMixin and 'BackdropTemplate')
+		self:SetOrientation('HORIZONTAL')
+		self:SetSize(144, 17)
 		self:SetHitRectInsets(0, 0, -10, -10)
 
 		self:SetBackdrop({
-			bgFile="Interface\\Buttons\\UI-SliderBar-Background",
-			edgeFile="Interface\\Buttons\\UI-SliderBar-Border",
+			bgFile='Interface\\Buttons\\UI-SliderBar-Background',
+			edgeFile='Interface\\Buttons\\UI-SliderBar-Border',
 			tile = true,
-			insets = {
-				left = 3,
-				right = 3,
-				top = 6,
-				bottom = 6,
-			},
+			insets = {left = 3, right = 3, top = 6,	bottom = 6},
 			tileSize = 8,
 			edgeSize = 8,
 		})
 
-		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlight")
-		self.Text:SetPoint("BOTTOM",self,"TOP")
+		self.Text = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
+		self.Text:SetPoint('BOTTOM', self, 'TOP')
 
-		self.Low = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
-		self.Low:SetPoint("TOPLEFT",self,"BOTTOMLEFT",-4,3)
+		self.Low = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
+		self.Low:SetPoint('TOPLEFT', self, 'BOTTOMLEFT', -4, 3)
 
-		self.High = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
-		self.High:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",4,3)
+		self.High = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
+		self.High:SetPoint('TOPRIGHT', self, 'BOTTOMRIGHT', 4, 3)
 
 		self.Thumb = self:CreateTexture()
-		self.Thumb:SetTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
-		self.Thumb:SetSize(32,32)
+		self.Thumb:SetTexture('Interface\\Buttons\\UI-SliderBar-Button-Horizontal')
+		self.Thumb:SetSize(32, 32)
 		self:SetThumbTexture(self.Thumb)
 
-		self:SetScript("OnEnter",OnEnter)
-		self:SetScript("OnLeave",OnLeave)
+		self:SetScript('OnEnter', OnEnter)
+		self:SetScript('OnLeave', OnLeave)
 
 		return self
 	end
 	function templates:AstralSliderModernTemplate(parent)
-		local self = CreateFrame("Slider",nil,parent)
-		self:SetOrientation("HORIZONTAL")
-		self:SetSize(144,10)
+		local self = CreateFrame('Slider', nil, parent)
+		self:SetOrientation('HORIZONTAL')
+		self:SetSize(144, 10)
 
-		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlight")
-		self.Text:SetPoint("BOTTOM",self,"TOP",0,1)
+		self.Text = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
+		self.Text:SetPoint('BOTTOM', self, 'TOP', 0, 1)
 
-		self.Low = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
-		self.Low:SetPoint("TOPLEFT",self,"BOTTOMLEFT",0,-1)
+		self.Low = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
+		self.Low:SetPoint('TOPLEFT', self, 'BOTTOMLEFT', 0, -1)
 
-		self.High = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
-		self.High:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",0,-1)
+		self.High = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
+		self.High:SetPoint('TOPRIGHT', self, 'BOTTOMRIGHT', 0, -1)
 
-		templates:Border(self,0.24,0.25,0.3,1,1,1,0)
+		templates:Border(self, 0.24, 0.25, 0.3, 1, 1, 1, 0)
 
 		self.Thumb = self:CreateTexture()
-		self.Thumb:SetColorTexture(1,206/255,0,0.7)
-		self.Thumb:SetSize(16,8)
+		self.Thumb:SetColorTexture(1, 206/255, 0, 0.7)
+		self.Thumb:SetSize(16, 8)
 		self:SetThumbTexture(self.Thumb)
 
-		self:SetScript("OnEnter",OnEnter)
-		self:SetScript("OnLeave",OnLeave)
+		self:SetScript('OnEnter', OnEnter)
+		self:SetScript('OnLeave', OnLeave)
 
 		return self
 	end
 	function templates:AstralSliderModernVerticalTemplate(parent)
-		local self = CreateFrame("Slider",nil,parent)
-		self:SetOrientation("VERTICAL")
+		local self = CreateFrame('Slider',nil,parent)
+		self:SetOrientation('VERTICAL')
 		self:SetSize(10,144)
 
-		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlight")
-		self.Text:SetPoint("BOTTOM",self,"TOP",0,1)
+		self.Text = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
+		self.Text:SetPoint('BOTTOM', self, 'TOP', 0, 1)
 
-		self.Low = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
-		self.Low:SetPoint("TOPLEFT",self,"TOPRIGHT",1,-1)
+		self.Low = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
+		self.Low:SetPoint('TOPLEFT', self, 'TOPRIGHT', 1, -1)
 
-		self.High = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
-		self.High:SetPoint("BOTTOMLEFT",self,"BOTTOMRIGHT",1,1)
+		self.High = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
+		self.High:SetPoint('BOTTOMLEFT', self, 'BOTTOMRIGHT', 1, 1)
 
-		templates:Border(self,0.24,0.25,0.3,1,1,0,1)
+		templates:Border(self, 0.24, 0.25, 0.3, 1, 1, 0, 1)
 
 		self.Thumb = self:CreateTexture()
-		self.Thumb:SetColorTexture(0.44,0.45,0.50,0.7)
-		self.Thumb:SetSize(8,16)
+		self.Thumb:SetColorTexture(0.44, 0.45, 0.50, 0.7)
+		self.Thumb:SetSize(8, 16)
 		self:SetThumbTexture(self.Thumb)
 
-		self:SetScript("OnEnter",OnEnter)
-		self:SetScript("OnLeave",OnLeave)
+		self:SetScript('OnEnter', OnEnter)
+		self:SetScript('OnLeave', OnLeave)
 
 		return self
 	end
@@ -523,16 +518,16 @@ do
 		AstralUI.ScrollDropDown.Update(self, elapsed)
 	end
 	function templates:AstralDropDownListTemplate(parent)
-		local self = CreateFrame("Button",nil,parent)
-		self:SetFrameStrata("TOOLTIP")
+		local self = CreateFrame('Button',nil,parent)
+		self:SetFrameStrata('TOOLTIP')
 		self:EnableMouse(true)
 		self:Hide()
 
-		self.Backdrop = CreateFrame("Frame",nil,self, BackdropTemplateMixin and "BackdropTemplate")
+		self.Backdrop = CreateFrame('Frame',nil,self, BackdropTemplateMixin and 'BackdropTemplate')
 		self.Backdrop:SetAllPoints()
 		self.Backdrop:SetBackdrop({
-			bgFile="Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-			edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",
+			bgFile='Interface\\DialogFrame\\UI-DialogBox-Background-Dark',
+			edgeFile='Interface\\DialogFrame\\UI-DialogBox-Border',
 			tile = true,
 			insets = {
 				left = 11,
@@ -589,36 +584,36 @@ do
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	function templates:AstralUIChatDownButtonTemplate(parent)
-		local self = CreateFrame("Button",nil,parent)
+		local self = CreateFrame('Button',nil,parent)
 		self:SetSize(24,24)
 
 		self.NormalTexture = self:CreateTexture()
-		self.NormalTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up")
+		self.NormalTexture:SetTexture('Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up')
 		self.NormalTexture:SetSize(24,24)
-		self.NormalTexture:SetPoint("RIGHT")
+		self.NormalTexture:SetPoint('RIGHT')
 		self:SetNormalTexture(self.NormalTexture)
 
 		self.PushedTexture = self:CreateTexture()
-		self.PushedTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Down")
+		self.PushedTexture:SetTexture('Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Down')
 		self.PushedTexture:SetSize(24,24)
-		self.PushedTexture:SetPoint("RIGHT")
+		self.PushedTexture:SetPoint('RIGHT')
 		self:SetPushedTexture(self.PushedTexture)
 
 		self.DisabledTexture = self:CreateTexture()
-		self.DisabledTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Disabled")
+		self.DisabledTexture:SetTexture('Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Disabled')
 		self.DisabledTexture:SetSize(24,24)
-		self.DisabledTexture:SetPoint("RIGHT")
+		self.DisabledTexture:SetPoint('RIGHT')
 		self:SetDisabledTexture(self.DisabledTexture)
 
 		self.HighlightTexture = self:CreateTexture()
-		self.HighlightTexture:SetTexture("Interface\\Buttons\\UI-Common-MouseHilight")
+		self.HighlightTexture:SetTexture('Interface\\Buttons\\UI-Common-MouseHilight')
 		self.HighlightTexture:SetSize(24,24)
-		self.HighlightTexture:SetPoint("RIGHT")
-		self:SetHighlightTexture(self.HighlightTexture,"ADD")
+		self.HighlightTexture:SetPoint('RIGHT')
+		self:SetHighlightTexture(self.HighlightTexture,'ADD')
 
-		self:SetScript("OnEnter",OnEnter)
-		self:SetScript("OnLeave",OnLeave)
-		self:SetScript("OnClick",OnClick)
+		self:SetScript('OnEnter',OnEnter)
+		self:SetScript('OnLeave',OnLeave)
+		self:SetScript('OnClick',OnClick)
 		return self
 	end
 end
@@ -629,7 +624,7 @@ do
 		CloseDropDownMenus()
 	end
 	function templates:AstralDropDownMenuTemplate(parent)
-		local self = CreateFrame("Frame",nil,parent)
+		local self = CreateFrame('FRAME',nil,parent)
 		self:SetSize(40,32)
 
 		self.Left = self:CreateTexture(nil,"ARTWORK")
@@ -818,28 +813,28 @@ do
 end
 
 function templates:AstralRadioButtonModernTemplate(parent)
-	local self = CreateFrame("CheckButton",nil,parent)
+	local self = CreateFrame('CheckButton',nil,parent)
 	self:SetSize(16,16)
 
-	self.text = self:CreateFontString(nil,"BACKGROUND","GameFontNormalSmall")
-	self.text:SetPoint("LEFT",self,"RIGHT",5,0)
+	self.text = self:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmall')
+	self.text:SetPoint('LEFT', self, 'RIGHT', 5, 0)
 
 	self:SetFontString(self.text)
 
 	self.NormalTexture = self:CreateTexture()
-	self.NormalTexture:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\Media\\radioModern")
+	self.NormalTexture:SetTexture('Interface\\Addons\\' ..ADDON_NAME.. '\\Media\\radioModern')
 	self.NormalTexture:SetAllPoints()
 	self.NormalTexture:SetTexCoord(0,0.25,0,1)
 	self:SetNormalTexture(self.NormalTexture)
 
 	self.HighlightTexture = self:CreateTexture()
-	self.HighlightTexture:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\Media\\radioModern")
+	self.HighlightTexture:SetTexture('Interface\\Addons\\' ..ADDON_NAME.. '\\Media\\radioModern')
 	self.HighlightTexture:SetAllPoints()
 	self.HighlightTexture:SetTexCoord(0.5,0.75,0,1)
 	self:SetHighlightTexture(self.HighlightTexture)
 
 	self.CheckedTexture = self:CreateTexture()
-	self.CheckedTexture:SetTexture("Interface\\Addons\\"..ADDON_NAME.."\\Media\\radioModern")
+	self.CheckedTexture:SetTexture('Interface\\Addons\\'..ADDON_NAME..'\\Media\\radioModern')
 	self.CheckedTexture:SetAllPoints()
 	self.CheckedTexture:SetTexCoord(0.25,0.5,0,1)
 	self:SetCheckedTexture(self.CheckedTexture)
@@ -850,23 +845,23 @@ end
 do
 	local function OnMouseDown(self)
 		local parent = self:GetParent()
-		parent.Icon:SetPoint("TOPLEFT", parent, "TOPLEFT", 8, -8)
+		parent.Icon:SetPoint('TOPLEFT', parent, 'TOPLEFT', 8, -8)
 		parent.IconOverlay:Show()
 	end
 	local function OnMouseUp(self)
 		local parent = self:GetParent()
-		parent.Icon:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, -6)
+		parent.Icon:SetPoint('TOPLEFT', parent, 'TOPLEFT', 6, -6)
 		parent.IconOverlay:Hide()
 	end
 	function templates:AstralTrackingButtonModernTemplate(parent)
-		local self = CreateFrame("Frame",nil,parent)
-		self:SetSize(32,32)
+		local self = CreateFrame('FRAME', nil, parent)
+		self:SetSize(32, 32)
 		self:SetHitRectInsets(0, 0, -10, -10)
 
-		self.Icon = self:CreateTexture(nil,"ARTWORK")
-		self.Icon:SetPoint("TOPLEFT",6,-6)
-		self.Icon:SetTexture("Interface\\Minimap\\Tracking\\None")
-		self.Icon:SetSize(20,20)
+		self.Icon = self:CreateTexture(nil, 'ARTWORK')
+		self.Icon:SetPoint('TOPLEFT', 6, -6)
+		self.Icon:SetTexture('Interface\\Minimap\\Tracking\\None')
+		self.Icon:SetSize(20, 20)
 
 		self.IconOverlay = self:CreateTexture(nil,"ARTWORK")
 		self.IconOverlay:SetPoint("TOPLEFT",self.Icon)
@@ -970,42 +965,39 @@ do
 		return self
 	end
 	function AstralUI:Icon(parent, textureIcon, size, isButton)
-		local self = CreateFrame(isButton and "Button" or "Frame",nil,parent)
+		local self = CreateFrame(isButton and 'Button' or 'Frame', nil, parent)
 		self:SetSize(size,size)
 		self.texture = self:CreateTexture(nil, "BACKGROUND")
 		self.texture:SetAllPoints()
-		self.texture:SetTexture(textureIcon or "Interface\\Icons\\INV_MISC_QUESTIONMARK")
+		self.texture:SetTexture(textureIcon or 'Interface\\Icons\\INV_MISC_QUESTIONMARK')
 		if isButton then
 	 		self:EnableMouse(true)
-			self:RegisterForClicks("LeftButtonDown")
+			self:RegisterForClicks('LeftButtonDown')
 		end
-
 		Mod(self,
 			'Icon',Widget_Icon,
 			'Tooltip',Widget_Tooltip
 		)
-
 		return self
 	end
 end
 
 do
 	function AstralUI:Shadow(parent,size,edgeSize)
-		local self = CreateFrame("Frame",nil,parent, BackdropTemplateMixin and "BackdropTemplate")
-		self:SetPoint("LEFT",-size,0)
-		self:SetPoint("RIGHT",size,0)
-		self:SetPoint("TOP",0,size)
-		self:SetPoint("BOTTOM",0,-size)
-		self:SetBackdrop({edgeFile="Interface/AddOns/"..ADDON_NAME.."/media/shadow",edgeSize=edgeSize or 28,insets={left=size,right=size,top=size,bottom=size}})
-		self:SetBackdropBorderColor(0,0,0,.45)
-
+		local self = CreateFrame('FRAME', nil, parent, BackdropTemplateMixin and 'BackdropTemplate')
+		self:SetPoint('LEFT', -size, 0)
+		self:SetPoint('RIGHT', size, 0)
+		self:SetPoint('TOP', 0, size)
+		self:SetPoint('BOTTOM', 0, -size)
+		self:SetBackdrop({edgeFile='Interface/AddOns/' .. ADDON_NAME .. '/media/shadow', edgeSize=edgeSize or 28, insets={left=size, right=size, top=size, bottom=size}})
+		self:SetBackdropBorderColor(0, 0, 0, .45)
 		return self
 	end
 end
 
 do
 	local function SliderOnMouseWheel(self,delta)
-		if tonumber(self:GetValue()) == nil then 
+		if tonumber(self:GetValue()) == nil then
 			return
 		end
 		if self.isVertical then
@@ -1083,12 +1075,8 @@ do
 		end
 		self:SetOrientation(isVertical and "VERTICAL" or "HORIZONTAL")
 		self:SetValueStep(1)
-		--self:SetObeyStepOnDrag(true)
-
 		self.isVertical = isVertical
-
 		self:SetScript("OnMouseWheel", SliderOnMouseWheel)
-
 		self.tooltipShow = SliderTooltipShow
 		self.tooltipHide = GameTooltip_Hide
 		self.tooltipReload = SliderTooltipReload
@@ -1150,13 +1138,13 @@ do
 	end
 	local function Widget_SetTooltip(self,text)
 		self.tooltip = text
-		self:SetScript("OnEnter",DropDown_OnEnter)
-		self:SetScript("OnLeave",DropDown_OnLeave)
+		self:SetScript('OnEnter', DropDown_OnEnter)
+		self:SetScript('OnLeave', DropDown_OnLeave)
 		return self
 	end
-	local function Widget_AddText(self,text,size,extra_func)
-		self.labelText = AstralUI:Text(self,text,size or 10):Point("LEFT",self,"LEFT",5,0):Center():Middle():Color():Shadow()
-		if type(extra_func)=='function' then
+	local function Widget_AddText(self, text, size, extra_func)
+		self.labelText = AstralUI:Text(self, text, size or 10):Point('LEFT', self, 'LEFT', 5, 0):Center():Middle():Color():Shadow()
+		if type(extra_func) == 'function' then
 			self.labelText:Run(extra_func)
 		end
 		return self
@@ -1169,12 +1157,12 @@ do
 		self.Button:Enable()
 		return self
 	end
-	local function DropDown_OnClick(self,...)
+	local function DropDown_OnClick(self, ...)
 		local parent = self:GetParent()
 		if parent.PreUpdate then
 			parent.PreUpdate(parent)
 		end
-		AstralUI.ScrollDropDown.ClickButton(self,...)
+		AstralUI.ScrollDropDown.ClickButton(self, ...)
 	end
 
 	local function Widget_ColorBorder(self,cR,cG,cB,cA)
@@ -1504,9 +1492,7 @@ function AstralUI.ScrollDropDown:Reload(level)
 
 					button.subMenu = data.subMenu
 					button.Lines = data.Lines --Max lines for second level
-
 					button.data = data
-
 					button:Show()
 
 					if now >= AstralUI.ScrollDropDown.DropDownList[j].LinesNow then
@@ -1560,16 +1546,16 @@ function AstralUI.ScrollDropDown.OnButtonEnter(self)
 		func(self,self.hoverArg)
 	end
 	if self.tooltip then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 		GameTooltip:AddLine(self.tooltip)
 		GameTooltip:Show()
 	end
 	AstralUI.ScrollDropDown:CloseSecondLevel(self.Level)
 	if self.subMenu then
 		if IsDropDownCustom then
-			AstralUI.ScrollDropDown.ToggleDropDownMenu(self,2,self.subMenu,IsDropDownCustom)
+			AstralUI.ScrollDropDown.ToggleDropDownMenu(self, 2, self.subMenu, IsDropDownCustom)
 		else
-			AstralUI.ScrollDropDown.ToggleDropDownMenu(self,2)
+			AstralUI.ScrollDropDown.ToggleDropDownMenu(self, 2)
 		end
 	end
 end
@@ -1589,7 +1575,7 @@ function AstralUI.ScrollDropDown.EasyMenu(self,list,customWidth)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
-function AstralUI.ScrollDropDown.ToggleDropDownMenu(self,level,customList,customWidth)
+function AstralUI.ScrollDropDown.ToggleDropDownMenu(self, level, customList, customWidth)
 	level = level or 1
 	if self.ToggleUpadte then
 		self:ToggleUpadte()
@@ -1602,7 +1588,7 @@ function AstralUI.ScrollDropDown.ToggleDropDownMenu(self,level,customList,custom
 			AstralUI.ScrollDropDown.DropDownList = ScrollDropDown_Blizzard
 		end
 	end
-	for i=level+1,#AstralUI.ScrollDropDown.DropDownList do
+	for i = level+1, #AstralUI.ScrollDropDown.DropDownList do
 		AstralUI.ScrollDropDown.DropDownList[i]:Hide()
 	end
 	local dropDown = AstralUI.ScrollDropDown.DropDownList[level]
@@ -1611,29 +1597,27 @@ function AstralUI.ScrollDropDown.ToggleDropDownMenu(self,level,customList,custom
 	local isModern = self.isModern or (customList and true)
 	if level > 1 then
 		local parent = AstralUI.ScrollDropDown.DropDownList[1].parent
-		dropDownWidth = (type(parent.Width)=='number' and parent.Width) or IsDropDownCustom or 200
+		dropDownWidth = (type(parent.Width) == 'number' and parent.Width) or IsDropDownCustom or 200
 		isModern = parent.isModern or (customList and true)
 	end
 
 	dropDown.List = customList or self.subMenu or self.List
-
 	local count = #dropDown.List
-
 	local maxLinesNow = self.Lines or count
 
-	for i=(dropDown.MaxLines+1),maxLinesNow do
+	for i = (dropDown.MaxLines+1), maxLinesNow do
 		AstralUI.ScrollDropDown.CreateButton(i,level)
 	end
-	dropDown.MaxLines = max(dropDown.MaxLines,maxLinesNow)
+	dropDown.MaxLines = max(dropDown.MaxLines, maxLinesNow)
 
-	local isSliderHidden = max(count-maxLinesNow+1,1) == 1
-	if isModern then 
-		for i=1,maxLinesNow do
-			dropDown.Buttons[i]:SetSize(dropDownWidth - 16 - (isSliderHidden and 0 or 12),16)
+	local isSliderHidden = max(count-maxLinesNow+1, 1) == 1
+	if isModern then
+		for i = 1, maxLinesNow do
+			dropDown.Buttons[i]:SetSize(dropDownWidth - 16 - (isSliderHidden and 0 or 12), 16)
 		end
 	else
-		for i=1,maxLinesNow do
-			dropDown.Buttons[i]:SetSize(dropDownWidth - 22 + (isSliderHidden and 16 or 0),16)
+		for i = 1, maxLinesNow do
+			dropDown.Buttons[i]:SetSize(dropDownWidth - 22 + (isSliderHidden and 16 or 0), 16)
 		end
 	end
 	dropDown.Position = 1
@@ -1643,9 +1627,9 @@ function AstralUI.ScrollDropDown.ToggleDropDownMenu(self,level,customList,custom
 		self.additionalToggle(self)
 	end
 	dropDown:ClearAllPoints()
-	dropDown:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",-16,0)
-	dropDown.Slider:SetMinMaxValues(1,max(count-maxLinesNow+1,1))
-	if isModern then 
+	dropDown:SetPoint('TOPRIGHT', self, 'BOTTOMRIGHT', -16, 0)
+	dropDown.Slider:SetMinMaxValues(1, max(count-maxLinesNow+1, 1))
+	if isModern then
 		dropDown:SetSize(dropDownWidth,16 + 16 * maxLinesNow)
 		dropDown.Slider:SetHeight(maxLinesNow * 16)
 	else
@@ -1660,22 +1644,20 @@ function AstralUI.ScrollDropDown.ToggleDropDownMenu(self,level,customList,custom
 	dropDown:ClearAllPoints()
 	if level > 1 then
 		if dropDownWidth and dropDownWidth + AstralUI.ScrollDropDown.DropDownList[level-1]:GetRight() > GetScreenWidth() then
-			dropDown:SetPoint("TOP",self,"TOP",0,8)
-			dropDown:SetPoint("RIGHT",AstralUI.ScrollDropDown.DropDownList[level-1],"LEFT",-5,0)
+			dropDown:SetPoint('TOP', self, 'TOP', 0, 8)
+			dropDown:SetPoint('RIGHT', AstralUI.ScrollDropDown.DropDownList[level-1], 'LEFT', -5,0)
 		else
-			dropDown:SetPoint("TOPLEFT",self,"TOPRIGHT",level > 1 and AstralUI.ScrollDropDown.DropDownList[level-1].Slider:IsShown() and 24 or 12,isModern and 8 or 16)
+			dropDown:SetPoint('TOPLEFT', self, 'TOPRIGHT', level > 1 and AstralUI.ScrollDropDown.DropDownList[level-1].Slider:IsShown() and 24 or 12, isModern and 8 or 16)
 		end
 	else
 		local toggleX = self.toggleX or -16
 		local toggleY = self.toggleY or 0
-		dropDown:SetPoint("TOPRIGHT",self,"BOTTOMRIGHT",toggleX,toggleY)
+		dropDown:SetPoint('TOPRIGHT', self, 'BOTTOMRIGHT', toggleX, toggleY)
 	end
 
 	dropDown.parent = self
-
 	dropDown:Show()
 	dropDown:SetFrameLevel(0)
-
 	AstralUI.ScrollDropDown:Reload()
 end
 
@@ -1698,7 +1680,7 @@ function AstralUI.ScrollDropDown.Close()
 end
 function AstralUI.ScrollDropDown:CloseSecondLevel(level)
 	level = level or 1
-	for i=(level+1),#AstralUI.ScrollDropDown.DropDownList do
+	for i = (level+1), #AstralUI.ScrollDropDown.DropDownList do
 		AstralUI.ScrollDropDown.DropDownList[i]:Hide()
 	end
 end
@@ -1708,46 +1690,46 @@ do
 	local function CheckBoxOnEnter(self)
 		local tooltipTitle = self.text:GetText()
 		local tooltipText = self.tooltipText
-		if tooltipTitle == "" or not tooltipTitle then
+		if tooltipTitle == '' or not tooltipTitle then
 			tooltipTitle = tooltipText
 			tooltipText = nil
 		end
-		AstralUI.Tooltip.Show(self,"ANCHOR_TOP",tooltipTitle,{tooltipText,1,1,1,true})
+		AstralUI.Tooltip.Show(self, 'ANCHOR_TOP', tooltipTitle, {tooltipText, 1, 1, 1, true})
 	end
-	local function Widget_Tooltip(self,text)
+	local function Widget_Tooltip(self, text)
 		self.tooltipText = text
 		return self
 	end
 	local function Widget_Left(self,relativeX)
 		self.text:ClearAllPoints()
-		self.text:SetPoint("RIGHT",self,"LEFT",relativeX and relativeX*(-1) or -2,0)
+		self.text:SetPoint('RIGHT', self, 'LEFT', relativeX and relativeX*(-1) or -2, 0)
 		return self
 	end
 	local function Widget_TextSize(self,size)
-		self.text:SetFont(self.text:GetFont(),size)
+		self.text:SetFont(self.text:GetFont(), size)
 		return self
 	end
 
 	local function Widget_ColorState(self,isBorderInsteadText)
 		if isBorderInsteadText then
-			local cR,cG,cB
+			local cR, cG, cB
 			if self.disabled or not self:IsEnabled() then
-				cR,cG,cB = .5,.5,.5
+				cR, cG, cB = .5, .5, .5
 			elseif self:GetChecked() then
-				cR,cG,cB = .2,.8,.2
+				cR, cG, cB = .2, .8, .2
 			else
-				cR,cG,cB = .8,.2,.2
+				cR, cG, cB = .8, .2, .2
 			end
-			self.BorderTop:SetColorTexture(cR,cG,cB,1)
-			self.BorderLeft:SetColorTexture(cR,cG,cB,1)
-			self.BorderBottom:SetColorTexture(cR,cG,cB,1)
-			self.BorderRight:SetColorTexture(cR,cG,cB,1)
+			self.BorderTop:SetColorTexture(cR, cG, cB, 1)
+			self.BorderLeft:SetColorTexture(cR, cG, cB, 1)
+			self.BorderBottom:SetColorTexture(cR, cG, cB, 1)
+			self.BorderRight:SetColorTexture(cR, cG, cB, 1)
 		elseif self.disabled or not self:IsEnabled() then
-			self.text:SetTextColor(.5,.5,.5,1)
+			self.text:SetTextColor(.5, .5, .5, 1)
 		elseif self:GetChecked() then
-			self.text:SetTextColor(.3,1,.3,1)
+			self.text:SetTextColor(.3, 1, .3, 1)
 		else
-			self.text:SetTextColor(1,.4,.4,1)
+			self.text:SetTextColor(1, .4, .4, 1)
 		end
 		return self
 	end
@@ -1770,16 +1752,16 @@ do
 
 	function AstralUI:Check(parent,text,state,template)
 		if template == 0 then
-			template = "UICheckButtonTemplate"
+			template = 'UICheckButtonTemplate'
 		elseif not template then
-			template = "AstralCheckButtonTemplate"
+			template = 'AstralCheckButtonTemplate'
 		end
-		local self = AstralUI:Template(template, parent) or CreateFrame("CheckButton",nil,parent,template)
+		local self = AstralUI:Template(template, parent) or CreateFrame('CheckButton', nil, parent, template)
 		self.text = AstralUI:Text(self):FontSize(10):Point('LEFT', self, 'RIGHT', 5, 0):Shadow()
 		self.text:SetText(text)
 		self:SetChecked(state and true or false)
-		self:SetScript("OnEnter",CheckBoxOnEnter)
-		self:SetScript("OnLeave",AstralUI.Tooltip.Hide)
+		self:SetScript('OnEnter',CheckBoxOnEnter)
+		self:SetScript('OnLeave',AstralUI.Tooltip.Hide)
 		self.defSetSize = self.SetSize
 
 		Mod(self)
@@ -1788,21 +1770,14 @@ do
 		self.TextSize = Widget_TextSize
 		self.ColorState = Widget_ColorState
 		self.AddColorState = Widget_AddColorState
-
 		return self
 	end
 end
 
 function AstralUI:GuildInfo(frame)
-	local backdropButton = {
-		bgFile = nil,
-		edgeFile = "Interface\\ChatFrame\\ChatFrameBackground", tile = true, tileSize = 16, edgeSize = 1,
-		insets = {left = 0, right = 0, top = 0, bottom = 0}
-	}
-
 	local astralGuildInfo
 	local guildVersionString = CreateFrame('BUTTON', nil, frame)
-	guildVersionString:SetNormalFontObject(InterUIRegular_Small)
+	guildVersionString:SetNormalFontObject('InterUIRegular_Small')
 	guildVersionString:SetSize(110, 20)
 	guildVersionString:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
 	guildVersionString:SetAlpha(0.65)
@@ -1818,30 +1793,35 @@ function AstralUI:GuildInfo(frame)
 		astralGuildInfo:SetShown(not astralGuildInfo:IsShown())
 	end)
 
-	astralGuildInfo = CreateFrame('FRAME', 'AstralGuildInfo', frame, "BackdropTemplate")
+	astralGuildInfo = CreateFrame('FRAME', nil, frame, BackdropTemplateMixin and 'BackdropTemplate')
 	astralGuildInfo:Hide()
 	astralGuildInfo:SetFrameLevel(8)
-	astralGuildInfo:SetSize(200, 100)
-	astralGuildInfo:SetBackdrop(backdropButton)
+	astralGuildInfo:SetSize(300, 150)
 	astralGuildInfo:EnableKeyboard(true)
-	astralGuildInfo:SetBackdropBorderColor(.2, .2, .2, 1)
 	astralGuildInfo:SetPoint('BOTTOM', UIParent, 'TOP', 0, -300)
 
-	astralGuildInfo.text = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal')
-	astralGuildInfo.text:SetPoint('TOP', astralGuildInfo,'TOP', 0, -10)
-	astralGuildInfo.text:SetText('Visit Astral at')
+	astralGuildInfo.background = astralGuildInfo:CreateTexture(nil, 'BACKGROUND')
+	astralGuildInfo.background:SetAllPoints(astralGuildInfo)
+	astralGuildInfo.background:SetColorTexture(33/255, 33/255, 33/255, 0.8)
 
-	astralGuildInfo.editBox = CreateFrame('EditBox', nil, astralGuildInfo, "BackdropTemplate")
-	astralGuildInfo.editBox:SetSize(180, 20)
-	astralGuildInfo.editBox:SetPoint('TOP', astralGuildInfo.text, 'BOTTOM', 0, -10)
+	astralGuildInfo.author = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal')
+	astralGuildInfo.author:SetPoint('TOP', astralGuildInfo,'TOP', 0, -20)
+	astralGuildInfo.author:SetText('Made by Luna <Astral> @ Area 52')
 
-	astralGuildInfo.tex = astralGuildInfo:CreateTexture('ARTWORK')
-	astralGuildInfo.tex:SetSize(198, 98)
-	astralGuildInfo.tex:SetPoint('TOPLEFT', astralGuildInfo, 'TOPLEFT', 1, -1)
-	astralGuildInfo.tex:SetColorTexture(0, 0, 0)
+	astralGuildInfo.visit = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal')
+	astralGuildInfo.visit:SetPoint('TOP', astralGuildInfo.author, 'BOTTOM', 0, -20)
+	astralGuildInfo.visit:SetText('Visit <Astral> at')
 
-	astralGuildInfo.editBox:SetBackdrop(backdropButton)
-	astralGuildInfo.editBox:SetBackdropBorderColor(.2, .2, .2, 1)
+	astralGuildInfo.editBox = CreateFrame('EditBox', nil, astralGuildInfo, 'BackdropTemplate')
+	astralGuildInfo.editBox:SetSize(125, 20)
+	astralGuildInfo.editBox:SetPoint('TOP', astralGuildInfo.visit, 'BOTTOM', 0, -20)
+
+	astralGuildInfo.logo = astralGuildInfo:CreateTexture(nil, 'ARTWORK')
+	astralGuildInfo.logo:SetAlpha(0.8)
+	astralGuildInfo.logo:SetSize(32, 32)
+	astralGuildInfo.logo:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\Logo@2x')
+	astralGuildInfo.logo:SetPoint('TOPLEFT', astralGuildInfo, 'TOPLEFT', 5, -8)
+
 	astralGuildInfo.editBox:SetFontObject(InterUIRegular_Normal)
 	astralGuildInfo.editBox:SetText('www.astralguild.com')
 	astralGuildInfo.editBox:HighlightText()
@@ -1856,15 +1836,15 @@ function AstralUI:GuildInfo(frame)
 		self:SetText('www.astralguild.com')
 		self:HighlightText()
 	end)
-	local button = CreateFrame('BUTTON', nil, astralGuildInfo, "BackdropTemplate")
-	button:SetSize(40, 20)
-	button:SetNormalFontObject(InterUIRegular_Normal)
-	button:SetText('Close')
-	button:SetBackdrop(backdropButton)
-	button:SetBackdropBorderColor(.2, .2, .2, 1)
-	button:SetPoint('BOTTOM', astralGuildInfo, 'BOTTOM', 0, 10)
 
-	button:SetScript('OnClick', function() astralGuildInfo:Hide() end)
+	local closeButton = CreateFrame('BUTTON', nil, astralGuildInfo)
+	closeButton:SetNormalTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\baseline-close-24px@2x.tga')
+	closeButton:SetSize(12, 12)
+	closeButton:GetNormalTexture():SetVertexColor(.8, .8, .8, 0.8)
+	closeButton:SetPoint('TOPRIGHT', astralGuildInfo, 'TOPRIGHT', -14, -14)
+	closeButton:SetScript('OnClick', function() astralGuildInfo:Hide() end)
+	closeButton:SetScript('OnEnter', function(self) self:GetNormalTexture():SetVertexColor(126/255, 126/255, 126/255, 0.8) end)
+	closeButton:SetScript('OnLeave', function(self) self:GetNormalTexture():SetVertexColor(0.8, 0.8, 0.8, 0.8) end)
 
 	return astralGuildInfo, guildVersionString
 end
@@ -1872,59 +1852,59 @@ end
 
 do
 	local function SetBorderColor(self,colorR,colorG,colorB,colorA,layerCounter)
-		layerCounter = layerCounter or ""
+		layerCounter = layerCounter or ''
 
-		self["border_top"..layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
-		self["border_bottom"..layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
-		self["border_left"..layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
-		self["border_right"..layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
+		self['border_top' .. layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
+		self['border_bottom' .. layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
+		self['border_left' .. layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
+		self['border_right' .. layerCounter]:SetColorTexture(colorR,colorG,colorB,colorA)
 	end
 	function AstralUI:Border(parent,size,colorR,colorG,colorB,colorA,outside,layerCounter)
 		outside = outside or 0
-		layerCounter = layerCounter or ""
+		layerCounter = layerCounter or ''
 		if size == 0 then
-			if parent["border_top"..layerCounter] then
-				parent["border_top"..layerCounter]:Hide()
-				parent["border_bottom"..layerCounter]:Hide()
-				parent["border_left"..layerCounter]:Hide()
-				parent["border_right"..layerCounter]:Hide()
+			if parent['border_top' .. layerCounter] then
+				parent['border_top' .. layerCounter]:Hide()
+				parent['border_bottom' .. layerCounter]:Hide()
+				parent['border_left' .. layerCounter]:Hide()
+				parent['border_right' .. layerCounter]:Hide()
 			end
 			return
 		end
 
 		local textureOwner = parent.CreateTexture and parent or parent:GetParent()
 
-		local top = parent["border_top"..layerCounter] or textureOwner:CreateTexture(nil, "BORDER")
-		local bottom = parent["border_bottom"..layerCounter] or textureOwner:CreateTexture(nil, "BORDER")
-		local left = parent["border_left"..layerCounter] or textureOwner:CreateTexture(nil, "BORDER")
-		local right = parent["border_right"..layerCounter] or textureOwner:CreateTexture(nil, "BORDER")
+		local top = parent['border_top' .. layerCounter] or textureOwner:CreateTexture(nil, 'BORDER')
+		local bottom = parent['border_bottom' .. layerCounter] or textureOwner:CreateTexture(nil, 'BORDER')
+		local left = parent['border_left' .. layerCounter] or textureOwner:CreateTexture(nil, 'BORDER')
+		local right = parent['border_right' .. layerCounter] or textureOwner:CreateTexture(nil, 'BORDER')
 
-		parent["border_top"..layerCounter] = top
-		parent["border_bottom"..layerCounter] = bottom
-		parent["border_left"..layerCounter] = left
-		parent["border_right"..layerCounter] = right
+		parent['border_top' .. layerCounter] = top
+		parent['border_bottom' .. layerCounter] = bottom
+		parent['border_left' .. layerCounter] = left
+		parent['border_right' .. layerCounter] = right
 
 		top:ClearAllPoints()
 		bottom:ClearAllPoints()
 		left:ClearAllPoints()
 		right:ClearAllPoints()
 
-		top:SetPoint("TOPLEFT",parent,"TOPLEFT",-size-outside,size+outside)
-		top:SetPoint("BOTTOMRIGHT",parent,"TOPRIGHT",size+outside,outside)
+		top:SetPoint('TOPLEFT', parent, 'TOPLEFT', -size-outside, size+outside)
+		top:SetPoint('BOTTOMRIGHT', parent, 'TOPRIGHT', size+outside, outside)
 
-		bottom:SetPoint("BOTTOMLEFT",parent,"BOTTOMLEFT",-size-outside,-size-outside)
-		bottom:SetPoint("TOPRIGHT",parent,"BOTTOMRIGHT",size+outside,-outside)
+		bottom:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', -size-outside, -size-outside)
+		bottom:SetPoint('TOPRIGHT', parent, 'BOTTOMRIGHT', size+outside, -outside)
 
-		left:SetPoint("TOPLEFT",parent,"TOPLEFT",-size-outside,outside)
-		left:SetPoint("BOTTOMRIGHT",parent,"BOTTOMLEFT",-outside,-outside)
+		left:SetPoint('TOPLEFT', parent, 'TOPLEFT', -size-outside, outside)
+		left:SetPoint('BOTTOMRIGHT', parent, 'BOTTOMLEFT', -outside, -outside)
 
-		right:SetPoint("TOPLEFT",parent,"TOPRIGHT",outside,outside)
-		right:SetPoint("BOTTOMRIGHT",parent,"BOTTOMRIGHT",size+outside,-outside)
+		right:SetPoint('TOPLEFT', parent, 'TOPRIGHT', outside, outside)
+		right:SetPoint('BOTTOMRIGHT', parent, 'BOTTOMRIGHT', size+outside, -outside)
 
-		top:SetColorTexture(colorR,colorG,colorB,colorA)
-		bottom:SetColorTexture(colorR,colorG,colorB,colorA)
-		left:SetColorTexture(colorR,colorG,colorB,colorA)
-		right:SetColorTexture(colorR,colorG,colorB,colorA)
+		top:SetColorTexture(colorR, colorG, colorB, colorA)
+		bottom:SetColorTexture(colorR, colorG, colorB, colorA)
+		left:SetColorTexture(colorR, colorG, colorB, colorA)
+		right:SetColorTexture(colorR, colorG, colorB, colorA)
 
 		parent.SetBorderColor = SetBorderColor
 
@@ -1936,65 +1916,64 @@ do
 end
 
 do
-	local function Widget_SetFont(self,...)
+	local function Widget_SetFont(self, ...)
 		self:SetFont(...)
 		return self
 	end
-	local function Widget_Color(self,colR,colG,colB)
-		self:SetTextColor(colR or 1,colG or 1,colB or 1,1)
+	local function Widget_Color(self, colR, colG, colB)
+		self:SetTextColor(colR or 1, colG or 1, colB or 1, 1)
 		return self
 	end
-	local function Widget_Left(self) self:SetJustifyH("LEFT") return self end
-	local function Widget_Center(self) self:SetJustifyH("CENTER") return self end
-	local function Widget_Right(self) self:SetJustifyH("RIGHT") return self end
-	local function Widget_Top(self) self:SetJustifyV("TOP") return self end
-	local function Widget_Middle(self) self:SetJustifyV("MIDDLE") return self end
-	local function Widget_Bottom(self) self:SetJustifyV("BOTTOM") return self end
+	local function Widget_Left(self) self:SetJustifyH('LEFT') return self end
+	local function Widget_Center(self) self:SetJustifyH('CENTER') return self end
+	local function Widget_Right(self) self:SetJustifyH('RIGHT') return self end
+	local function Widget_Top(self) self:SetJustifyV('TOP') return self end
+	local function Widget_Middle(self) self:SetJustifyV('MIDDLE') return self end
+	local function Widget_Bottom(self) self:SetJustifyV('BOTTOM') return self end
 	local function Widget_Shadow(self,disable)
-		self:SetShadowColor(0,0,0,disable and 0 or 1)
-		self:SetShadowOffset(1,-1)
+		self:SetShadowColor(0, 0, 0, disable and 0 or 1)
+		self:SetShadowOffset(1, -1)
 		return self
 	end
-	local function Widget_Outline(self,disable)
+	local function Widget_Outline(self, disable)
 		local filename,fontSize = self:GetFont()
-		self:SetFont(filename,fontSize,(not disable) and "OUTLINE")
+		self:SetFont(filename,fontSize, (not disable) and 'OUTLINE')
 		return self
 	end
 	local function Widget_FontSize(self,size)
-		local filename,fontSize,fontParam1,fontParam2,fontParam3 = self:GetFont()
-		self:SetFont(filename,size,fontParam1,fontParam2,fontParam3)
+		local filename, fontSize, fontParam1, fontParam2, fontParam3 = self:GetFont()
+		self:SetFont(filename, size, fontParam1, fontParam2, fontParam3)
 		return self
 	end
 
 	local function OnTooltipEnter(self)
 		local text = self.t
 		if text.TooltipOverwrite then
-			AstralUI.Tooltip.Show(self,self.a,text.TooltipOverwrite)
+			AstralUI.Tooltip.Show(self, self.a, text.TooltipOverwrite)
 			return
 		end
 		if not text:IsTruncated() and not text.alwaysTooltip then
 			return
 		end
-		AstralUI.Tooltip.Show(self,self.a,text:GetText())
+		AstralUI.Tooltip.Show(self, self.a, text:GetText())
 	end
 	local function OnTooltipLeave(self)
 		AstralUI.Tooltip.Hide()
 	end
 	local function Widget_Tooltip(self,anchor,isButton)
-		local f = CreateFrame(isButton and "Button" or "Frame",nil,self:GetParent())
+		local f = CreateFrame(isButton and 'BUTTON' or 'FRAME', nil, self:GetParent())
 		f:SetAllPoints(self)
 		f.t = self
-		f.a = anchor or "ANCHOR_RIGHT"
-		f:SetScript("OnEnter",OnTooltipEnter)
-		f:SetScript("OnLeave",OnTooltipLeave)
+		f.a = anchor or 'ANCHOR_RIGHT'
+		f:SetScript('OnEnter', OnTooltipEnter)
+		f:SetScript('OnLeave', OnTooltipLeave)
 		self.TooltipFrame = f
 		return self
 	end
-	local function Widget_MaxLines(self,num)
+	local function Widget_MaxLines(self, num)
 		self:SetMaxLines(num)
 		return self
 	end
-
 
 	function AstralUI:Text(parent, text, size, template)
 		if template == 0 then
@@ -2002,45 +1981,33 @@ do
 		elseif not template then
 			template = 'InterUIBold_Normal'
 		end
-		local self = parent:CreateFontString(nil, "ARTWORK", template)
+		local self = parent:CreateFontString(nil, 'ARTWORK', template)
 		if template and size then
 			local filename = self:GetFont()
 			if filename then
-				self:SetFont(filename,size)
+				self:SetFont(filename, size)
 			end
 		end
-		self:SetJustifyH("LEFT")
-		self:SetJustifyV("MIDDLE")
+		self:SetJustifyH('LEFT')
+		self:SetJustifyV('MIDDLE')
 		if template then
-			self:SetText(text or "")
+			self:SetText(text or '')
 		end
 		Mod(self,
-			'Font',Widget_SetFont,
-			'Color',Widget_Color,
-			'Left',Widget_Left,
-			'Center',Widget_Center,
-			'Right',Widget_Right,
-			'Top',Widget_Top,
-			'Middle',Widget_Middle,
-			'Bottom',Widget_Bottom,
-			'Shadow',Widget_Shadow,
-			'Outline',Widget_Outline,
-			'FontSize',Widget_FontSize,
-			'Tooltip',Widget_Tooltip,
-			'MaxLines',Widget_MaxLines
+			'Font', Widget_SetFont,
+			'Color', Widget_Color,
+			'Left', Widget_Left,
+			'Center', Widget_Center,
+			'Right', Widget_Right,
+			'Top', Widget_Top,
+			'Middle', Widget_Middle,
+			'Bottom', Widget_Bottom,
+			'Shadow', Widget_Shadow,
+			'Outline', Widget_Outline,
+			'FontSize', Widget_FontSize,
+			'Tooltip', Widget_Tooltip,
+			'MaxLines', Widget_MaxLines
 		)
-		return self
-	end
-
-	function AstralUI:CreateText(parent,width,height,relativePoint,x,y,hor,ver,font,fontSize,text,tem,colR,colG,colB,shadow,outline,doNotUseTemplate)
-		if doNotUseTemplate then tem = 0 end
-		local self = AstralUI:Text(parent,text,fontSize,tem):Size(width,height):Point(relativePoint or "TOPLEFT", x,y)
-		if hor then self:SetJustifyH(hor) end
-		if ver then self:SetJustifyV(ver) end
-		if font then self:Font(font,fontSize) end
-		if shadow then self:Shadow() end
-		if outline then self:Outline() end
-		if colR then self:Color(colR,colG,colB) end
 		return self
 	end
 end
@@ -2103,7 +2070,7 @@ do
 		self.title:SetTextColor(1, 1, 1, 1)
 		self.title:SetText(title or '')
 
-		self.Close:SetScript('OnClick',buttonCloseOnClick)
+		self.Close:SetScript('OnClick', buttonCloseOnClick)
 
 		Mod(self)
 
@@ -3135,7 +3102,6 @@ do
 		self.poins = nil
 	end
 	local function ScrollListMouseWheel(self,delta)
-		-- This function isnt called, cuz wheel cause scrollframe wheel event
 		if delta > 0 then
 			self.Frame.ScrollBar.buttonUP:Click("LeftButton")
 		else
@@ -3256,12 +3222,12 @@ do
 		line.background:SetPoint("BOTTOMRIGHT")
 
 		line.HighlightTexture = line:CreateTexture()
-		line.HighlightTexture:SetTexture(self.LINE_TEXTURE or "Interface\\QuestFrame\\UI-QuestLogTitleHighlight")
+		line.HighlightTexture:SetTexture(self.LINE_TEXTURE or 'Interface\\QuestFrame\\UI-QuestLogTitleHighlight')
 		if not self.LINE_TEXTURE_IGNOREBLEND then
-			line.HighlightTexture:SetBlendMode("ADD")
+			line.HighlightTexture:SetBlendMode('ADD')
 		end
-		line.HighlightTexture:SetPoint("LEFT",0,0)
-		line.HighlightTexture:SetPoint("RIGHT",0,0)
+		line.HighlightTexture:SetPoint('LEFT',0,0)
+		line.HighlightTexture:SetPoint('RIGHT',0,0)
 		line.HighlightTexture:SetHeight(self.LINE_TEXTURE_HEIGHT or 15)
 		if self.LINE_TEXTURE_COLOR_HL then
 			line.HighlightTexture:SetVertexColor(unpack(self.LINE_TEXTURE_COLOR_HL))
@@ -3271,9 +3237,9 @@ do
 		line:SetHighlightTexture(line.HighlightTexture)
 
 		line.PushedTexture = line:CreateTexture()
-		line.PushedTexture:SetTexture(self.LINE_TEXTURE or "Interface\\QuestFrame\\UI-QuestLogTitleHighlight")
+		line.PushedTexture:SetTexture(self.LINE_TEXTURE or 'Interface\\QuestFrame\\UI-QuestLogTitleHighlight')
 		if not self.LINE_TEXTURE_IGNOREBLEND then
-			line.PushedTexture:SetBlendMode("ADD")
+			line.PushedTexture:SetBlendMode('ADD')
 		end
 		line.PushedTexture:SetPoint("LEFT",0,0)
 		line.PushedTexture:SetPoint("RIGHT",0,0)
@@ -3433,7 +3399,7 @@ do
 		else
 			for i=1,#self.List do
 				for j=1,#self.T do
-					self.List[i]['text'..j]:SetFont(self.List[i]['text'..j]:GetFont(),size)
+					self.List[i]['text' .. j]:SetFont(self.List[i]['text' .. j]:GetFont(),size)
 				end
 			end
 		end
@@ -3488,7 +3454,7 @@ do
 	end
 
 	local function CreateScrollList(parent,list)
-		local self = CreateFrame("Frame",nil,parent)
+		local self = CreateFrame('FRAME', nil, parent)
 		self.Frame = AstralUI:ScrollFrame(self):Point(0,0)
 
 		AstralUI:Border(self,2,.24,.25,.30,1)
@@ -3509,30 +3475,30 @@ do
 		)
 		self._Size = self.Size	self.Size = Widget_SetSize
 
-		self.Frame.ScrollBar:SetScript("OnValueChanged",ScrollList_ScrollBar_OnValueChanged)
-		self:SetScript("OnShow",self.Update)
-		self:SetScript("OnMouseWheel",ScrollListMouseWheel)
+		self.Frame.ScrollBar:SetScript('OnValueChanged', ScrollList_ScrollBar_OnValueChanged)
+		self:SetScript('OnShow', self.Update)
+		self:SetScript('OnMouseWheel', ScrollListMouseWheel)
 
 		return self
 	end
 	function AstralUI:ScrollList(parent,list)
-		local self = CreateScrollList(parent,list)
+		local self = CreateScrollList(parent, list)
 		self:Update()
 
 		return self
 	end
-	function AstralUI:ScrollTableList(parent,...)
+	function AstralUI:ScrollTableList(parent, ...)
 		local self = CreateScrollList(parent)
 		self.T = {}
 		for i=1,select("#",...) do
-			self.T[i] = select(i,...)
+			self.T[i] = select(i, ...)
 		end
 		self:Update()
 
 		return self
 	end
-	function AstralUI:ScrollCheckList(parent,list)
-		local self = CreateScrollList(parent,list)
+	function AstralUI:ScrollCheckList(parent, list)
+		local self = CreateScrollList(parent, list)
 		self.C = {}
 		self.isCheckList = true
 

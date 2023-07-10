@@ -1,4 +1,5 @@
 local _, addon = ...
+local L = addon.L
 
 local function auraTrigger(e, _, m, _, name, ...)
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_AURA_APPLIED' and addon.InEncounter then
@@ -22,7 +23,7 @@ end
 
 local function auraNotifier(trigger)
   local link, _ = GetSpellLink(trigger.spellID)
-  addon.Console(string.format('%s affected by %s at %s', addon.ClassColorName(trigger.player), link, trigger.time))
+  addon.Console(string.format(L['AURA_NOTIFIER_MSG'], addon.ClassColorName(trigger.player), link, trigger.time))
 end
 
 local function castTrigger(e, ...)
@@ -56,7 +57,7 @@ local function castNotifier(trigger)
 			name = UnitName('boss'..i) or 'Boss'
 		end
  	end
-  addon.Console(string.format('%s used %s (target: %s) at %s', name, link, target, trigger.time))
+  addon.Console(string.format(L['CAST_NOTIFIER_MSG'], name, link, target, trigger.time))
 end
 
 local events = {
@@ -87,30 +88,30 @@ AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidNotifi
 AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', unitSpellcastSucceeded, 'astralRaidNotifiersUnitSpellcastSucceeded')
 
 
-local module = addon:New('Notifiers', 'Notifiers', true)
+local module = addon:New(L['NOTIFIERS'], L['NOTIFIERS'], true)
 local enableCheckbox, toConsoleCheckbox, toOfficerCheckbox, toRaidCheckbox, encounterList, specificHeader, instanceDropdown, encounterDetailsList
 local currentInstance = nil
 
 function module.options:Load()
-  local header = AstralUI:Text(self, 'Encounter Notifiers'):Point('TOPLEFT', 0, 0):Shadow()
+  local header = AstralUI:Text(self, L['ENCOUNTER_NOTIFIERS']):Point('TOPLEFT', 0, 0):Shadow()
 
   enableCheckbox = AstralUI:Check(self, 'Enable'):Point('TOPLEFT', header, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
     AstralRaidSettings.notifiers.general.isEnabled = self:GetChecked()
   end)
 
-  toConsoleCheckbox = AstralUI:Check(self, 'Send to Local ' .. CHAT):Point('LEFT', enableCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
+  toConsoleCheckbox = AstralUI:Check(self, L['SEND_TO_LOCAL'] .. ' ' .. CHAT):Point('LEFT', enableCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
     AstralRaidSettings.notifiers.general.toConsole = self:GetChecked()
   end)
 
-  toOfficerCheckbox = AstralUI:Check(self, 'Send to Officer'):Point('LEFT', toConsoleCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
+  toOfficerCheckbox = AstralUI:Check(self, L['SEND_TO_OFFICER']):Point('LEFT', toConsoleCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
     AstralRaidSettings.notifiers.general.toOfficer = self:GetChecked()
   end)
 
-  toRaidCheckbox = AstralUI:Check(self, 'Send to Raid'):Point('LEFT', toOfficerCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
+  toRaidCheckbox = AstralUI:Check(self, L['SEND_TO_GROUP']):Point('LEFT', toOfficerCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
     AstralRaidSettings.notifiers.general.toRaid = self:GetChecked()
   end)
 
-  specificHeader = AstralUI:Text(self, 'Specific Notifiers'):Point('TOPLEFT', enableCheckbox, 'BOTTOMLEFT', 0, -20):Size(200, 12)
+  specificHeader = AstralUI:Text(self, L['SPECIFIC_NOTIFIERS']):Point('TOPLEFT', enableCheckbox, 'BOTTOMLEFT', 0, -20):Size(200, 12)
 
   local function updateList()
 		if not currentInstance then return end
@@ -184,13 +185,13 @@ function module.options:Load()
   for i = 1, ceil(400/32) do
     local line = CreateFrame('FRAME', nil, encounterDetailsList.C)
     encounterDetailsList.lines[i] = line
-    line:SetPoint('TOPLEFT',0,-(i-1)*32)
-    line:SetPoint('RIGHT',0,0)
+    line:SetPoint('TOPLEFT', 0, -(i-1)*32)
+    line:SetPoint('RIGHT', 0, 0)
     line:SetHeight(32)
 		line.detailType = 'SPELL'
 		line.icon = AstralUI:Icon(line, nil, 16):Point('LEFT', 10, 0)
 		line.spellName = AstralUI:Text(line):Size(225, 10):FontSize(10):Point('LEFT', line.icon, 'RIGHT', 5, 0):Shadow()
-    line.castChk = AstralUI:Check(line, 'Cast'):Point('LEFT', line.spellName, 'RIGHT', 5, 0):OnClick(function(self)
+    line.castChk = AstralUI:Check(line, L['CAST']):Point('LEFT', line.spellName, 'RIGHT', 5, 0):OnClick(function(self)
 			local index = AstralRaidSettings.notifiers.instances[currentInstance].encounters[encounterList.selected]
 			if self.disabled then
 				AstralRaidSettings.notifiers.encounters[index].casts[self:GetParent().data.spell] = nil
@@ -203,7 +204,7 @@ function module.options:Load()
 				AstralRaidSettings.notifiers.encounters[index].casts[self:GetParent().data.spell] = nil
 			end
 		end)
-    line.auraChk = AstralUI:Check(line, 'Aura'):Point('LEFT', line.castChk, 'RIGHT', 40, 0):OnClick(function(self)
+    line.auraChk = AstralUI:Check(line, L['AURA']):Point('LEFT', line.castChk, 'RIGHT', 40, 0):OnClick(function(self)
 			local index = AstralRaidSettings.notifiers.instances[currentInstance].encounters[encounterList.selected]
 			if self.disabled then
 				AstralRaidSettings.notifiers.encounters[index].auras[self:GetParent().data.spell] = nil

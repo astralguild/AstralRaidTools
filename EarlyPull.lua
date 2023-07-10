@@ -1,4 +1,5 @@
 local _, addon = ...
+local L = addon.L
 
 -- Adapted/copied from Early Pull weakaura (https://wago.io/TyN8l9eWg/1)
 
@@ -22,7 +23,7 @@ local combatLogDamageEventTest, combatLogSwingEventTest, summons, summons2
 
 local function init()
 	for i = 1, combatLog.maxPos do
-		combatLog[i] = {time = negInfinity, guid = nil, name = nil, event = nil, destGUID = nil, spellID = nil}
+		combatLog[i] = {time = negInfinity, guid = nil, name = nil, event = nil, destGUID = nil, destName = nil, spellID = nil}
 	end
 	for i = 1, threatLog.maxPos do
 		threatLog[i] = {time = negInfinity, threatEntries = {count = 0}}
@@ -83,16 +84,16 @@ local function classifyPull(pullTimeDiff)
 	local aType, pullDesc
 	if not pullTimeDiff then
 		aType = AstralRaidSettings.earlypull.announce.untimedPull
-		pullDesc = 'Boss pulled'
+		pullDesc = L['BOSS_PULLED']
 	elseif pullTimeDiff <= -0.005 then
 		aType = AstralRaidSettings.earlypull.announce.earlyPull
-		pullDesc = format('Boss pulled %.2f seconds early', -pullTimeDiff)
+		pullDesc = format(L['BOSS_PULLED_EARLY'], -pullTimeDiff)
 	elseif pullTimeDiff < 0.005 then
 		aType = AstralRaidSettings.earlypull.announce.onTimePull
-		pullDesc = 'Boss pulled on time'
+		pullDesc = L['BOSS_PULLED_ON_TIME']
 	else
 		aType = AstralRaidSettings.earlypull.announce.latePull
-		pullDesc = format('Boss pulled %.2f seconds late', pullTimeDiff)
+		pullDesc = format(L['BOSS_PULLED_LATE'], pullTimeDiff)
 	end
 	return getAnnounceChannel(aType), pullDesc
 end
@@ -229,7 +230,7 @@ end
 local function onSync(channel, msg, sender)
 	if not AstralRaidSettings.earlypull.general.isEnabled then return end
 	if not (IsInGroup() or IsInRaid()) then return end
-	addon.PrintDebug('earlyPull', 'onSync', msg)
+	addon.PrintDebug(msg)
 	local entry = advanceLog(syncLog)
 	entry.time = GetTime()
 	entry.message = msg
@@ -337,8 +338,7 @@ local function finalizeCandidate(cand)
 	local entry = cand.combatLogEntry
 	if entry then
 		cand.name = entry.name
-		-- don't assign spell blame if low certainty
-		if cand.combatLogScore >= 50 then
+		if cand.combatLogScore >= 25 then
 			if combatLogSwingEventTest[entry.event] then
 				cand.spellID = 6603 -- Auto Attack
 			else
@@ -356,7 +356,7 @@ local function finalizeCandidate(cand)
 end
 
 local function printCandidateDetails(cand, intro)
-	addon.Console(string.format('%s%s (spellID=%s petOwner=%s) with score=%.2f (combatLog=%.2f, threat=%.2f, target=%.2f).',
+	addon.Console(string.format('%s%s (spellID=%s, petOwner=%s); score=%.2f (log=%.2f, threat=%.2f, target=%.2f).',
 		intro, tostring(cand.name), tostring(cand.spellID), tostring(cand.petOwner),
 		cand.score, cand.combatLogScore, cand.threatScore, cand.targetScore))
 end
@@ -365,18 +365,18 @@ local function printDetails()
 	local ctx = pullContext
 	if not ctx then return end
 
-	addon.Console(string.format('%s (id=%d) pulled %.3fs ago with timing=%s announce=%s.',
+	addon.Console(string.format('%s (id=%d) pulled %.3fs ago (%s) announce=%s.',
 		tostring(ctx.encounterName), ctx.encounterID, GetTime() - ctx.pullTime,
 		ctx.pullTimeDiff and format('%+.3fs', ctx.pullTimeDiff) or 'UNTIMED',
 		tostring(ctx.announceChannel)))
 
 	if ctx.bestCand then
-		printCandidateDetails(ctx.bestCand, 'Best candidate was ')
+		printCandidateDetails(ctx.bestCand, 'Best pull candidate: ')
 		if ctx.secondCand then
-			printCandidateDetails(ctx.secondCand, 'Next-best candidate was ')
+			printCandidateDetails(ctx.secondCand, 'Next best pull candidate: ')
 		end
 	else
-		addon.Console('Did not find any candidates to be blamed for pull.')
+		addon.Console('No candidates to blame for pull.')
 	end
 end
 
@@ -405,6 +405,7 @@ local function announce(channel, msg)
 	if channel == 'PRINT' then
 		addon.Console(msg)
 	elseif channel then
+		if AstralRaidSettings.earlypull.announce.onlyGuild and not IsInGuildGroup() then addon.Console('Not in guild group; not announcing pull.') return end
 		SendChatMessage(msg, channel)
 	end
 end
@@ -412,8 +413,8 @@ end
 local function afterPull()
 	local ctx = pullContext
 	local pullTime = ctx.pullTime
-	local cwBeginTime = pullTime - 0.33
-	local cwEndTime = pullTime + 0.33
+	local cwBeginTime = pullTime - 0.5
+	local cwEndTime = pullTime + 0.5
 	local timelinessCenter = pullTime
 	local timelinessDecayRate = 3
 	local function getTimelinessPenalty(entry)
@@ -610,7 +611,8 @@ local function cleu(_, event, _, sourceGUID, sourceName, sourceFlags, _, destGUI
 		entry.name = sourceName
 		entry.event = event
 		entry.destGUID = destGUID
-		entry.spellID = spellID  -- n/a for swings, but we'll check that when needed
+		entry.destName = destName
+		entry.spellID = spellID
 	end
 end
 
@@ -640,7 +642,7 @@ local function encounterStart(encounterID, encounterName)
 		encounterID = encounterID,
 		encounterName = encounterName,
 	}
-	C_Timer.After(0.5, afterPull)
+	C_Timer.After(1, afterPull)
 
 	scanAllBosses()
 end
@@ -667,20 +669,21 @@ AstralRaidComms:RegisterPrefix('INSTANCE_CHAT', 'earlyPullSync', function(...) o
 
 -- addon.AddDefaultSettings('earlypull', 'announce', {earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1})
 
-local module = addon:New('Early Pull', 'Early Pull')
-local enableCheckbox, printResultsCheckbox, pullHeader, earlyPullDropdown, onTimePullDropdown, latePullDropdown, untimedPullDropdown
+local module = addon:New(L['EARLY_PULL'], L['EARLY_PULL'])
+local enableCheckbox, printResultsCheckbox, onlyGuildGroupsCheckbox, pullHeader, earlyPullDropdown, onTimePullDropdown, latePullDropdown, untimedPullDropdown
 
 local announceKinds = {[1] = 'Say', [2] = 'Group', [3] = 'Officer', [4] = 'Print', [5] = 'None'}
 
 function module.options:Load()
-  local header = AstralUI:Text(self, 'Early Pull Detection'):Point('TOPLEFT', 0, 0):Shadow()
+  local header = AstralUI:Text(self, L['EARLY_PULL_DETECTION']):Point('TOPLEFT', 0, 0):Shadow()
 
-  enableCheckbox = AstralUI:Check(self, 'Enable'):Point('TOPLEFT', header, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
+  enableCheckbox = AstralUI:Check(self, ENABLE):Point('TOPLEFT', header, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
     AstralRaidSettings.earlypull.general.isEnabled = self:GetChecked()
 		if AstralRaidSettings.earlypull.general.isEnabled then
 			init()
 			printResultsCheckbox:Show()
 			pullHeader:Show()
+			onlyGuildGroupsCheckbox:Show()
 			earlyPullDropdown:Show()
 			onTimePullDropdown:Show()
 			latePullDropdown:Show()
@@ -688,6 +691,7 @@ function module.options:Load()
 		else
 			printResultsCheckbox:Hide()
 			pullHeader:Hide()
+			onlyGuildGroupsCheckbox:Hide()
 			earlyPullDropdown:Hide()
 			onTimePullDropdown:Hide()
 			latePullDropdown:Hide()
@@ -695,13 +699,17 @@ function module.options:Load()
 		end
   end)
 
-  printResultsCheckbox = AstralUI:Check(self, 'Print Results to Local ' .. CHAT):Point('LEFT', enableCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
+  printResultsCheckbox = AstralUI:Check(self, L['EARLY_PULL_PRINT_RESULTS'] .. CHAT):Point('LEFT', enableCheckbox, 'RIGHT', 150, 0):OnClick(function(self)
     AstralRaidSettings.earlypull.general.printResults = self:GetChecked()
   end)
 
-	local earlyPullDesc = AstralUI:Text(self, 'Even if this module is enabled, only one group member will announce based on role and rank.'):Point('TOPLEFT', enableCheckbox, 'BOTTOMLEFT', 0, -10):FontSize(9):Shadow()
+	local earlyPullDesc = AstralUI:Text(self, L['EARLY_PULL_DESC']):Point('TOPLEFT', enableCheckbox, 'BOTTOMLEFT', 0, -10):FontSize(9):Shadow()
 
-	pullHeader = AstralUI:Text(self, 'Announce on Pull'):Point('TOPLEFT', earlyPullDesc, 'BOTTOMLEFT', 0, -20):Shadow()
+	pullHeader = AstralUI:Text(self, L['EARLY_PULL_ANNOUNCE']):Point('TOPLEFT', earlyPullDesc, 'BOTTOMLEFT', 0, -20):Shadow()
+
+  onlyGuildGroupsCheckbox = AstralUI:Check(self, 'Only Announce in ' .. GUILD .. ' ' .. GROUPS):Point('TOPLEFT', pullHeader, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
+    AstralRaidSettings.earlypull.announce.onlyGuild = self:GetChecked()
+  end)
 
 	local function earlyPullDropdownSetValue(_, arg1)
 		AstralUI:DropDownClose()
@@ -709,7 +717,7 @@ function module.options:Load()
     AstralRaidSettings.earlypull.announce.earlyPull = arg1
 	end
 
-	earlyPullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('TOPLEFT', pullHeader, 'BOTTOMLEFT', 0, -20):AddText("|cffffce00Early Pull:")
+	earlyPullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('TOPLEFT', onlyGuildGroupsCheckbox, 'BOTTOMLEFT', 0, -20):AddText(string.format('|cffffce00%s:', L['EARLY_PULL']))
 	for i = 1, #announceKinds do
 		local info = {}
 		earlyPullDropdown.List[i] = info
@@ -725,7 +733,7 @@ function module.options:Load()
     AstralRaidSettings.earlypull.announce.onTimePull = arg1
 	end
 
-	onTimePullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('LEFT', earlyPullDropdown, 'RIGHT', 10, 0):AddText("|cffffce00On-Time Pull:")
+	onTimePullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('LEFT', earlyPullDropdown, 'RIGHT', 10, 0):AddText(string.format('|cffffce00%s:', L['ON_TIME_PULL']))
 	for i = 1, #announceKinds do
 		local info = {}
 		onTimePullDropdown.List[i] = info
@@ -741,7 +749,7 @@ function module.options:Load()
     AstralRaidSettings.earlypull.announce.latePull = arg1
 	end
 
-	latePullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('TOPLEFT', earlyPullDropdown, 'BOTTOMLEFT', 0, -20):AddText("|cffffce00Late Pull:")
+	latePullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('TOPLEFT', earlyPullDropdown, 'BOTTOMLEFT', 0, -20):AddText(string.format('|cffffce00%s:', L['LATE_PULL']))
 	for i = 1, #announceKinds do
 		local info = {}
 		latePullDropdown.List[i] = info
@@ -757,7 +765,7 @@ function module.options:Load()
     AstralRaidSettings.earlypull.announce.untimedPull = arg1
 	end
 
-	untimedPullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('LEFT', latePullDropdown, 'RIGHT', 10, 0):AddText("|cffffce00Untimed Pull:")
+	untimedPullDropdown = AstralUI:DropDown(self, 200, 10):Size(250):Point('LEFT', latePullDropdown, 'RIGHT', 10, 0):AddText(string.format('|cffffce00%s:', L['UNTIMED_PULL']))
 	for i = 1, #announceKinds do
 		local info = {}
 		untimedPullDropdown.List[i] = info
@@ -771,6 +779,7 @@ end
 function module.options:OnShow()
   enableCheckbox:SetChecked(AstralRaidSettings.earlypull.general.isEnabled)
   printResultsCheckbox:SetChecked(AstralRaidSettings.earlypull.general.printResults)
+	onlyGuildGroupsCheckbox:SetChecked(AstralRaidSettings.earlypull.announce.onlyGuild)
 	earlyPullDropdown:SetText(announceKinds[AstralRaidSettings.earlypull.announce.earlyPull])
 	onTimePullDropdown:SetText(announceKinds[AstralRaidSettings.earlypull.announce.onTimePull])
 	latePullDropdown:SetText(announceKinds[AstralRaidSettings.earlypull.announce.latePull])
@@ -778,6 +787,7 @@ function module.options:OnShow()
 
 	if not AstralRaidSettings.earlypull.general.isEnabled then
 		printResultsCheckbox:Hide()
+		onlyGuildGroupsCheckbox:Hide()
 		pullHeader:Hide()
 		earlyPullDropdown:Hide()
 		onTimePullDropdown:Hide()

@@ -1,5 +1,5 @@
 ## Interface: 100100
-## Title: Astral |cfff5e4a8Raid|r
+## Title: Astral |cfff5e4a8Raid Tools|r
 ## Notes: Raider utilities and raid lead roster management
 ## Author: Astral
 ## Version: 0.2
@@ -9,6 +9,9 @@
 ## AddonCompartmentFunc: OpenAstralRaidWindow
 
 embeds.xml
+
+Localization\Localization.lua
+Localization\enUS.lua
 
 Events.lua
 Settings.lua

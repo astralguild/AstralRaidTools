@@ -54,7 +54,7 @@ function addon.LoadDefaultSettings()
 	addon.AddDefaultSettings('notifiers', 'instances', {})
 	addon.AddDefaultSettings('notifiers', 'encounters', {})
 	addon.AddDefaultSettings('earlypull', 'general', {isEnabled = false, printResults = true})
-	addon.AddDefaultSettings('earlypull', 'announce', {earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1})
+	addon.AddDefaultSettings('earlypull', 'announce', {onlyGuild = false, earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1})
 
 	local encounters = addon.GetEncountersList(true, true)
 	for i = 1, #encounters do

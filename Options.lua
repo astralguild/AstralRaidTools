@@ -1,4 +1,5 @@
 local ADDON_NAME, addon = ...
+local L = addon.L
 
 addon.SharedMedia = LibStub('LibSharedMedia-3.0')
 
@@ -88,7 +89,7 @@ function options:SetPage(page)
 	end
 
 	if options.CurrentFrame.isWide then
-		options.CurrentFrame:SetWidth(type(options.CurrentFrame.isWide)=='number' and options.CurrentFrame.isWide or 850)
+		options.CurrentFrame:SetWidth(type(options.CurrentFrame.isWide) == 'number' and options.CurrentFrame.isWide or 850)
 	end
 
 	if type(options.CurrentFrame.OnShow) == 'function' then
@@ -122,14 +123,14 @@ end
 
 addon.Options = options
 
-local generalPage = options:Add('General', 'General')
+local generalPage = options:Add(GENERAL, GENERAL)
 framesList:SetListValue(1)
 framesList.selected = 1
 framesList:Update()
 
-local generalHeader = AstralUI:Text(generalPage, 'General Options'):Point('TOPLEFT', 0, 0):Shadow()
+local generalHeader = AstralUI:Text(generalPage, L['GENERAL_OPTIONS']):Point('TOPLEFT', 0, 0):Shadow()
 
-local showMinimap = AstralUI:Check(generalPage, 'Show Minimap Button'):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
+local showMinimap = AstralUI:Check(generalPage, L['SHOW_MINIMAP_BUTTON']):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
 	AstralRaidSettings.general.show_minimap_button.isEnabled = self:GetChecked()
 	if AstralRaidSettings.general.show_minimap_button.isEnabled then
 		addon.icon:Show(ADDON_NAME)
@@ -183,7 +184,7 @@ local ldb = LibStub('LibDataBroker-1.1'):NewDataObject(ADDON_NAME, {
 	end,
 	OnTooltipShow = function(tooltip)
 		tooltip:AddLine('Astral Raid Tools')
-		tooltip:AddLine('Left click to toggle options window')
+		tooltip:AddLine(L['TOGGLE_OPTIONS'])
 	end,
 })
 addon.icon = LibStub('LibDBIcon-1.0')

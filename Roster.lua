@@ -1,4 +1,5 @@
 local ADDON_NAME, addon = ...
+local L = addon.L
 
 function addon.IterateRoster(maxGroup, index)
 	index = (index or 0) + 1
@@ -12,21 +13,21 @@ function addon.IterateRoster(maxGroup, index)
 		if subgroup > maxGroup then
 			return addon.IterateRoster(maxGroup,index)
 		end
-		local guid = UnitGUID(name or ("raid"..index))
-		name = name or ""
+		local guid = UnitGUID(name or ('raid'..index))
+		name = name or ''
 		return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
 	else
 		local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _
-		local unit = index == 1 and "player" or "party"..(index-1)
+		local unit = index == 1 and 'player' or 'party'..(index-1)
 		local guid = UnitGUID(unit)
 		if not guid then
 			return
 		end
 		subgroup = 1
 		name, _ = UnitName(unit)
-		name = name or ""
+		name = name or ''
 		if _ then
-			name = name .. "-" .. _
+			name = name .. '-' .. _
 		end
 		class, fileName = UnitClass(unit)
 		if UnitIsGroupLeader(unit) then
@@ -67,12 +68,12 @@ function addon.DelUnitNameServer(unitName)
 	return unitName
 end
 
-local module = addon:New('Roster', 'Roster View', true)
+local module = addon:New(L['ROSTER'], L['ROSTER_VIEW'], true)
 
 local statusIcons = {
-	[1] = "Interface\\RaidFrame\\ReadyCheck-Waiting",
-	[2] = "Interface\\RaidFrame\\ReadyCheck-Ready",
-	[3] = "Interface\\RaidFrame\\ReadyCheck-NotReady",
+	[1] = 'Interface\\RaidFrame\\ReadyCheck-Waiting',
+	[2] = 'Interface\\RaidFrame\\ReadyCheck-Ready',
+	[3] = 'Interface\\RaidFrame\\ReadyCheck-NotReady',
 	[4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
 }
 local notInGroupText, roster, raidSlider, raidNames, updateButton
@@ -137,16 +138,16 @@ function module.options:Load()
 			self:SetAlpha(0)
 		elseif type == 1 then
 			self:SetTexture(statusIcons[3])
-			self:SetVertexColor(1,1,1,1)
+			self:SetVertexColor(1, 1, 1, 1)
 		elseif type == 2 then
 			self:SetTexture(statusIcons[2])
-			self:SetVertexColor(1,1,1,1)
+			self:SetVertexColor(1, 1, 1, 1)
 		elseif type == 3 then
 			self:SetTexture(statusIcons[1])
-			self:SetVertexColor(1,1,1,1)
+			self:SetVertexColor(1, 1, 1, 1)
 		elseif type == 4 then
 			self:SetTexture(statusIcons[4])
-			self:SetVertexColor(0.6,0.6,0.6,1)
+			self:SetVertexColor(0.6, 0.6, 0.6, 1)
 		end
 	end
 
@@ -192,7 +193,7 @@ function module.options:Load()
 		f:SetScript('OnEnter', function(self)
 			local t = self.t:GetText()
 			if t ~= '' then
-				AstralUI.Tooltip.Show(self,'ANCHOR_LEFT',t)
+				AstralUI.Tooltip.Show(self, 'ANCHOR_LEFT', t)
 			end
 		end)
 		f:SetScript('OnLeave', AstralUI.Tooltip.Hide)
@@ -200,7 +201,7 @@ function module.options:Load()
 
 		local t = roster:CreateTexture(nil, 'BACKGROUND')
 		raidNames[i].t = t
-		t:SetPoint('TOPLEFT',LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1),0)
+		t:SetPoint('TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0)
 		t:SetSize(VERTICALNAME_WIDTH, LISTFRAME_HEIGHT)
 		if i % 2 == 1 then
 			t:SetColorTexture(.5,.5,1,.05)
@@ -213,7 +214,7 @@ function module.options:Load()
 	rotation:SetDuration(0.000001)
 	rotation:SetEndDelay(2147483647)
 	rotation:SetOrigin('BOTTOMRIGHT', 0, 0)
-	rotation:SetDegrees(60)
+	rotation:SetDegrees(65)
 	rosterRotation:Play()
 
 	local function sortByName(a,b)
@@ -310,7 +311,7 @@ function module.options:Load()
 					local d = ll[pname]
 					if lastRequest and (not d) then
 						roster:SetIcon(line.icons[j], 4)
-						line.icons[j].t = 'No Response'
+						line.icons[j].t = L['NO_RESPONSE']
 					elseif not d then
 						roster:SetIcon(line.icons[j], 0)
 						line.icons[j].t = ''
@@ -319,7 +320,7 @@ function module.options:Load()
 						line.icons[j].t = ''
 					elseif type(d[data]) == 'string' then -- data different
 						roster:SetIcon(line.icons[j], 3)
-						line.icons[j].t = string.format('Your Version: %s\nTheir Version: %s', tostring(yy[data].version), d[data])
+						line.icons[j].t = string.format('%s: %s\n%s: %s', L['YOUR_VERSION'], tostring(yy[data].version), L['THEIR_VERSION'], d[data])
 					elseif d and not d[data] then
 						roster:SetIcon(line.icons[j], 4)
 						line.icons[j].t = ''
@@ -349,7 +350,7 @@ function module.options:Load()
 	end)
 
 	notInGroupText = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
-	notInGroupText:SetText('You must be in a group to inspect a group roster.')
+	notInGroupText:SetText(L['ROSTER_MUST_BE_IN_GROUP'])
 	notInGroupText:SetPoint('CENTER', -50, 100)
 	notInGroupText:Hide()
 end

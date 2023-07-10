@@ -1,4 +1,5 @@
 local _, addon = ...
+local L = addon.L
 
 local ABERRUS = 2166
 local NELTH = 2684
@@ -58,7 +59,7 @@ bdgNelthHeartMacro = function(...)
 		if m.settings.isEnabled then
 			bdgNealthHeartMacroPressed(Ambiguate(sender, 'short'))
 			if #m.debuffs == 5 then
-				sendMessage(m, string.format('Heart (set %d) completed in %.2fs.', m.heartSet, GetTime() - m.lastHeartTime))
+				sendMessage(m, string.format(L['BDG_NELTH_HEART_SET_MESSAGE'], m.heartSet, GetTime() - m.lastHeartTime))
 				if m.heartSet == 10 then
 					m.lastHeartTime = GetTime()
 				end
@@ -89,9 +90,9 @@ bdgNealthHeartMacroPressed = function(player)
 		table.insert(log.bdgNelthHeart.hearts, heart)
 	end
 	if heart.pressedAt then
-		sendMessage(m, string.format('Heart (set %d) macro (%d) hit by %s at %s after %.2fs', heart.set, heart.index, player, heart.time, heart.pressedAt))
+		sendMessage(m, string.format(L['BDG_NELTH_HEART_PRESSED_MESSAGE'], heart.set, heart.index, player, heart.time, heart.pressedAt))
 	else
-		sendMessage(m, string.format('Heart (set %d) macro (%d) hit by %s at %s after unknown time (no known last heart event)', heart.set, heart.index, player, heart.time))
+		sendMessage(m, string.format(L['BDG_NELTH_HEART_PRESSED_MESSAGE_UNKNOWN_TIME'], heart.set, heart.index, player, heart.time))
 	end
 end
 
@@ -179,9 +180,9 @@ bdgNelthHeartInit = function(...)
 				C_UnitAuras.RemovePrivateAuraAnchor(m.privateAura)
 			end
 			if self.pressed and m.lastHeartTime then
-				addon.Console(string.format('Pressed macro in %.2fs', GetTime() - m.lastHeartTime))
+				addon.Console(string.format(L['BDG_NELTH_HEART_PRESSED_MESSAGE_PERSONAL'] , GetTime() - m.lastHeartTime))
 			elseif self.pressed then
-				addon.Console('Pressed macro')
+				addon.Console(L['BDG_NELTH_HEART_PRESSED_MESSAGE_PERSONAL_UNKNOWN_TIME'] )
 			end
 		end)
 		m.frame:Hide()
@@ -281,9 +282,9 @@ function module.options:Load()
 		AstralUI:DropDownClose()
 	end
 
-  local specificHeader = AstralUI:Text(self, 'Boss Modules'):Point('TOPLEFT', 0, 0):Size(200, 12):Shadow()
+  local specificHeader = AstralUI:Text(self, L['BOSS_MODULES']):Point('TOPLEFT', 0, 0):Size(200, 12):Shadow()
 
-  instanceDropdown = AstralUI:DropDown(self, 400, 25):AddText('Raid:'):Point('LEFT', specificHeader, 'RIGHT', 10, 0):Size(400):SetText('-')
+  instanceDropdown = AstralUI:DropDown(self, 400, 25):AddText(L['RAID'] .. ':'):Point('LEFT', specificHeader, 'RIGHT', 10, 0):Size(400):SetText('-')
   do
 		local list = instanceDropdown.List
 		for i = 1, #encounters do
@@ -331,17 +332,17 @@ function module.options:Load()
 	frames[ABERRUS][NELTH]:SetSize(400, 430)
 	frames[ABERRUS][NELTH]:Hide()
 
-  local nelthHeartHeader = AstralUI:Text(frames[ABERRUS][NELTH], 'BDG Heart Macro Detection'):Point('TOPLEFT', 0, 0):Shadow()
+  local nelthHeartHeader = AstralUI:Text(frames[ABERRUS][NELTH], L['BDG_NELTH_HEART_TITLE']):Point('TOPLEFT', 0, 0):Shadow()
 
-  nelthHeartMacroEnableCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], 'Enable Notifier'):Point('TOPLEFT', nelthHeartHeader, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
+  nelthHeartMacroEnableCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], L['ENABLE_NOTIFIER']):Point('TOPLEFT', nelthHeartHeader, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
     AstralRaidSettings.bossModules[NELTH].isEnabled = self:GetChecked()
   end)
 
-  nelthHeartMacroPrintCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], 'Print Results'):Point('LEFT', nelthHeartMacroEnableCheckbox, 'RIGHT', 100, 0):OnClick(function(self)
+  nelthHeartMacroPrintCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], L['PRINT_RESULTS']):Point('LEFT', nelthHeartMacroEnableCheckbox, 'RIGHT', 100, 0):OnClick(function(self)
     AstralRaidSettings.bossModules[NELTH].printResults = self:GetChecked()
   end)
 
-	nelthHeartMacroLogCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], 'Log to Disk'):Point('LEFT', nelthHeartMacroPrintCheckbox, 'RIGHT', 100, 0):OnClick(function(self)
+	nelthHeartMacroLogCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], L['LOG_TO_DISK']):Point('LEFT', nelthHeartMacroPrintCheckbox, 'RIGHT', 100, 0):OnClick(function(self)
     AstralRaidSettings.bossModules[NELTH].logResults = self:GetChecked()
   end)
 
@@ -363,16 +364,16 @@ function module.options:Load()
 		end
 	end
 
-	local nelthHeartDesc = AstralUI:Text(frames[ABERRUS][NELTH], string.format('Notify on heart macro press from %s.', WrapTextInColorCode('BDG/Angered - Neltharion Portal+Heart Map', 'D1FFADAD'))):Point('TOPLEFT', nelthHeartMacroAnnounceDropdown, 'BOTTOMLEFT', 0, -20):FontSize(9):Shadow()
+	local nelthHeartDesc = AstralUI:Text(frames[ABERRUS][NELTH], string.format(L['BDG_NELTH_HEART_DESC'], WrapTextInColorCode('BDG/Angered - Neltharion Portal+Heart Map', 'D1FFADAD'))):Point('TOPLEFT', nelthHeartMacroAnnounceDropdown, 'BOTTOMLEFT', 0, -20):FontSize(9):Shadow()
 
-	nelthHeartIconEnableCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], 'Enable Large Icon'):Point('TOPLEFT', nelthHeartDesc, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
+	nelthHeartIconEnableCheckbox = AstralUI:Check(frames[ABERRUS][NELTH], L['BDG_NELTH_HEART_ENABLE_ICON']):Point('TOPLEFT', nelthHeartDesc, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
     AstralRaidSettings.bossModules[NELTH].showIcon = self:GetChecked()
   end)
 
-  nelthHeartIconSizeSlider = AstralUI:Slider(frames[ABERRUS][NELTH], 'Icon Size'):Size(200):Point('LEFT', nelthHeartIconEnableCheckbox, 'RIGHT', 150, 0):Range(256,512)
+  nelthHeartIconSizeSlider = AstralUI:Slider(frames[ABERRUS][NELTH], L['ICON_SIZE']):Size(200):Point('LEFT', nelthHeartIconEnableCheckbox, 'RIGHT', 150, 0):Range(256,512)
 
 	local vhLink, _ = GetSpellLink(410953)
-	local nelthHeartIconDesc = AstralUI:Text(frames[ABERRUS][NELTH], string.format('Show an icon on %s that only hides when you press the macro.', vhLink)):Point('TOPLEFT', nelthHeartIconEnableCheckbox, 'BOTTOMLEFT', 0, -20):FontSize(9):Shadow()
+	local nelthHeartIconDesc = AstralUI:Text(frames[ABERRUS][NELTH], string.format(L['BDG_NELTH_HEART_ICON_DESC'], vhLink)):Point('TOPLEFT', nelthHeartIconEnableCheckbox, 'BOTTOMLEFT', 0, -20):FontSize(9):Shadow()
 
 	local selected = nil
 	for i = 1, #encounters do
