@@ -742,7 +742,7 @@ do
 		self.Highlight:Show()
 		if ( self.tooltipTitle ) then
 			if ( self.tooltipOnButton ) then
-				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+				GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 				GameTooltip:AddLine(self.tooltipTitle, 1.0, 1.0, 1.0)
 				GameTooltip:AddLine(self.tooltipText)
 				GameTooltip:Show()
@@ -751,7 +751,7 @@ do
 			end
 		end
 		if ( self.NormalText:IsTruncated() ) then
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 			GameTooltip:AddLine(self.NormalText:GetText())
 			GameTooltip:Show()
 		end
@@ -769,28 +769,28 @@ do
 		self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
 	end
 	function templates:AstralDropDownMenuButtonTemplate(parent)
-		local self = CreateFrame("Button",nil,parent)
+		local self = CreateFrame('Button',nil,parent)
 		self:SetSize(100,16)
 
-		self.Highlight = self:CreateTexture(nil,"BACKGROUND")
-		self.Highlight:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+		self.Highlight = self:CreateTexture(nil,'BACKGROUND')
+		self.Highlight:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
 		self.Highlight:SetAllPoints()
-		self.Highlight:SetBlendMode("ADD")
+		self.Highlight:SetBlendMode('ADD')
 		self.Highlight:Hide()
 
-		self.Texture = self:CreateTexture(nil,"BACKGROUND",nil,-8)
+		self.Texture = self:CreateTexture(nil,'BACKGROUND',nil,-8)
 		self.Texture:Hide()
 		self.Texture:SetAllPoints()
 
-		self.Icon = self:CreateTexture(nil,"ARTWORK")
+		self.Icon = self:CreateTexture(nil,'ARTWORK')
 		self.Icon:SetSize(16,16)
-		self.Icon:SetPoint("LEFT")
+		self.Icon:SetPoint('LEFT')
 		self.Icon:Hide()
 
-		self.Arrow = self:CreateTexture(nil,"ARTWORK")
-		self.Arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+		self.Arrow = self:CreateTexture(nil,'ARTWORK')
+		self.Arrow:SetTexture('Interface\\ChatFrame\\ChatFrameExpandArrow')
 		self.Arrow:SetSize(16,16)
-		self.Arrow:SetPoint("RIGHT")
+		self.Arrow:SetPoint('RIGHT')
 		self.Arrow:Hide()
 
 		self.NormalText = self:CreateFontString()

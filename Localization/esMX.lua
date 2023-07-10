@@ -1,4 +1,4 @@
-local L = select(2, ...).L('enUS')
+local L = select(2, ...).L('esMX')
 
 -- Common Terms/Phrases
 L['CAST'] = 'Cast'

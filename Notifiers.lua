@@ -2,12 +2,12 @@ local _, addon = ...
 local L = addon.L
 
 local function auraTrigger(e, _, m, _, name, ...)
-  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_AURA_APPLIED' and addon.InEncounter then
+  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_AURA_APPLIED' and addon.InEncounter then -- SPELL_AURA_APPLIED_DOSE for stacks
 		local trigger = {
 			spellID = select(7, ...),
 			encounterID = addon.Encounter.encounterID,
 			encounterStart = addon.Encounter.start,
-			player = Ambiguate(name, 'short'),
+			unit = UnitName(name),
 			date = date('%x'),
 			time = date('%H:%M:%S %p'),
 		}
@@ -23,7 +23,7 @@ end
 
 local function auraNotifier(trigger)
   local link, _ = GetSpellLink(trigger.spellID)
-  addon.Console(string.format(L['AURA_NOTIFIER_MSG'], addon.ClassColorName(trigger.player), link, trigger.time))
+  addon.Console(string.format(L['AURA_NOTIFIER_MSG'], addon.ClassColorName(trigger.unit), link, trigger.time))
 end
 
 local function castTrigger(e, ...)
