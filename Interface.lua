@@ -190,7 +190,7 @@ do
 		local logo = menuBar:CreateTexture(nil, 'ARTWORK')
 		logo:SetAlpha(0.8)
 		logo:SetSize(32, 32)
-		logo:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\Logo@2x')
+		logo:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\logo.png', nil, nil, 'TRILINEAR')
 		logo:SetPoint('BOTTOMLEFT', menuBar, 'BOTTOMLEFT', 10, 10)
 		self.Logo = logo
 

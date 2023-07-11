@@ -51,10 +51,40 @@ local bossModules = {
 	},
 }
 
+local privateAuraAnchors = {
+	['LARGE'] = {},
+	['SMALL'] = {},
+}
+
+local function privateAuraOnShow(self)
+	if self.privateAura then
+		C_UnitAuras.RemovePrivateAuraAnchor(self.privateAura)
+	end
+	local privateAnchorArgs = {
+		unitToken = 'player',
+		auraIndex = 1,
+		parent = self,
+		showCountdownFrame = true,
+		showCountdownNumbers = true,
+		iconInfo = {
+			iconAnchor = {
+				point = 'CENTER',
+				relativeTo = self,
+				relativePoint = 'CENTER',
+				offsetX = 0,
+				offsetY = 0
+			},
+			iconWidth = self:GetWidth(),
+			iconHeight = self:GetHeight()
+		}
+	}
+	self.privateAura = C_UnitAuras.AddPrivateAuraAnchor(privateAnchorArgs)
+end
+
 bdgNelthHeartMacro = function(...)
 	local prefix, text, _, sender = ...
 	local m = bossModules[NELTH]
-	if addon.Encounter.difficultyID ~= 16 and (not addon.Debug) then return end
+	if addon.Encounter.difficultyID ~= 16 or (not addon.Debug) then return end
 	if prefix == 'BDG_NELTH_HEART' and text == 'heart' then
 		if m.settings.isEnabled then
 			bdgNealthHeartMacroPressed(Ambiguate(sender, 'short'))
@@ -105,7 +135,7 @@ bdgNelthHeartCast = function(...)
 		m.debuffs = {}
 		bdgNelthShowHeartIcon()
 	elseif spellID == 407207 then -- Rushing Darkness
-		if m.frame and m.frame:IsShown() then
+		if m.settings.showIcon and m.frame:IsShown() then
 			m.frame:Hide()
 			C_Timer.After(5.1, function()
 				if GetTime() - m.lastHeartTime < 7 then
@@ -118,8 +148,8 @@ end
 
 bdgNelthShowHeartIcon = function()
 	local m = bossModules[NELTH]
-	if addon.Encounter.difficultyID ~= 16 and (not addon.Debug) then return end
-	if m.settings.showIcon and m.frame then
+	if addon.Encounter.difficultyID ~= 16 or (not addon.Debug) then return end
+	if m.settings.showIcon then
 		m.frame:Show()
 		C_Timer.After(7, function()
 			if m.frame:IsShown() then
@@ -144,36 +174,11 @@ bdgNelthHeartInit = function(...)
 	m.debuffs = {}
 	m.settings = AstralRaidSettings.bossModules[NELTH]
 
-	if m.settings.showIcon and not m.frame then
-		m.frame = CreateFrame('FRAME', nil, UIParent)
-		m.frame:SetHeight(m.settings.iconSize)
-		m.frame:SetWidth(m.settings.iconSize)
-		m.frame:SetAlpha(0.75)
-		m.frame:SetPoint('BOTTOM', UIParent, 'CENTER', 0, 20)
+	if not m.frame and m.settings.showIcon then
+		m.frame = privateAuraAnchors['LARGE']
 		m.frame:SetScript('OnShow', function(self)
 			m.frame.pressed = false
-			if m.privateAura then
-				C_UnitAuras.RemovePrivateAuraAnchor(m.privateAura)
-			end
-			local privateAnchorArgs = {
-				unitToken = 'player',
-				auraIndex = 1,
-				parent = self,
-				showCountdownFrame = true,
-				showCountdownNumbers = true,
-				iconInfo = {
-					iconAnchor = {
-						point = 'CENTER',
-						relativeTo = self,
-						relativePoint = 'CENTER',
-						offsetX = 0,
-						offsetY = 0
-					},
-					iconWidth = self:GetWidth(),
-					iconHeight = self:GetHeight()
-				}
-			}
-			m.privateAura = C_UnitAuras.AddPrivateAuraAnchor(privateAnchorArgs)
+			privateAuraOnShow(self)
 		end)
 		m.frame:SetScript('OnHide', function(self)
 			if m.privateAura then
@@ -182,10 +187,9 @@ bdgNelthHeartInit = function(...)
 			if self.pressed and m.lastHeartTime then
 				addon.Console(string.format(L['BDG_NELTH_HEART_PRESSED_MESSAGE_PERSONAL'] , GetTime() - m.lastHeartTime))
 			elseif self.pressed then
-				addon.Console(L['BDG_NELTH_HEART_PRESSED_MESSAGE_PERSONAL_UNKNOWN_TIME'] )
+				addon.Console(L['BDG_NELTH_HEART_PRESSED_MESSAGE_PERSONAL_UNKNOWN_TIME'])
 			end
 		end)
-		m.frame:Hide()
 	end
 end
 
@@ -203,6 +207,16 @@ AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', function(...) handle('UNIT
 AstralRaidEvents:Register('CHAT_MSG_ADDON', function(...) handle('CHAT_MSG_ADDON', ...) end, 'astralRaidBossModulesChatMsgAddon')
 AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function(...) handle('COMBAT_LOG_EVENT_UNFILTERED', GetCurrentCombatTextEventInfo()) end, 'astralRaidBossModulesCLEU')
 AstralRaidEvents:Register('ENCOUNTER_START', function(...) handle('ENCOUNTER_START', ...) end, 'astralRaidBossModulesEncounterStart')
+
+local function initPrivateAuraAnchors()
+	local frame = CreateFrame('FRAME', nil, UIParent)
+	frame:SetHeight(AstralRaidSettings.bossModules.priavteAuras.largeIconSize)
+	frame:SetWidth(AstralRaidSettings.bossModules.priavteAuras.largeIconSize)
+	frame:SetAlpha(0.75)
+	frame:SetPoint('BOTTOM', UIParent, 'CENTER', 0, 20)
+	frame:Hide()
+	privateAuraAnchors['LARGE'] = frame
+end
 
 local module = addon:New('Boss Modules', 'Boss Modules')
 local instanceDropdown, encounterList, setContent
@@ -275,7 +289,7 @@ function module.options:Load()
 		setContent()
 	end
 
-  local function instanceDropdownSetValue(self, instance)
+  local function instanceDropdownSetValue(_, instance)
 		instanceDropdown:SetText(type(instance) == 'string' and instance or (C_Map.GetMapInfo(instance or 0) or {}).name or '???')
 		currentInstance = instance
 		updateList()
@@ -384,6 +398,8 @@ function module.options:Load()
 	end
 	if selected then instanceDropdownSetValue(_, selected) end
 	updateList()
+
+	initPrivateAuraAnchors()
 end
 
 function module.options:OnShow()
@@ -392,9 +408,9 @@ function module.options:OnShow()
   nelthHeartMacroLogCheckbox:SetChecked(AstralRaidSettings.bossModules[NELTH].logResults)
 	nelthHeartMacroAnnounceDropdown:SetText(announceKinds[AstralRaidSettings.bossModules[NELTH].announce])
 	nelthHeartIconEnableCheckbox:SetChecked(AstralRaidSettings.bossModules[NELTH].showIcon)
-	nelthHeartIconSizeSlider:SetTo(AstralRaidSettings.bossModules[NELTH].iconSize):OnChange(function(self, event)
+	nelthHeartIconSizeSlider:SetTo(AstralRaidSettings.bossModules.privateAuras.largeIconSize):OnChange(function(self, event)
 		event = event - event % 1
-		AstralRaidSettings.bossModules[NELTH].iconSize = event
+		AstralRaidSettings.bossModules.privateAuras.largeIconSize = event
 		self.tooltipText = event
 		self:tooltipReload(self)
 	end)

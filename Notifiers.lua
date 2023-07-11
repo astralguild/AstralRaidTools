@@ -95,7 +95,7 @@ local currentInstance = nil
 function module.options:Load()
   local header = AstralUI:Text(self, L['ENCOUNTER_NOTIFIERS']):Point('TOPLEFT', 0, 0):Shadow()
 
-  enableCheckbox = AstralUI:Check(self, 'Enable'):Point('TOPLEFT', header, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
+  enableCheckbox = AstralUI:Check(self, ENABLE):Point('TOPLEFT', header, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
     AstralRaidSettings.notifiers.general.isEnabled = self:GetChecked()
   end)
 
@@ -129,7 +129,7 @@ function module.options:Load()
 		encounterDetailsList:Update()
 	end
 
-  local function instanceDropdown_SetValue(self, instance)
+  local function instanceDropdown_SetValue(_, instance)
 		instanceDropdown:SetText(type(instance) == 'string' and instance or (C_Map.GetMapInfo(instance or 0) or {}).name or '???')
 		currentInstance = instance
 		updateList()

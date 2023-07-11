@@ -86,12 +86,14 @@ local waHeader, waList, noWAs, addonHeader, addonList
 local allWAs = nil
 local childrenWAs = {}
 local expandedWAs = {}
+local parentWAs = {}
 
 local function getChildrenWeakAuras(weakAuras, parent)
   local children = {}
   for wa, data in pairs(weakAuras) do
     if data.parent == parent then
       children[#children+1] = wa
+      parentWAs[wa] = parent
     end
   end
   return children
@@ -130,6 +132,16 @@ local function updateAddonList()
     list[#list+1] = data
   end
   addonList.list = list
+end
+
+local function getChildLevel(wa)
+  local level = 0
+  local parent = parentWAs[wa]
+  while parent do
+    level = level + 1
+    parent = parentWAs[parent]
+  end
+  return level
 end
 
 function waModule.options:Load()
@@ -186,6 +198,7 @@ function waModule.options:Load()
     line.chk = AstralUI:Check(line):Point('LEFT', line.expand, 'RIGHT', 5, 0):OnClick(waOnClick)
     line.chk.CheckedTexture:SetVertexColor(0.2,1,0.2,1)
     line.waName = AstralUI:Text(line):Size(AstralRaidOptionsFrame.ContentWidth - 10, 10):FontSize(10):Point('LEFT',line.chk,'RIGHT',5,0):Shadow()
+    line.y = -(i-1)*32
     line:Hide()
   end
 
@@ -204,6 +217,8 @@ function waModule.options:Load()
       else
         line.expand.texture:SetTexCoord(0.375,0.4375,0.5,0.625)
       end
+      line:SetPoint('TOPLEFT', math.min(getChildLevel(data)*10, AstralRaidOptionsFrame.ContentWidth - 40), line.y)
+      line:SetPoint('RIGHT', 0, 0)
       line.chk:SetChecked(AstralRaidSettings.wa.required[data])
     end)
   end

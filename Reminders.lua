@@ -223,14 +223,14 @@ function module.options:Load()
 		addon.UpdateTextsFonts()
 	end
 
-	local function soundDropdownSetValue(self, arg1)
+	local function soundDropdownSetValue(_, sound, rName)
 		AstralUI:DropDownClose()
-		self:SetText(arg1)
-    if arg1 and arg1 ~= NONE then
-      local path = addon.SharedMedia:Fetch('sound', arg1, true)
-      PlaySoundFile(path or arg1)
+    if sound and sound ~= NONE then
+      local path = addon.SharedMedia:Fetch('sound', sound, true)
+      PlaySoundFile(path or sound)
     end
-    AstralRaidSettings.texts.sounds[self.rname] = arg1
+    AstralRaidSettings.texts.sounds[rName] = sound
+		reminderWidgets[rName].soundDropdown:SetText(sound)
 	end
 
   -- Start UI
@@ -285,7 +285,7 @@ function module.options:Load()
       s.List[i] = info
       info.text = sounds[i]
       info.arg1 = sounds[i]
-      info.rname = name
+      info.arg2 = name
       info.func = soundDropdownSetValue
       info.justifyH = 'CENTER'
     end

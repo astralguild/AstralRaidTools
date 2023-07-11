@@ -413,8 +413,8 @@ end
 local function afterPull()
 	local ctx = pullContext
 	local pullTime = ctx.pullTime
-	local cwBeginTime = pullTime - 0.5
-	local cwEndTime = pullTime + 0.5
+	local cwBeginTime = pullTime - 1
+	local cwEndTime = pullTime + 1
 	local timelinessCenter = pullTime
 	local timelinessDecayRate = 3
 	local function getTimelinessPenalty(entry)
