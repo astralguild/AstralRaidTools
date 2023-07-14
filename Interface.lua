@@ -1523,7 +1523,7 @@ function AstralUI.ScrollDropDown.UpdateChecks()
 end
 
 function AstralUI.ScrollDropDown.Update(self, elapsed)
-	if ( not self.showTimer or not self.isCounting ) then
+	if (not self.showTimer or not self.isCounting) then
 		return
 	elseif ( self.showTimer < 0 ) then
 		self:Hide()
@@ -1543,7 +1543,7 @@ end
 function AstralUI.ScrollDropDown.OnButtonEnter(self)
 	local func = self.hoverFunc
 	if func then
-		func(self,self.hoverArg)
+		func(self, self.hoverArg)
 	end
 	if self.tooltip then
 		GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')

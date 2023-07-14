@@ -3,6 +3,8 @@ local L = addon.L
 
 -- Adapted/copied from Early Pull weakaura (https://wago.io/TyN8l9eWg/1)
 
+local EARLY_PULL_PREFIX_2 = 'earlyPullSync'
+
 local sourceFlagMask = COMBATLOG_OBJECT_CONTROL_MASK
 local sourceFlagFilter = COMBATLOG_OBJECT_CONTROL_PLAYER
 local destFlagMask = bit.bor(COMBATLOG_OBJECT_CONTROL_MASK, COMBATLOG_OBJECT_REACTION_MASK)
@@ -38,7 +40,14 @@ local function init()
 		syncLog[i] = {time = negInfinity, message = nil}
 	end
 
-	unitList = {raid = {}, raidpet = {}, party = {}, partypet = {}, boss = {}, bosstarget = {}}
+	unitList = {
+		raid = {},
+		raidpet = {},
+		party = {},
+		partypet = {},
+		boss = {},
+		bosstarget = {}
+	}
 
 	for i = 1, 40 do
 		unitList.raid[i] = 'raid'..i
@@ -187,13 +196,12 @@ local function scanAllBosses()
 end
 
 local function createSyncTable(encounterID)
-	local syncPriority = 2 -- low, (normal), high, isolated
-	return {addon.CLIENT_VERSION, encounterID, syncPriority, addon.GetGroupRank(), UnitName('player'), GetRealmName()}
+	return {addon.CLIENT_VERSION, encounterID, addon.GetGroupRank(), UnitName('player'), GetRealmName()}
 end
 
 local function deserializeSyncTable(d)
 	local syncTable = {strsplit('\t', d)}
-	for i = 1, 6 do
+	for i = 1, 5 do
 		if i <= 4 then
 			syncTable[i] = tonumber(syncTable[i])
 		end
@@ -205,11 +213,9 @@ local function deserializeSyncTable(d)
 end
 
 local function compareSyncTables(a, b)
-	if a[1] < b[1] then return true elseif a[1] > b[1] then return false end
 	if a[3] < b[3] then return true elseif a[3] > b[3] then return false end
-	if a[4] < b[4] then return true elseif a[4] > b[4] then return false end
+	if a[4] > b[4] then return true elseif a[4] < b[4] then return false end
 	if a[5] > b[5] then return true elseif a[5] < b[5] then return false end
-	if a[6] > b[6] then return true elseif a[6] < b[6] then return false end
 end
 
 local function checkSyncTableEncounter(syncTable, encounterID)
@@ -217,14 +223,14 @@ local function checkSyncTableEncounter(syncTable, encounterID)
 end
 
 local function isMe(syncTable)
-	return syncTable[5] == UnitName('player') and syncTable[6] == GetRealmName()
+	return syncTable[4] == UnitName('player') and syncTable[5] == GetRealmName()
 end
 
 local function sendSync(syncTable)
 	local channel = addon.GetInstanceChannel()
 	if not channel then return end
 	local msg = table.concat(syncTable, '\t')
-	AstralRaidComms:NewMessage(AstralRaidComms.PREFIX, 'earlyPullSync ' .. msg, channel)
+	AstralRaidComms:NewMessage(AstralRaidComms.PREFIX, EARLY_PULL_PREFIX_2 .. ' ' .. msg, channel)
 end
 
 local function onSync(channel, msg, sender)
@@ -340,7 +346,7 @@ local function finalizeCandidate(cand)
 		cand.name = entry.name
 		if cand.combatLogScore >= 25 then
 			if combatLogSwingEventTest[entry.event] then
-				cand.spellID = 6603 -- Auto Attack
+				cand.spellID = 6603 -- auto attack
 			else
 				cand.spellID = entry.spellID
 			end
@@ -376,7 +382,7 @@ local function printDetails()
 			printCandidateDetails(ctx.secondCand, 'Next best pull candidate: ')
 		end
 	else
-		addon.Console('No candidates to blame for pull.')
+		addon.Console('No one to blame for pull.')
 	end
 end
 
@@ -573,7 +579,7 @@ end
 local function unitTarget(unit)
 	if not AstralRaidSettings.earlypull.general.isEnabled then return end
 	if not (IsInGroup() or IsInRaid()) then return end
-	if unit and unit:find('^boss') then scanBoss(unit, unit..'target') end
+	if unit and unit:find('^boss') then scanBoss(unit, unit .. 'target') end
 end
 
 local function cleu(_, event, _, sourceGUID, sourceName, sourceFlags, _, destGUID, destName, destFlags, _, spellID, _, _, auraType)
@@ -659,13 +665,13 @@ AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', playerEnteringWorld, 'astralR
 AstralRaidEvents:Register('CHAT_MSG_ADDON', chatMsgAddon, 'astralRaidEarlyPullChatMsgAddon')
 AstralRaidEvents:Register('UNIT_THREAT_LIST_UPDATE', unitThreatListUpdate, 'astralRaidEarlyPullUnitThreatListUpdate')
 AstralRaidEvents:Register('UNIT_TARGET', unitTarget, 'astralRaidEarlyPullUnitTarget')
-AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidEarlyPullCLEU')
+AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function() cleu(GetCurrentCombatTextEventInfo()) end, 'astralRaidEarlyPullCLEU')
 AstralRaidEvents:Register('ENCOUNTER_START', encounterStart, 'astralRaidEarlyPullEncounterStart')
 AstralRaidEvents:Register('INSTANCE_ENCOUNTER_ENGAGE_UNIT', instanceEncounterEngageUnit, 'astralRaidEarlyPullInstanceEncounterEngageUnit')
 
-AstralRaidComms:RegisterPrefix('RAID', 'earlyPullSync', function(...) onSync('RAID', ...) end)
-AstralRaidComms:RegisterPrefix('PARTY', 'earlyPullSync', function(...) onSync('PARTY', ...) end)
-AstralRaidComms:RegisterPrefix('INSTANCE_CHAT', 'earlyPullSync', function(...) onSync('INSTANCE_CHAT', ...) end)
+AstralRaidComms:RegisterPrefix('RAID', EARLY_PULL_PREFIX_2, function(...) onSync('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', EARLY_PULL_PREFIX_2, function(...) onSync('PARTY', ...) end)
+AstralRaidComms:RegisterPrefix('INSTANCE_CHAT', EARLY_PULL_PREFIX_2, function(...) onSync('INSTANCE_CHAT', ...) end)
 
 -- addon.AddDefaultSettings('earlypull', 'announce', {earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1})
 

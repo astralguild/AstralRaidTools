@@ -130,7 +130,7 @@ local function healthstoneReminder(e, _, m, ...)
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' and notFullHealthstones() then
     local spellID = select(10, ...)
     if spellID == healthstoneSpell then
-      untrigger('healthstones', notFullHealthstones)
+      hideAfter('healthstones', 20)
       return 'SHOW'
     end
   elseif not notFullHealthstones() then
@@ -176,8 +176,8 @@ end
 
 AstralRaidReminders = {
   ['eatFood'] = {text = L['EAT_FOOD'], sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu'}, func = eatFoodReminder},
-  ['cauldronDown'] = {text = L['CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'spellcastSuccess'}, func = cauldronReminder},
-  ['repairDown'] =  {text = L['REPAIR'], sound = 2917320, callbacks = {'enterInstance', 'enterCombat', 'cleu'}, func = repairReminder},
+  ['cauldronDown'] = {text = L['CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = cauldronReminder},
+  ['repairDown'] =  {text = L['REPAIR'], sound = 2917320, callbacks = {'enterInstance', 'cleu'}, func = repairReminder},
   ['healthstones'] = {text = L['GRAB_HEALTHSTONES'], sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder},
   ['healingPotions'] = {text = L['GRAB_HEALING_POTIONS'], sound = 'Noot Noot', callbacks = {'cleu'}, func = healingPotionsReminder},
   ['combatPotions'] = {text = L['GRAB_COMBAT_POTIONS'], callbacks = {'cleu'}, func = combatPotionsReminder},

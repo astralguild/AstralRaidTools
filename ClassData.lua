@@ -153,6 +153,6 @@ function addon.ClassColorNum(class)
 	if classColorArray then
 		return classColorArray.r, classColorArray.g, classColorArray.b
 	else
-		return 0.8,0.8,0.8
+		return 0.8, 0.8, 0.8
 	end
 end

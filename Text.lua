@@ -109,10 +109,12 @@ function addon.ShowText(name)
 end
 
 function addon.HideText(name)
-  if not (texts[name] or texts[name]:IsShown()) then
+  if not texts[name] then
     return
   end
-  texts[name]:Hide()
+  if texts[name]:IsShown() then
+    texts[name]:Hide()
+  end
   state[name] = false
   remindersState[name] = false
 end
@@ -148,6 +150,7 @@ local events = {}
 local function handle(e, event, ...)
   local t = texts[e.name]
   if not t then return end
+  if t.type == 'REMINDER' and InCombatLockdown() then return end
   local action = e.f(event, ...)
   if action then
     if action == 'SHOW' and canShowText(t.type) and textIsEnabled(e.name) then
@@ -226,10 +229,6 @@ local function alive(...)
   for _, e in pairs(events.alive) do handle(e, 'PLAYER_UNGHOST', ...) end
 end
 
-local function spellcastSuccess(...)
-  for _, e in pairs(events.spellcastSuccess) do handle(e, 'UNIT_SPELLCAST_SUCCEEDED', ...) end
-end
-
 local function cleu(...)
   for _, e in pairs(events.cleu) do handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', CombatLogGetCurrentEventInfo()) end
 end
@@ -247,5 +246,4 @@ AstralRaidEvents:Register('PLAYER_LEAVE_COMBAT', leaveCombat, 'astralRaidTextsLe
 AstralRaidEvents:Register('PLAYER_ALIVE', resurrected, 'astralRaidTextsResurrected')
 AstralRaidEvents:Register('PLAYER_DEAD', dead, 'astralRaidTextsDeath')
 AstralRaidEvents:Register('PLAYER_UNGHOST', alive, 'astralRaidTextsAlive')
-AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', spellcastSuccess, 'astralRaidTextsSpellcastSuccess')
 AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidTextsCLEU')

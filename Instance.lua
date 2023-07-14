@@ -18,10 +18,6 @@ function addon.GetInstanceChannel()
 	end
 end
 
-function addon.CheckInstanceType()
-	addon.InInstance, addon.InstanceType = IsInInstance()
-end
-
 local bw, bwClear
 do
 	local isAdded = nil
@@ -51,7 +47,9 @@ do
 	end
 end
 
-AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', addon.CheckInstanceType, 'astralRaidGetInstance')
+AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
+	addon.InInstance, addon.InstanceType = IsInInstance()
+end, 'astralRaidGetInstance')
 
 AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName, difficultyID, groupSize)
   addon.InEncounter = true
@@ -259,9 +257,8 @@ addon.EncountersList = {
 	{2047,2512,2540,2553,2544,2539,2542,2529,2546,2543,2549,2537},	--sfo
 
 	{2119,2587,2639,2590,2592,2635,2605,2614,2607},	--voti
-	{2166,2688,2682,2687,2693,2680,2689,2683,2684,2685},	--a
+	{2166,2688,2682,2687,2693,2680,2689,2683,2684,2685}, --a
 }
-
 
 local actualRaid = 1735
 local actualDungeon = 1666
@@ -613,8 +610,7 @@ addon.MapToEncounter = {
 	[2170] = 2685,
 }
 
-local encounterIDtoEJidChache = {
-}
+local encounterIDtoEJidChache, instanceIDtoEJidChache = {}, {}
 
 local encounterIDtoNamePredef = {
 	[2688] = "Kazzara, the Hellforged",
@@ -634,9 +630,6 @@ addon.BossName = setmetatable({}, {__index=function (t, k)
 	end
 	return encounterIDtoEJidChache[k]
 end})
-
-local instanceIDtoEJidChache = {
-}
 
 addon.EJInstanceName = setmetatable({}, {__index=function (t, k)
 	if not instanceIDtoEJidChache[k] then

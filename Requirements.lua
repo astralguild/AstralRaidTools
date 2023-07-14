@@ -52,8 +52,7 @@ AstralRaidComms:RegisterPrefix('PARTY', 'waPush', function(...) waPush('PARTY', 
 
 function addon.SendWeakAuraRequest()
 	if not (IsInRaid() or IsInGroup()) then return end
-  local channel = 'RAID'
-  if IsInGroup() then channel = 'PARTY' end
+  local channel = addon.GetInstanceChannel()
 
 	local req = ''
   local weakAuras = addon.GetWeakAuras()
@@ -68,8 +67,7 @@ end
 
 function addon.SendAddonsRequest()
 	if not (IsInRaid() or IsInGroup()) then return end
-  local channel = 'RAID'
-  if IsInGroup() then channel = 'PARTY' end
+  local channel = addon.GetInstanceChannel()
 
 	local req = ''
   local addons = addon.GetAddons()

@@ -95,9 +95,9 @@ end
 function module.options:Load()
 	local LISTFRAME_WIDTH = 610
 	local LISTFRAME_HEIGHT = 455
-	local VERTICALNAME_WIDTH = 20
-	local VERTICALNAME_COUNT = 24
 	local LINE_HEIGHT, LINE_NAME_WIDTH = 16, 150
+	local VERTICALNAME_WIDTH = 20
+	local VERTICALNAME_COUNT = 20
 
 	roster = AstralUI:ScrollFrame(self):Point(0, -80):Size(LISTFRAME_WIDTH, LISTFRAME_HEIGHT)
 	updateButton = AstralUI:Button(self, UPDATE):Point('BOTTOMRIGHT', -15, 15):Size(130, 20):OnClick(function(self)
@@ -185,7 +185,7 @@ function module.options:Load()
 	end
 
 	raidNames = CreateFrame('FRAME', nil, self)
-	for i=1,VERTICALNAME_COUNT do
+	for i = 1,VERTICALNAME_COUNT do
 		raidNames[i] = AstralUI:Text(raidNames, 'raid'..i, 9):Point('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0):Color(1, 1, 1)
 		local f = CreateFrame('FRAME', nil, self)
 		f:SetPoint('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0)
@@ -373,5 +373,7 @@ function module.options:OnShow()
 end
 
 function addon.UpdateRosterPage()
-	roster:Update()
+	if roster and roster:IsShown() then
+		roster:Update()
+	end
 end
