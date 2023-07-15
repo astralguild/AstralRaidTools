@@ -7,10 +7,8 @@ AstralRaidEvents.dtbl = {}
 -- @return Event object with method to be called on event fire
 function AstralRaidEvents:NewObject(f, name)
 	local obj = {}
-
 	obj.name = name or 'anonymous'
 	obj.method = f
-
 	return obj
 end
 
@@ -21,7 +19,6 @@ end
 function AstralRaidEvents:Register(event, f, name)
 	if self:IsRegistered(event, name) then return end -- Event already registered with same name, bail out
 	local obj = self:NewObject(f, name)
-
 	if not self.dtbl[event] then
 		self.dtbl[event] = {}
 		AstralRaidEvents:RegisterEvent(event)
@@ -49,7 +46,6 @@ end
 function AstralRaidEvents:IsRegistered(event, name)
 	local objs = self.dtbl[event]
 	if not objs then return false end
-
 	if objs[name] then
 		return true
 	else
@@ -64,7 +60,6 @@ end
 function AstralRaidEvents:GetRegisteredFunction(event, handler)
 	local objs = self.dtbl[event]
 	if not objs then return end
-
 	if objs[handler] then
 		return objs[handler].method
 	else

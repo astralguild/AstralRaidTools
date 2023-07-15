@@ -1,6 +1,6 @@
 local _, addon = ...
 
-local SendAddonMessage, SendChatMessage = C_ChatInfo.SendAddonMessage, SendChatMessage
+local SendAddonMessage = C_ChatInfo.SendAddonMessage
 local LibDeflate = LibStub:GetLibrary("LibDeflate")
 
 -- Protocol constants
@@ -12,11 +12,8 @@ local CHUNKED_EOL = '##F##$'
 -- Creates a random variance between +- [.001, .100] to help prevent
 -- disconnects from too many addon messages
 -- Borrowed from Astral Keys Communications.lua
-local SEND_VARIANCE = ((-1)^math.random(1,2)) * math.random(1, 100)/ 10^3 -- random number to space out messages being sent between clients
-local SEND_INTERVAL = {}
-SEND_INTERVAL[1] = 0.2 + SEND_VARIANCE
-SEND_INTERVAL[2] = 1 + SEND_VARIANCE
-local SEND_INTERVAL_SETTING = 1
+local SEND_VARIANCE = ((-1)^math.random(1,2)) * math.random(1, 100)/ 10^3
+local SEND_INTERVAL = 0.2 + SEND_VARIANCE
 
 local msgs, newMsg, delMsg
 
@@ -24,7 +21,7 @@ AstralRaidComms = CreateFrame('FRAME', 'AstralRaidComms')
 AstralRaidComms.PREFIX = PREFIX
 
 function AstralRaidComms:Init()
-	C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
+	self.registered = C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
 
 	self:SetScript('OnEvent', self.OnEvent)
 	self:SetScript('OnUpdate', self.OnUpdate)
@@ -44,9 +41,7 @@ end
 
 function AstralRaidComms:RegisterPrefix(channel, prefix, f)
 	channel = channel or 'RAID'
-
-	if self:IsPrefixRegistered(channel, prefix) then return end -- Did we register something to the same channel with the same name?
-
+	if self:IsPrefixRegistered(channel, prefix) then return end
 	if not self.dtbl[channel] then self.dtbl[channel] = {} end
 	local obj = {}
 	obj.method = f
@@ -91,12 +86,10 @@ end
 
 function AstralRaidComms:OnUpdate(elapsed)
 	self.delay = self.delay + elapsed
-	if self.delay < SEND_INTERVAL[SEND_INTERVAL_SETTING] + self.loadDelay then
-		return
-	end
+	if self.delay < SEND_INTERVAL + self.loadDelay then return end
 	self.loadDelay = 0
 	self.delay = 0
-	if #self.queue < 1 then -- Don't have any messages to send
+	if #self.queue < 1 then -- no messages to send
 		self:Hide()
 		return
 	end
@@ -104,23 +97,9 @@ function AstralRaidComms:OnUpdate(elapsed)
 end
 
 function AstralRaidComms:NewMessage(prefix, text, channel, target)
-	if channel == 'GUILD' then
-		if not IsInGuild() then
-			return
-		end
-	end
-
-	if channel == 'RAID' then
-		if not IsInRaid() then
-			return
-		end
-	end
-
-	if channel == 'PARTY' then
-		if not IsInGroup() then
-			return
-		end
-	end
+	if channel == 'GUILD' and not IsInGuild() then return end
+	if channel == 'RAID' and not IsInRaid() then return end
+	if channel == 'PARTY' and not IsInGroup() then return end
 
 	local msg = newMsg()
 	msg.method = SendAddonMessage
@@ -132,18 +111,16 @@ function AstralRaidComms:NewMessage(prefix, text, channel, target)
 	--Let's add it to queue
 	self.queue[#self.queue + 1] = msg
 
-	if not self:IsShown() then
-		self:Show()
-	end
+	if not self:IsShown() then self:Show() end
 end
 
 function AstralRaidComms:SendMessage()
 	local msg = table.remove(self.queue, 1)
 	if msg[3] == 'WHISPER' then
-		if addon.IsFriendOnline(msg[4]) then -- Are they still logged into that toon
+		if addon.IsFriendOnline(msg[4]) then
 			msg.method(unpack(msg, 1, #msg))
 		end
-	else-- Guild/raid message, just send it
+	else
 		msg.method(unpack(msg, 1, #msg))
 		delMsg(msg)
 	end
@@ -186,6 +163,22 @@ function AstralRaidComms:DecodeChunkedAddonMessages(sender, message, func)
 		self.runningText[sender][prefix2] = nil
 		func(decompressed)
 	end
+end
+
+msgs = setmetatable({}, {__mode='k'})
+
+newMsg = function()
+	local msg = next(msgs)
+	if msg then
+		msgs[msg] = nil
+		return msg
+	end
+	return {}
+end
+
+delMsg = function(msg)
+	msg[1] = nil
+	msgs[msg] = true
 end
 
 -- Version/Addon/WA Checking
@@ -246,30 +239,15 @@ local function versionRequest(channel, ...)
 end
 
 AstralRaidComms:Init()
+
 AstralRaidComms:RegisterPrefix('RAID', 'waRequest', function(...) waRequest('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('PARTY', 'waRequest', function(...) waRequest('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'waRequest', function(...) waRequest('GUILD', ...) end)
+
 AstralRaidComms:RegisterPrefix('RAID', 'addonRequest', function(...) addonRequest('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('PARTY', 'addonRequest', function(...) addonRequest('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'addonRequest', function(...) addonRequest('GUILD', ...) end)
+
 AstralRaidComms:RegisterPrefix('RAID', 'versionRequest', function(...) versionRequest('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('PARTY', 'versionRequest', function(...) versionRequest('PARTY', ...) end)
 AstralRaidComms:RegisterPrefix('GUILD', 'versionRequest', function(...) versionRequest('GUILD', ...) end)
-
--- Message handling
-
-msgs = setmetatable({}, {__mode='k'})
-
-newMsg = function()
-	local msg = next(msgs)
-	if msg then
-		msgs[msg] = nil
-		return msg
-	end
-	return {}
-end
-
-delMsg = function(msg)
-	msg[1] = nil
-	msgs[msg] = true
-end

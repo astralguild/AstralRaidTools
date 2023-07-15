@@ -1,15 +1,5 @@
 local ADDON_NAME, addon = ...
 
-function addon.Console(...)
-	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', 'fff5e4a8'), ...)
-end
-
-function addon.PrintDebug(...)
-  if addon.Debug then
-    addon.Console(WrapTextInColorCode('D', 'C1E1C1FF'), ...)
-  end
-end
-
 function addon.TextureToText(textureName, widthInText, heightInText, textureWidth, textureHeight, l, r, t, b)
 	return '|T' .. textureName .. ':' .. (widthInText or 0) .. ':' .. (heightInText or 0) .. ':0:0:' .. textureWidth .. ':' .. textureHeight .. ':' ..
 		format('%d',l*textureWidth) .. ':' ..format('%d', r*textureWidth) .. ':' .. format ('%d',t*textureHeight) .. ':' .. format('%d', b*textureHeight) .. '|t'
@@ -539,27 +529,27 @@ do
 			edgeSize = 32,
 		})
 
-		self:SetScript("OnClick",OnClick)
-		self:SetScript("OnShow",OnShow)
-		self:SetScript("OnUpdate",OnUpdate)
+		self:SetScript('OnClick', OnClick)
+		self:SetScript('OnShow', OnShow)
+		self:SetScript('OnUpdate', OnUpdate)
 		return self
 	end
 	function templates:AstralDropDownListModernTemplate(parent)
-		local self = CreateFrame("Button",nil,parent)
-		self:SetFrameStrata("TOOLTIP")
+		local self = CreateFrame('Button',nil,parent)
+		self:SetFrameStrata('TOOLTIP')
 		self:EnableMouse(true)
 		self:Hide()
 
-		templates:Border(self,0,0,0,1,1)
+		templates:Border(self, 0, 0, 0, 1, 1)
 
-		self.Background = self:CreateTexture(nil,"BACKGROUND")
-		self.Background:SetColorTexture(0,0,0,.9)
-		self.Background:SetPoint("TOPLEFT")
-		self.Background:SetPoint("BOTTOMRIGHT")
+		self.Background = self:CreateTexture(nil, 'BACKGROUND')
+		self.Background:SetColorTexture(0, 0, 0, .9)
+		self.Background:SetPoint('TOPLEFT')
+		self.Background:SetPoint('BOTTOMRIGHT')
 
-		self:SetScript("OnClick",OnClick)
-		self:SetScript("OnShow",OnShow)
-		self:SetScript("OnUpdate",OnUpdate)
+		self:SetScript('OnClick', OnClick)
+		self:SetScript('OnShow', OnShow)
+		self:SetScript('OnUpdate', OnUpdate)
 		return self
 	end
 end

@@ -6,10 +6,11 @@ addon.CLIENT_VERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
 
 addon.Modules = {}
 addon.ModulesOptions = {}
-
 addon.A = {}
-
+addon.W = {}
 addon.mod = {}
+
+AstralRaidLibrary = {}
 
 function addon.mod:Event(event, ...)
 	return self[event](self, ...)
@@ -49,4 +50,53 @@ do
 
 		return m
 	end
+end
+
+function addon.Console(...)
+	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', 'fff5e4a8'), ...)
+end
+
+function addon.PrintDebug(...)
+  if addon.Debug then
+    addon.Console(WrapTextInColorCode('D', 'C1E1C1FF'), ...)
+  end
+end
+
+function AstralRaidLibrary:Console(...)
+	print(WrapTextInColorCode('[Astral]', '008888FF'), ...)
+end
+
+function AstralRaidLibrary:SendMessage(config, ...)
+	if config.officer then
+		SendChatMessage(..., 'OFFICER')
+	end
+	if config.raid then
+		SendChatMessage(..., 'RAID')
+	end
+	if config.console then
+		AstralRaidLibrary:Console(...)
+	end
+end
+
+function AstralRaidLibrary:RegisterWeakAura(name, prefix)
+	if not addon.W[name] then
+		addon.W[name] = {prefix = prefix}
+	end
+end
+
+function AstralRaidLibrary:IterateRoster()
+	local l = {}
+	for _, name, _, class, guid, rank, level, online, isDead, combatRole in addon.IterateRoster do
+		l[#l + 1] = {
+			name = name,
+			class = class,
+			guid = guid,
+			rank = rank,
+			level = level,
+			online = online,
+			isDead = isDead,
+			combatRole = combatRole,
+		}
+	end
+	return l
 end

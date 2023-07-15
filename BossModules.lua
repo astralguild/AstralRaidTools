@@ -218,6 +218,10 @@ local function initPrivateAuraAnchors()
 	privateAuraAnchors['LARGE'] = frame
 end
 
+function AstralRaidLibrary:L()
+	return log
+end
+
 local module = addon:New('Boss Modules', 'Boss Modules')
 local instanceDropdown, encounterList, setContent
 

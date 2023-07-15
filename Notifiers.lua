@@ -2,23 +2,20 @@ local _, addon = ...
 local L = addon.L
 
 local function auraTrigger(e, _, m, _, name, ...)
+	local encounterID = addon.Encounter.encounterID
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_AURA_APPLIED' then -- SPELL_AURA_APPLIED_DOSE for stacks
-		local auras = AstralRaidSettings.notifiers.encounters[addon.Encounter.encounterID].auras
+		local auras = AstralRaidSettings.notifiers.encounters[encounterID].auras
 		local spellID = select(7, ...)
-		local trigger
 		for auraSpellID, tracked in pairs(auras) do
 			if tracked and auraSpellID == spellID then
-				if not trigger then
-					trigger = {
-						spellID = spellID,
-						encounterID = addon.Encounter.encounterID,
-						encounterStart = addon.Encounter.start,
-						unit = UnitName(name),
-						date = date('%x'),
-						time = date('%H:%M:%S %p'),
-					}
-				end
-				return trigger
+				return {
+					spellID = spellID,
+					encounterID = encounterID,
+					encounterStart = addon.Encounter.start,
+					unit = UnitName(name),
+					date = date('%x'),
+					time = date('%H:%M:%S %p'),
+				}
 			end
 		end
   end
@@ -30,24 +27,21 @@ local function auraNotifier(trigger)
 end
 
 local function castTrigger(e, ...)
+	local encounterID = addon.Encounter.encounterID
   if e == 'UNIT_SPELLCAST_SUCCEEDED' then
-		local casts = AstralRaidSettings.notifiers.encounters[addon.Encounter.encounterID].casts
+		local casts = AstralRaidSettings.notifiers.encounters[encounterID].casts
 		local spellID = select(3, ...)
-		local trigger
 		for castSpellID, tracked in pairs(casts) do
 			if tracked and castSpellID == spellID then
-				if not trigger then
-					trigger = {
-						target = select(1, ...),
-						guid = select(2, ...),
-						spellID = spellID,
-						encounterID = addon.Encounter.encounterID,
-						encounterStart = addon.Encounter.start,
-						date = date('%x'),
-						time = date('%H:%M:%S %p'),
-					}
-				end
-				return trigger
+				return {
+					target = select(1, ...),
+					guid = select(2, ...),
+					spellID = spellID,
+					encounterID = encounterID,
+					encounterStart = addon.Encounter.start,
+					date = date('%x'),
+					time = date('%H:%M:%S %p'),
+				}
 			end
 		end
   end
@@ -75,6 +69,12 @@ local events = {
 	},
 }
 
+local function isTrackedEncounter()
+	if not (AstralRaidSettings.notifiers.general.isEnabled) then return false end
+	if not (addon.InEncounter and AstralRaidSettings.notifiers.encounters[addon.Encounter.encounterID]) then return false end
+	return true
+end
+
 local function handle(e, event, ...)
   local trigger = e.f(event, ...)
   if trigger then
@@ -83,16 +83,15 @@ local function handle(e, event, ...)
 end
 
 local function cleu(...)
-	if not (AstralRaidSettings.notifiers.general.isEnabled) then return end
-	if not (addon.InEncounter and AstralRaidSettings.notifiers.encounters[addon.Encounter.encounterID]) then return end
+	if not isTrackedEncounter() then return end
+	local info = CombatLogGetCurrentEventInfo()
   for _, e in pairs(events.cleu) do
-		handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', CombatLogGetCurrentEventInfo())
+		handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', info)
 	end
 end
 
 local function unitSpellcastSucceeded(...)
-	if not (AstralRaidSettings.notifiers.general.isEnabled) then return end
-	if not (addon.InEncounter and AstralRaidSettings.notifiers.encounters[addon.Encounter.encounterID]) then return end
+	if not isTrackedEncounter() then return end
   for _, e in pairs(events.unitSpellcastSucceeded) do
 		handle(e, 'UNIT_SPELLCAST_SUCCEEDED', ...)
 	end
@@ -100,7 +99,6 @@ end
 
 AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidNotifiersCLEU')
 AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', unitSpellcastSucceeded, 'astralRaidNotifiersUnitSpellcastSucceeded')
-
 
 local module = addon:New(L['NOTIFIERS'], L['NOTIFIERS'], true)
 local enableCheckbox, toConsoleCheckbox, toOfficerCheckbox, toRaidCheckbox, encounterList, specificHeader, instanceDropdown, encounterDetailsList
