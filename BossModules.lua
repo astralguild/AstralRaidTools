@@ -1,4 +1,4 @@
-local _, addon = ...
+local ADDON_NAME, addon = ...
 local L = addon.L
 
 local ABERRUS = 2166
@@ -148,7 +148,7 @@ end
 
 bdgNelthShowHeartIcon = function()
 	local m = bossModules[NELTH]
-	if addon.Encounter.difficultyID ~= 16 or (not addon.Debug) then return end
+	if addon.Encounter.difficultyID ~= 16 and not addon.Debug then return end
 	if m.settings.showIcon then
 		m.frame:Show()
 		C_Timer.After(7, function()
@@ -210,17 +210,31 @@ AstralRaidEvents:Register('ENCOUNTER_START', function(...) handle('ENCOUNTER_STA
 
 local function initPrivateAuraAnchors()
 	local frame = CreateFrame('FRAME', nil, UIParent)
-	frame:SetHeight(AstralRaidSettings.bossModules.priavteAuras.largeIconSize)
-	frame:SetWidth(AstralRaidSettings.bossModules.priavteAuras.largeIconSize)
+	frame:SetHeight(AstralRaidSettings.bossModules.privateAuras.largeIconSize)
+	frame:SetWidth(AstralRaidSettings.bossModules.privateAuras.largeIconSize)
 	frame:SetAlpha(0.75)
 	frame:SetPoint('BOTTOM', UIParent, 'CENTER', 0, 20)
 	frame:Hide()
 	privateAuraAnchors['LARGE'] = frame
+
+	-- frame = CreateFrame('FRAME', nil, UIParent)
+	-- frame:SetHeight(AstralRaidSettings.bossModules.privateAuras.smallIconSize)
+	-- frame:SetWidth(AstralRaidSettings.bossModules.privateAuras.smallIconSize)
+	-- frame:SetAlpha(0.75)
+	-- frame:SetPoint('BOTTOM', UIParent, 'CENTER', 0, 20)
+	-- frame:Hide()
+	-- privateAuraAnchors['SMALL'] = frame
 end
 
 function AstralRaidLibrary:L()
 	return log
 end
+
+AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
+	if addonName == ADDON_NAME then
+		initPrivateAuraAnchors()
+	end
+end, 'AstralRaidBossModulesInit')
 
 local module = addon:New('Boss Modules', 'Boss Modules')
 local instanceDropdown, encounterList, setContent
@@ -402,8 +416,6 @@ function module.options:Load()
 	end
 	if selected then instanceDropdownSetValue(_, selected) end
 	updateList()
-
-	initPrivateAuraAnchors()
 end
 
 function module.options:OnShow()

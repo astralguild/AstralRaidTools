@@ -58,9 +58,9 @@ L['ON_TIME_PULL']  = 'On-Time Pull'
 -- Notifiers
 L['ENABLE_NOTIFIER'] = 'Enable Notifier'
 L['ENCOUNTER_NOTIFIERS'] = 'Encounter Notifiers'
-L['SPECIFIC_NOTIFIERS'] = 'Specific Notifiers'
 L['AURA_NOTIFIER_MSG'] = '%s affected by %s at %s'
 L['CAST_NOTIFIER_MSG'] = '%s used %s (target: %s) at %s'
+L['NOTIFIERS_DESC'] = 'Notifiers are customizable per-spell mid-encounter chat panel notifications.'
 
 -- BossModules
 L['BDG_NELTH_HEART_TITLE'] = 'BDG Heart Macro Detection'

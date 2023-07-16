@@ -105,7 +105,7 @@ local enableCheckbox, toConsoleCheckbox, toOfficerCheckbox, toRaidCheckbox, enco
 local currentInstance = nil
 
 function module.options:Load()
-  local header = AstralUI:Text(self, L['ENCOUNTER_NOTIFIERS']):Point('TOPLEFT', 0, 0):Shadow()
+  local header = AstralUI:Text(self, L['NOTIFIERS']):Point('TOPLEFT', 0, 0):Shadow()
 
   enableCheckbox = AstralUI:Check(self, ENABLE):Point('TOPLEFT', header, 'BOTTOMLEFT', 0, -20):OnClick(function(self)
     AstralRaidSettings.notifiers.general.isEnabled = self:GetChecked()
@@ -123,7 +123,9 @@ function module.options:Load()
     AstralRaidSettings.notifiers.general.toRaid = self:GetChecked()
   end)
 
-  specificHeader = AstralUI:Text(self, L['SPECIFIC_NOTIFIERS']):Point('TOPLEFT', enableCheckbox, 'BOTTOMLEFT', 0, -20):Size(200, 12)
+	local desc = AstralUI:Text(self, L['NOTIFIERS_DESC']):Point('TOPLEFT', enableCheckbox, 'BOTTOMLEFT', 0, -10):FontSize(9):Shadow()
+
+  specificHeader = AstralUI:Text(self, L['ENCOUNTER_NOTIFIERS']):Point('TOPLEFT', desc, 'BOTTOMLEFT', 0, -20):Size(200, 12)
 
   local function updateList()
 		if not currentInstance then return end

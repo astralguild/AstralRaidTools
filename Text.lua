@@ -204,15 +204,17 @@ local function enterInstance(...)
 end
 
 local function enterCombat(...)
+  hideRemindersForCombat()
+  if not events.enterCombat then return end
   for _, e in pairs(events.enterCombat) do
     handle(e, 'PLAYER_ENTER_COMBAT', ...)
-    hideRemindersForCombat()
   end
 end
 
 local function leaveCombat(...)
+  showRemindersAfterCombat()
+  if not events.leaveCombat then return end
   for _, e in pairs(events.leaveCombat) do
-    showRemindersAfterCombat()
     handle(e, 'PLAYER_LEAVE_COMBAT', ...)
   end
 end

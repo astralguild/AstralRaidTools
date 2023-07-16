@@ -139,7 +139,7 @@ do
 	local function close(self)
 		self:GetParent():Hide()
 	end
-	function templates:AstralOptionsFrame(parent)
+	function templates:AstralOptionsFrame(parent, logoPath)
 		local self = CreateFrame('FRAME', nil, parent, BackdropTemplateMixin and 'BackdropTemplate')
 
 		self:SetSize(850, 650)
@@ -180,7 +180,7 @@ do
 		local logo = menuBar:CreateTexture(nil, 'ARTWORK')
 		logo:SetAlpha(0.8)
 		logo:SetSize(32, 32)
-		logo:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\logo.png', nil, nil, 'TRILINEAR')
+		logo:SetTexture(logoPath or ('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\logo.png'), nil, nil, 'TRILINEAR')
 		logo:SetPoint('BOTTOMLEFT', menuBar, 'BOTTOMLEFT', 10, 10)
 		self.Logo = logo
 
@@ -516,8 +516,8 @@ do
 		self.Backdrop = CreateFrame('Frame',nil,self, BackdropTemplateMixin and 'BackdropTemplate')
 		self.Backdrop:SetAllPoints()
 		self.Backdrop:SetBackdrop({
-			bgFile='Interface\\DialogFrame\\UI-DialogBox-Background-Dark',
-			edgeFile='Interface\\DialogFrame\\UI-DialogBox-Border',
+			bgFile = 'Interface\\DialogFrame\\UI-DialogBox-Background-Dark',
+			edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Border',
 			tile = true,
 			insets = {
 				left = 11,
@@ -557,16 +557,16 @@ end
 do
 	local function OnEnter(self)
 		local parent = self:GetParent()
-		local myscript = parent:GetScript("OnEnter")
-		if myscript then
-			myscript(parent)
+		local s = parent:GetScript('OnEnter')
+		if s then
+			s(parent)
 		end
 	end
 	local function OnLeave(self)
 		local parent = self:GetParent()
-		local myscript = parent:GetScript("OnLeave")
-		if myscript then
-			myscript(parent)
+		local s = parent:GetScript('OnLeave')
+		if s then
+			s(parent)
 		end
 	end
 	local function OnClick(self)
@@ -574,7 +574,7 @@ do
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	function templates:AstralUIChatDownButtonTemplate(parent)
-		local self = CreateFrame('Button',nil,parent)
+		local self = CreateFrame('Button', nil, parent)
 		self:SetSize(24,24)
 
 		self.NormalTexture = self:CreateTexture()
@@ -617,85 +617,85 @@ do
 		local self = CreateFrame('FRAME',nil,parent)
 		self:SetSize(40,32)
 
-		self.Left = self:CreateTexture(nil,"ARTWORK")
-		self.Left:SetPoint("TOPLEFT",0,17)
-		self.Left:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
+		self.Left = self:CreateTexture(nil, 'ARTWORK')
+		self.Left:SetPoint('TOPLEFT', 0, 17)
+		self.Left:SetTexture('Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame')
 		self.Left:SetSize(25,64)
 		self.Left:SetTexCoord(0,0.1953125,0,1)
 
-		self.Middle = self:CreateTexture(nil,"ARTWORK")
-		self.Middle:SetPoint("LEFT",self.Left,"RIGHT")
-		self.Middle:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
-		self.Middle:SetSize(115,64)
-		self.Middle:SetTexCoord(0.1953125,0.8046875,0,1)
+		self.Middle = self:CreateTexture(nil, 'ARTWORK')
+		self.Middle:SetPoint('LEFT', self.Left, 'RIGHT')
+		self.Middle:SetTexture('Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame')
+		self.Middle:SetSize(115, 64)
+		self.Middle:SetTexCoord(0.1953125, 0.8046875, 0, 1)
 
-		self.Right = self:CreateTexture(nil,"ARTWORK")
-		self.Right:SetPoint("LEFT",self.Middle,"RIGHT")
-		self.Right:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
-		self.Right:SetSize(25,64)
-		self.Right:SetTexCoord(0.8046875,1,0,1)
+		self.Right = self:CreateTexture(nil, 'ARTWORK')
+		self.Right:SetPoint('LEFT', self.Middle, 'RIGHT')
+		self.Right:SetTexture('Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame')
+		self.Right:SetSize(25, 64)
+		self.Right:SetTexCoord(0.8046875, 1, 0, 1)
 
-		self.Text = self:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+		self.Text = self:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
 		self.Text:SetWordWrap(false)
-		self.Text:SetJustifyH("RIGHT")
-		self.Text:SetSize(0,10)
-		self.Text:SetPoint("RIGHT",self.Right,-43,2)
+		self.Text:SetJustifyH('RIGHT')
+		self.Text:SetSize(0, 10)
+		self.Text:SetPoint('RIGHT', self.Right, -43, 2)
 
-		self.Icon = self:CreateTexture(nil,"OVERLAY")
+		self.Icon = self:CreateTexture(nil, 'OVERLAY')
 		self.Icon:Hide()
-		self.Icon:SetPoint("LEFT",30,2)
-		self.Icon:SetSize(16,16)
+		self.Icon:SetPoint('LEFT', 30, 2)
+		self.Icon:SetSize(16, 16)
 
-		self.Button = AstralUI:Template("AstralUIChatDownButtonTemplate",self)
-		self.Button:SetPoint("TOPRIGHT",self.Right,-16,-18)
+		self.Button = AstralUI:Template('AstralUIChatDownButtonTemplate', self)
+		self.Button:SetPoint('TOPRIGHT', self.Right, -16, -18)
 		self.Button:SetMotionScriptsWhileDisabled(true)
 
-		self:SetScript("OnHide",OnHide)
+		self:SetScript('OnHide', OnHide)
 
 		return self
 	end
 	function templates:AstralDropDownButtonModernTemplate(parent)
-		local self = AstralUI:Template("AstralUIChatDownButtonTemplate",parent)
-		self:SetSize(16,16)
+		local self = AstralUI:Template('AstralUIChatDownButtonTemplate', parent)
+		self:SetSize(16, 16)
 		self:SetMotionScriptsWhileDisabled(true)
 
-		self.NormalTexture:SetTexture("Interface\\AddOns\\"..ADDON_NAME.."\\media\\DiesalGUIcons16x256x128")
-		self.NormalTexture:SetTexCoord(0.25,0.3125,0.5,0.625)
-		self.NormalTexture:SetVertexColor(1,1,1,.7)
-		self.NormalTexture:SetSize(0,0)
+		self.NormalTexture:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\media\\DiesalGUIcons16x256x128')
+		self.NormalTexture:SetTexCoord(0.25, 0.3125, 0.5, 0.625)
+		self.NormalTexture:SetVertexColor(1, 1, 1, .7)
+		self.NormalTexture:SetSize(0, 0)
 		self.NormalTexture:ClearAllPoints()
-		self.NormalTexture:SetPoint("TOPLEFT",-5,2)
-		self.NormalTexture:SetPoint("BOTTOMRIGHT",5,-2)
+		self.NormalTexture:SetPoint('TOPLEFT', -5, 2)
+		self.NormalTexture:SetPoint('BOTTOMRIGHT', 5, -2)
 
-		self.PushedTexture:SetTexture("Interface\\AddOns\\"..ADDON_NAME.."\\media\\DiesalGUIcons16x256x128")
+		self.PushedTexture:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\media\\DiesalGUIcons16x256x128')
 		self.PushedTexture:SetTexCoord(0.25,0.3125,0.5,0.625)
 		self.PushedTexture:SetVertexColor(1,1,1,1)
 		self.PushedTexture:SetSize(0,0)
 		self.PushedTexture:ClearAllPoints()
-		self.PushedTexture:SetPoint("TOPLEFT",-5,1)
-		self.PushedTexture:SetPoint("BOTTOMRIGHT",5,-3)
+		self.PushedTexture:SetPoint('TOPLEFT',-5,1)
+		self.PushedTexture:SetPoint('BOTTOMRIGHT',5,-3)
 
-		self.DisabledTexture:SetTexture("Interface\\AddOns\\"..ADDON_NAME.."\\media\\DiesalGUIcons16x256x128")
+		self.DisabledTexture:SetTexture('Interface\\AddOns\\'..ADDON_NAME..'\\media\\DiesalGUIcons16x256x128')
 		self.DisabledTexture:SetTexCoord(0.25,0.3125,0.5,0.625)
 		self.DisabledTexture:SetVertexColor(.4,.4,.4,1)
 		self.DisabledTexture:SetSize(0,0)
 		self.DisabledTexture:ClearAllPoints()
-		self.DisabledTexture:SetPoint("TOPLEFT",-5,2)
-		self.DisabledTexture:SetPoint("BOTTOMRIGHT",5,-2)
+		self.DisabledTexture:SetPoint('TOPLEFT',-5,2)
+		self.DisabledTexture:SetPoint('BOTTOMRIGHT',5,-2)
 
 		self.HighlightTexture:SetColorTexture(1,1,1,.3)
 		self.HighlightTexture:SetSize(0,0)
 		self.HighlightTexture:ClearAllPoints()
-		self.HighlightTexture:SetPoint("TOPLEFT")
-		self.HighlightTexture:SetPoint("BOTTOMRIGHT")
+		self.HighlightTexture:SetPoint('TOPLEFT')
+		self.HighlightTexture:SetPoint('BOTTOMRIGHT')
 		self:SetHighlightTexture(self.HighlightTexture)
 
 		templates:Border(self,0.24,0.25,0.30,1,1)
 
-		self.Background = self:CreateTexture(nil,"BACKGROUND")
+		self.Background = self:CreateTexture(nil,'BACKGROUND')
 		self.Background:SetColorTexture(0,0,0,.3)
-		self.Background:SetPoint("TOPLEFT")
-		self.Background:SetPoint("BOTTOMRIGHT")
+		self.Background:SetPoint('TOPLEFT')
+		self.Background:SetPoint('BOTTOMRIGHT')
 
 		return self
 	end
@@ -948,7 +948,7 @@ do
 		end
 		return self
 	end
-	local function Widget_Tooltip(self,text)
+	local function Widget_Tooltip(self, text)
 		self:SetScript("OnEnter", AstralUI.Tooltip.Std)
 		self:SetScript("OnLeave", AstralUI.Tooltip.Hide)
 		self.tooltipText = text
@@ -965,8 +965,8 @@ do
 			self:RegisterForClicks('LeftButtonDown')
 		end
 		Mod(self,
-			'Icon',Widget_Icon,
-			'Tooltip',Widget_Tooltip
+			'Icon', Widget_Icon,
+			'Tooltip', Widget_Tooltip
 		)
 		return self
 	end
@@ -3471,10 +3471,9 @@ do
 
 		return self
 	end
-	function AstralUI:ScrollList(parent,list)
+	function AstralUI:ScrollList(parent, list)
 		local self = CreateScrollList(parent, list)
 		self:Update()
-
 		return self
 	end
 	function AstralUI:ScrollTableList(parent, ...)
@@ -3484,16 +3483,13 @@ do
 			self.T[i] = select(i, ...)
 		end
 		self:Update()
-
 		return self
 	end
 	function AstralUI:ScrollCheckList(parent, list)
 		local self = CreateScrollList(parent, list)
 		self.C = {}
 		self.isCheckList = true
-
 		self:Update()
-
 		return self
 	end
 end

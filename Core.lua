@@ -84,7 +84,7 @@ function AstralRaidLibrary:RegisterWeakAura(name, prefix)
 	end
 end
 
-function AstralRaidLibrary:IterateRoster()
+function AstralRaidLibrary:GetRoster()
 	local l = {}
 	for _, name, _, class, guid, rank, level, online, isDead, combatRole in addon.IterateRoster do
 		l[#l + 1] = {
@@ -99,4 +99,12 @@ function AstralRaidLibrary:IterateRoster()
 		}
 	end
 	return l
+end
+
+function AstralRaidLibrary:GetBossAbilities(...)
+	return addon.GetBossAbilities(...)
+end
+
+function AstralRaidLibrary:GetPlayerRole()
+	return addon.GetPlayerRole()
 end

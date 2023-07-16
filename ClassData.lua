@@ -41,6 +41,7 @@ addon.ClassData.ClassSpecializationIcons = {
 	[581] = 'Interface\\Icons\\ability_demonhunter_spectank',
 	[1467] = 'Interface\\Icons\\classicon_evoker_devastation',
 	[1468] = 'Interface\\Icons\\classicon_evoker_preservation',
+	[1473] = 'Interface\\Icons\\classicon_evoker_augmentation',
 }
 
 addon.ClassData.ClassList = {
@@ -72,7 +73,7 @@ addon.ClassSpecializationList = {
 	['MONK'] = {268, 269, 270},
 	['DRUID'] = {102, 103, 104, 105},
 	['DEMONHUNTER'] = {577, 581},
-	['EVOKER'] = {1467,1468},
+	['EVOKER'] = {1467, 1468, 1473},
 }
 
 addon.ClassData.ClassArmorType = {
@@ -130,6 +131,7 @@ addon.ClassData.ClassSpecializationRole = {
 	[581] = 'TANK',
 	[1467] = 'RANGE',
 	[1468] = 'HEAL',
+	[1473] = 'RANGE',
 }
 
 addon.ClassData.ClassID = {

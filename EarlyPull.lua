@@ -3,7 +3,7 @@ local L = addon.L
 
 -- Adapted/copied from Early Pull weakaura (https://wago.io/TyN8l9eWg/1)
 
-local EARLY_PULL_PREFIX_2 = 'earlyPullSync'
+local EARLY_PULL_PREFIX = 'earlyPullSync'
 
 local sourceFlagMask = COMBATLOG_OBJECT_CONTROL_MASK
 local sourceFlagFilter = COMBATLOG_OBJECT_CONTROL_PLAYER
@@ -230,7 +230,7 @@ local function sendSync(syncTable)
 	local channel = addon.GetInstanceChannel()
 	if not channel then return end
 	local msg = table.concat(syncTable, '\t')
-	AstralRaidComms:NewMessage(AstralRaidComms.PREFIX, EARLY_PULL_PREFIX_2 .. ' ' .. msg, channel)
+	AstralRaidComms:NewMessage(AstralRaidComms.PREFIX, EARLY_PULL_PREFIX .. ' ' .. msg, channel)
 end
 
 local function onSync(channel, msg, sender)
@@ -585,26 +585,23 @@ end
 local function cleu(_, event, _, sourceGUID, sourceName, sourceFlags, _, destGUID, destName, destFlags, _, spellID, _, _, auraType)
 	if not AstralRaidSettings.earlypull.general.isEnabled then return end
 	if not (IsInGroup() or IsInRaid()) then return end
+	if not addon.InInstance then return end
 
-	if event == 'SPELL_DAMAGE' or event == 'SPELL_MISSED' or event == 'SPELL_PERIODIC_DAMAGE'
-		or event == 'SWING_DAMAGE' or event == 'RANGE_DAMAGE' or event == 'RANGE_MISSED'
-		or event == 'SPELL_AURA_APPLIED' or event == 'SPELL_CAST_SUCCESS' or event == 'SPELL_SUMMON' then
-		-- summons are used for tracking pet owners, not pull detection
-		if event == 'SPELL_SUMMON' then
-			if not destGUID then return end
-			summons[destGUID] = sourceName
-			local counter = summons.counter + 1
-			if counter >= 1000 then
-				summons = summons2
-				summons2 = summons
-				wipe(summons)
-				summons.counter = 0
-			else
-				summons.counter = counter
-			end
-			return
+	if event == 'SPELL_SUMMON' then -- summons are used for tracking pet owners, not pull detection
+		if not destGUID then return end
+		summons[destGUID] = sourceName
+		local counter = summons.counter + 1
+		if counter >= 1000 then
+			summons = summons2
+			summons2 = summons
+			wipe(summons)
+			summons.counter = 0
+		else
+			summons.counter = counter
 		end
-
+	elseif event == 'SPELL_DAMAGE' or event == 'SPELL_MISSED' or event == 'SPELL_PERIODIC_DAMAGE'
+		or event == 'SWING_DAMAGE' or event == 'RANGE_DAMAGE' or event == 'RANGE_MISSED'
+		or event == 'SPELL_AURA_APPLIED' or event == 'SPELL_CAST_SUCCESS' then
 		if not (sourceGUID and destGUID) or (event == 'SPELL_AURA_APPLIED' and auraType ~= 'DEBUFF') then return end
 		if bit.band(sourceFlags, sourceFlagMask) ~= sourceFlagFilter then return end
 
@@ -649,7 +646,6 @@ local function encounterStart(encounterID, encounterName)
 		encounterName = encounterName,
 	}
 	C_Timer.After(1, afterPull)
-
 	scanAllBosses()
 end
 
@@ -665,13 +661,13 @@ AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', playerEnteringWorld, 'astralR
 AstralRaidEvents:Register('CHAT_MSG_ADDON', chatMsgAddon, 'astralRaidEarlyPullChatMsgAddon')
 AstralRaidEvents:Register('UNIT_THREAT_LIST_UPDATE', unitThreatListUpdate, 'astralRaidEarlyPullUnitThreatListUpdate')
 AstralRaidEvents:Register('UNIT_TARGET', unitTarget, 'astralRaidEarlyPullUnitTarget')
-AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function() cleu(GetCurrentCombatTextEventInfo()) end, 'astralRaidEarlyPullCLEU')
+AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function() cleu(CombatLogGetCurrentEventInfo()) end, 'astralRaidEarlyPullCLEU')
 AstralRaidEvents:Register('ENCOUNTER_START', encounterStart, 'astralRaidEarlyPullEncounterStart')
 AstralRaidEvents:Register('INSTANCE_ENCOUNTER_ENGAGE_UNIT', instanceEncounterEngageUnit, 'astralRaidEarlyPullInstanceEncounterEngageUnit')
 
-AstralRaidComms:RegisterPrefix('RAID', EARLY_PULL_PREFIX_2, function(...) onSync('RAID', ...) end)
-AstralRaidComms:RegisterPrefix('PARTY', EARLY_PULL_PREFIX_2, function(...) onSync('PARTY', ...) end)
-AstralRaidComms:RegisterPrefix('INSTANCE_CHAT', EARLY_PULL_PREFIX_2, function(...) onSync('INSTANCE_CHAT', ...) end)
+AstralRaidComms:RegisterPrefix('RAID', EARLY_PULL_PREFIX, function(...) onSync('RAID', ...) end)
+AstralRaidComms:RegisterPrefix('PARTY', EARLY_PULL_PREFIX, function(...) onSync('PARTY', ...) end)
+AstralRaidComms:RegisterPrefix('INSTANCE_CHAT', EARLY_PULL_PREFIX, function(...) onSync('INSTANCE_CHAT', ...) end)
 
 -- addon.AddDefaultSettings('earlypull', 'announce', {earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1})
 
