@@ -175,7 +175,7 @@ local function noReleaseReminder(e, ...)
 end
 
 AstralRaidReminders = {
-  ['eatFood'] = {text = L['EAT_FOOD'], sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu'}, func = eatFoodReminder},
+  ['eatFood'] = {text = L['EAT_FOOD'], sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu', 'leaveCombat'}, func = eatFoodReminder},
   ['cauldronDown'] = {text = L['CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = cauldronReminder},
   ['repairDown'] =  {text = L['REPAIR'], sound = 2917320, callbacks = {'enterInstance', 'cleu'}, func = repairReminder},
   ['healthstones'] = {text = L['GRAB_HEALTHSTONES'], sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder},
@@ -216,37 +216,37 @@ function module.options:Load()
   end
   table.insert(sounds, NONE)
 
-	local function fontDropdownSetValue(_, arg1)
-		AstralUI:DropDownClose()
-		fontDropdown:SetText(arg1)
+  local function fontDropdownSetValue(_, arg1)
+    AstralUI:DropDownClose()
+    fontDropdown:SetText(arg1)
     AstralRaidSettings.general.font.name = arg1
-		addon.UpdateTextsFonts()
-	end
+    addon.UpdateTextsFonts()
+  end
 
-	local function soundDropdownSetValue(_, sound, rName)
-		AstralUI:DropDownClose()
+  local function soundDropdownSetValue(_, sound, rName)
+    AstralUI:DropDownClose()
     if sound and sound ~= NONE then
       local path = addon.SharedMedia:Fetch('sound', sound, true)
       PlaySoundFile(path or sound)
     end
     AstralRaidSettings.texts.sounds[rName] = sound
-		reminderWidgets[rName].soundDropdown:SetText(sound)
-	end
+    reminderWidgets[rName].soundDropdown:SetText(sound)
+  end
 
   -- Start UI
 
   local generalHeader = AstralUI:Text(self, L['REMINDERS_OPTIONS']):Point('TOPLEFT', 0, 0):Shadow()
 
-	fontDropdown = AstralUI:DropDown(self, 350, 10):Size(320):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):AddText(string.format('|cffffce00%s:', L['FONT']))
-	for i = 1, #fonts do
-		local info = {}
-		fontDropdown.List[i] = info
-		info.text = fonts[i]
-		info.arg1 = fonts[i]
-		info.func = fontDropdownSetValue
-		info.font = addon.SharedMedia:Fetch('font', fonts[i], true) or fonts[i]
-		info.justifyH = 'CENTER'
-	end
+  fontDropdown = AstralUI:DropDown(self, 350, 10):Size(320):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):AddText(string.format('|cffffce00%s:', L['FONT']))
+  for i = 1, #fonts do
+    local info = {}
+    fontDropdown.List[i] = info
+    info.text = fonts[i]
+    info.arg1 = fonts[i]
+    info.func = fontDropdownSetValue
+    info.font = addon.SharedMedia:Fetch('font', fonts[i], true) or fonts[i]
+    info.justifyH = 'CENTER'
+  end
 
   fontSizeSlider = AstralUI:Slider(self, L['FONT_SIZE']):Size(200):Point('LEFT', fontDropdown, 'RIGHT', 10, 0):Range(36, 120)
 
@@ -271,7 +271,7 @@ function module.options:Load()
   AstralUI:Button(self, L['TEST_REMINDERS']):Point('LEFT', inPartyCheckbox, 'RIGHT', 445, 0):Size(130,20):OnClick(function(self)
     testReminders = not testReminders
     addon.TestTexts(testReminders, 5)
-	end)
+  end)
 
   local specificHeader = AstralUI:Text(self, L['SPECIFIC_REMINDERS']):Point('TOPLEFT', inPartyCheckbox, 'BOTTOMLEFT', 0, -20)
   reminderWidgets = {}
@@ -315,11 +315,11 @@ function module.options:OnShow()
     r.enableCheck:SetChecked(AstralRaidSettings.texts.enabled[name])
   end
 
-	fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)
-		event = event - event%1
-		AstralRaidSettings.general.font.size = event
-		addon.UpdateTextsFonts()
-		self.tooltipText = event
-		self:tooltipReload(self)
-	end)
+  fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)
+    event = event - event%1
+    AstralRaidSettings.general.font.size = event
+    addon.UpdateTextsFonts()
+    self.tooltipText = event
+    self:tooltipReload(self)
+  end)
 end

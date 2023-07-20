@@ -1,5 +1,7 @@
 local ADDON_NAME, addon = ...
 
+ASTRAL_RAID_TOOLS = 'Astral Raid Tools'
+
 LibStub('AceAddon-3.0'):NewAddon(addon, ADDON_NAME, 'AceConsole-3.0')
 
 addon.CLIENT_VERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
@@ -61,6 +63,8 @@ function addon.PrintDebug(...)
     addon.Console(WrapTextInColorCode('D', 'C1E1C1FF'), ...)
   end
 end
+
+-- WA Library Hooks
 
 function AstralRaidLibrary:Console(...)
 	print(WrapTextInColorCode('[Astral]', '008888FF'), ...)

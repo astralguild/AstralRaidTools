@@ -21,221 +21,210 @@ AstralRaidComms = CreateFrame('FRAME', 'AstralRaidComms')
 AstralRaidComms.PREFIX = PREFIX
 
 function AstralRaidComms:Init()
-	self.registered = C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
+  self.registered = C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
 
-	self:SetScript('OnEvent', self.OnEvent)
-	self:SetScript('OnUpdate', self.OnUpdate)
+  self:SetScript('OnEvent', self.OnEvent)
+  self:SetScript('OnUpdate', self.OnUpdate)
 
-	self.dtbl = {}
-	self.queue = {}
+  self.dtbl = {}
+  self.queue = {}
 
-	self:Hide()
-	self.delay = 0
-	self.loadDelay = 0
-	self.sendIndex = 0
-	self.recIndex = {}
-	self.runningText = {}
+  self:Hide()
+  self.delay = 0
+  self.loadDelay = 0
+  self.sendIndex = 0
+  self.recIndex = {}
+  self.runningText = {}
 
-	self:RegisterEvent('CHAT_MSG_ADDON')
+  self:RegisterEvent('CHAT_MSG_ADDON')
 end
 
 function AstralRaidComms:RegisterPrefix(channel, prefix, f)
-	channel = channel or 'RAID'
-	if self:IsPrefixRegistered(channel, prefix) then return end
-	if not self.dtbl[channel] then self.dtbl[channel] = {} end
-	local obj = {}
-	obj.method = f
-	obj.prefix = prefix
-	table.insert(self.dtbl[channel], obj)
+  channel = channel or 'RAID'
+  if self:IsPrefixRegistered(channel, prefix) then return end
+  if not self.dtbl[channel] then self.dtbl[channel] = {} end
+  local obj = {}
+  obj.method = f
+  obj.prefix = prefix
+  table.insert(self.dtbl[channel], obj)
 end
 
 function AstralRaidComms:UnregisterPrefix(channel, prefix)
-	local objs = self.dtbl[channel]
-	if not objs then return end
-	for id, obj in pairs(objs) do
-		if obj.prefix == prefix then
-			objs[id] = nil
-			break
-		end
-	end
+  local objs = self.dtbl[channel]
+  if not objs then return end
+  for id, obj in pairs(objs) do
+    if obj.prefix == prefix then
+      objs[id] = nil
+      break
+    end
+  end
 end
 
 function AstralRaidComms:IsPrefixRegistered(channel, prefix)
-	local objs = self.dtbl[channel]
-	if not objs then return false end
-	for _, obj in pairs(objs) do
-		if obj.prefix == prefix then
-			return true
-		end
-	end
-	return false
+  local objs = self.dtbl[channel]
+  if not objs then return false end
+  for _, obj in pairs(objs) do
+    if obj.prefix == prefix then
+      return true
+    end
+  end
+  return false
 end
 
 function AstralRaidComms:OnEvent(event, prefix, msg, channel, sender)
-	if event ~= 'CHAT_MSG_ADDON' then return end
-	if prefix ~= PREFIX then return end
-	local objs = self.dtbl[channel]
-	if not objs then return end
-	local arg, _ = strsplit(' ', msg, 2)
-	for _, obj in pairs(objs) do
-		if obj.prefix == arg then
-			obj.method(msg, sender)
-		end
-	end
+  if event ~= 'CHAT_MSG_ADDON' then return end
+  if prefix ~= PREFIX then return end
+  local objs = self.dtbl[channel]
+  if not objs then return end
+  local arg, _ = strsplit(' ', msg, 2)
+  for _, obj in pairs(objs) do
+    if obj.prefix == arg then
+      obj.method(msg, sender)
+    end
+  end
 end
 
 function AstralRaidComms:OnUpdate(elapsed)
-	self.delay = self.delay + elapsed
-	if self.delay < SEND_INTERVAL + self.loadDelay then return end
-	self.loadDelay = 0
-	self.delay = 0
-	if #self.queue < 1 then -- no messages to send
-		self:Hide()
-		return
-	end
-	self:SendMessage()
+  self.delay = self.delay + elapsed
+  if self.delay < SEND_INTERVAL + self.loadDelay then return end
+  self.loadDelay = 0
+  self.delay = 0
+  if #self.queue < 1 then -- no messages to send
+    self:Hide()
+    return
+  end
+  self:SendMessage()
 end
 
 function AstralRaidComms:NewMessage(prefix, text, channel, target)
-	if channel == 'GUILD' and not IsInGuild() then return end
-	if channel == 'RAID' and not IsInRaid() then return end
-	if channel == 'PARTY' and not IsInGroup() then return end
+  if channel == 'GUILD' and not IsInGuild() then return end
+  if channel == 'RAID' and not IsInRaid() then return end
+  if channel == 'PARTY' and not IsInGroup() then return end
 
-	local msg = newMsg()
-	msg.method = SendAddonMessage
-	msg[1] = prefix
-	msg[2] = text
-	msg[3] = channel
-	msg[4] = channel == 'WHISPER' and target or ''
+  local msg = newMsg()
+  msg.method = SendAddonMessage
+  msg[1] = prefix
+  msg[2] = text
+  msg[3] = channel
+  msg[4] = channel == 'WHISPER' and target or ''
 
-	--Let's add it to queue
-	self.queue[#self.queue + 1] = msg
+  --Let's add it to queue
+  self.queue[#self.queue + 1] = msg
 
-	if not self:IsShown() then self:Show() end
+  if not self:IsShown() then self:Show() end
 end
 
 function AstralRaidComms:SendMessage()
-	local msg = table.remove(self.queue, 1)
-	if msg[3] == 'WHISPER' then
-		if addon.IsFriendOnline(msg[4]) then
-			msg.method(unpack(msg, 1, #msg))
-		end
-	else
-		msg.method(unpack(msg, 1, #msg))
-		delMsg(msg)
-	end
+  local msg = table.remove(self.queue, 1)
+  if msg[3] == 'WHISPER' then
+    if addon.IsFriendOnline(msg[4]) then
+      msg.method(unpack(msg, 1, #msg))
+    end
+  else
+    msg.method(unpack(msg, 1, #msg))
+    delMsg(msg)
+  end
 end
 
 function AstralRaidComms:SendChunkedAddonMessages(prefix2, message, ...)
-	local compressed = LibDeflate:CompressDeflate(message, {level = 9})
-	local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
-	encoded = encoded .. "##F##"
+  local compressed = LibDeflate:CompressDeflate(message, {level = 9})
+  local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
+  encoded = encoded .. "##F##"
 
-	local index = 0
-	while self.sendIndex ~= index do
-		index = math.random(100, 999)
-	end
-	self.sendIndex = index
+  local index = 0
+  while self.sendIndex ~= index do
+    index = math.random(100, 999)
+  end
+  self.sendIndex = index
 
-	local parts = ceil(#encoded / 240)
-	for i = 1, parts do
-		local msg = encoded:sub((i-1)*240+1, i*240)
-		AstralRaidComms:NewMessage(PREFIX, string.format('%s %d %s', prefix2, index, msg), ...)
-	end
+  local parts = ceil(#encoded / 240)
+  for i = 1, parts do
+    local msg = encoded:sub((i-1)*240+1, i*240)
+    AstralRaidComms:NewMessage(PREFIX, string.format('%s %d %s', prefix2, index, msg), ...)
+  end
 end
 
 function AstralRaidComms:DecodeChunkedAddonMessages(sender, message, func)
-	if not self.runningText[sender] then
-		self.runningText[sender] = {}
-	end
+  if not self.runningText[sender] then
+    self.runningText[sender] = {}
+  end
 
-	local prefix2, index, msg = strsplit(' ', message, 3)
-	if self.runningText[sender][prefix2] and self.recIndex[prefix2] == index then
-		self.runningText[sender][prefix2] = self.runningText[sender][prefix2] .. msg
-	else
-		self.runningText[sender][prefix2] = msg
-	end
-	self.recIndex[prefix2] = index
+  local prefix2, index, msg = strsplit(' ', message, 3)
+  if self.runningText[sender][prefix2] and self.recIndex[prefix2] == index then
+    self.runningText[sender][prefix2] = self.runningText[sender][prefix2] .. msg
+  else
+    self.runningText[sender][prefix2] = msg
+  end
+  self.recIndex[prefix2] = index
 
-	if self.runningText[sender][prefix2] and self.runningText[sender][prefix2]:find(CHUNKED_EOL) then
-		local decoded = LibDeflate:DecodeForWoWAddonChannel(self.runningText[sender][prefix2]:gsub(CHUNKED_EOL, ''))
-		local decompressed = LibDeflate:DecompressDeflate(decoded)
-		self.runningText[sender][prefix2] = nil
-		func(decompressed)
-	end
+  if self.runningText[sender][prefix2] and self.runningText[sender][prefix2]:find(CHUNKED_EOL) then
+    local decoded = LibDeflate:DecodeForWoWAddonChannel(self.runningText[sender][prefix2]:gsub(CHUNKED_EOL, ''))
+    local decompressed = LibDeflate:DecompressDeflate(decoded)
+    self.runningText[sender][prefix2] = nil
+    func(decompressed)
+  end
 end
 
 msgs = setmetatable({}, {__mode='k'})
 
 newMsg = function()
-	local msg = next(msgs)
-	if msg then
-		msgs[msg] = nil
-		return msg
-	end
-	return {}
+  local msg = next(msgs)
+  if msg then
+    msgs[msg] = nil
+    return msg
+  end
+  return {}
 end
 
 delMsg = function(msg)
-	msg[1] = nil
-	msgs[msg] = true
+  msg[1] = nil
+  msgs[msg] = true
 end
 
 -- Version/Addon/WA Checking
 
 local function waRequest(channel, ...)
-	local msg, sender = ...
-	local weakAuras = addon.GetWeakAuras()
-	AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
-		addon.PrintDebug('waRequest', m)
-		local resp = addon.PlayerClass
-		for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-			local mine = ''
-			if weakAuras[wa] then
-				mine = weakAuras[wa].version
-			end
-			addon.PrintDebug('wa', wa, v, mine)
-			if not weakAuras[wa] or tostring(weakAuras[wa].version) ~= v then
-				local d = ''
-				if weakAuras[wa] then
-					d = tostring(weakAuras[wa].version)
-				end
-				resp = resp .. string.format(' "%s":"%s"', wa, d)
-			end
-		end
-		AstralRaidComms:SendChunkedAddonMessages('waPush', resp, channel)
-		addon.PrintDebug('waPush', resp, channel)
-	end)
+  local msg, sender = ...
+  local weakAuras = addon.GetWeakAuras()
+  AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
+    addon.PrintDebug('waRequest', m)
+    local resp = addon.PlayerClass
+    for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+      if not weakAuras[wa] or tostring(weakAuras[wa].version) ~= v then
+        local d = ''
+        if weakAuras[wa] then
+          d = tostring(weakAuras[wa].version)
+        end
+        resp = resp .. string.format(' "%s":"%s"', wa, d)
+      end
+    end
+    AstralRaidComms:SendChunkedAddonMessages('waPush', resp, channel)
+    addon.PrintDebug('waPush', resp, channel)
+  end)
 end
 
 local function addonRequest(channel, ...)
-	local msg, sender = ...
-	local addons = addon.GetAddons()
-	AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
-		addon.PrintDebug('addonRequest', m)
-		local resp = addon.PlayerClass
-		for a, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-			local mine = ''
-			if addons[a] then
-				mine = addons[a].version
-			end
-			addon.PrintDebug('addon', a, v, mine)
-			if not addons[a] or addons[a].version ~= v then
-				local d = ''
-				if addons[a] then
-					d = addons[a].version
-				end
-				resp = resp .. string.format(' "%s":"%s"', a, d)
-			end
-		end
-		AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)
-		addon.PrintDebug('addonPush', resp, channel)
-	end)
+  local msg, sender = ...
+  local addons = addon.GetAddons()
+  AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
+    addon.PrintDebug('addonRequest', m)
+    local resp = addon.PlayerClass
+    for a, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+      if not addons[a] or addons[a].version ~= v then
+        local d = ''
+        if addons[a] then
+          d = addons[a].version
+        end
+        resp = resp .. string.format(' "%s":"%s"', a, d)
+      end
+    end
+    AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)
+    addon.PrintDebug('addonPush', resp, channel)
+  end)
 end
 
 local function versionRequest(channel, ...)
-	local resp = 'versionPush ' .. string.format('%s:%s', addon.CLIENT_VERSION, addon.PlayerClass)
-	SendAddonMessage(PREFIX, resp, channel)
+  SendAddonMessage(PREFIX, 'versionPush ' .. string.format('%s:%s', addon.CLIENT_VERSION, addon.PlayerClass), channel)
 end
 
 AstralRaidComms:Init()

@@ -4,3 +4,8 @@
 - README with known issues
 - search bar, sort lists
 - boss hp % (WA)
+- PI
+- soulstone
+- innervates
+- summons
+- augmentation

@@ -8,8 +8,10 @@ addon.Options = {}
 AstralRaidOptionsFrame = AstralUI:Template('AstralOptionsFrame', UIParent)
 AstralRaidOptionsFrame:Hide()
 AstralRaidOptionsFrame:SetPoint('CENTER', 0, 0)
-AstralRaidOptionsFrame.HeaderText:SetText('Astral Raid Tools')
+AstralRaidOptionsFrame.HeaderText:SetText(ASTRAL_RAID_TOOLS)
 AstralRaidOptionsFrame.HeaderText:SetTextColor(1, .82, 0, 1)
+AstralRaidOptionsFrame.GuildInfo.title:SetText(ASTRAL_RAID_TOOLS)
+AstralRaidOptionsFrame.GuildInfo.title:SetTextColor(1, .82, 0, 1)
 AstralRaidOptionsFrame:SetMovable(true)
 AstralRaidOptionsFrame:RegisterForDrag('LeftButton')
 AstralRaidOptionsFrame:SetScript('OnDragStart', function(self) self:StartMoving() end)
@@ -23,6 +25,8 @@ end)
 AstralRaidOptionsFrame:SetDontSavePosition(true)
 
 -- Paging
+
+local OPTIONS_FRAME_WIDTH = 850
 
 local options = AstralRaidOptionsFrame or {}
 
@@ -80,8 +84,8 @@ function options:SetPage(page)
 	options.CurrentFrame:Show()
 
 	if options.CurrentFrame.isWide and options.nowWide ~= options.CurrentFrame.isWide then
-		local frameWidth = type(options.CurrentFrame.isWide)=='number' and options.CurrentFrame.isWide or 850
-		options:SetWidth(frameWidth+options.ListWidth)
+		local frameWidth = type(options.CurrentFrame.isWide) == 'number' and options.CurrentFrame.isWide or OPTIONS_FRAME_WIDTH
+		options:SetWidth(frameWidth + options.ListWidth)
 		options.nowWide = options.CurrentFrame.isWide
 	elseif not options.CurrentFrame.isWide and options.nowWide then
 		options:SetWidth(options.Width)
@@ -89,7 +93,7 @@ function options:SetPage(page)
 	end
 
 	if options.CurrentFrame.isWide then
-		options.CurrentFrame:SetWidth(type(options.CurrentFrame.isWide) == 'number' and options.CurrentFrame.isWide or 850)
+		options.CurrentFrame:SetWidth(type(options.CurrentFrame.isWide) == 'number' and options.CurrentFrame.isWide or OPTIONS_FRAME_WIDTH)
 	end
 
 	if type(options.CurrentFrame.OnShow) == 'function' then
@@ -137,7 +141,7 @@ local showMinimap = AstralUI:Check(generalPage, L['SHOW_MINIMAP_BUTTON']):Point(
 	else
 		addon.icon:Hide(ADDON_NAME)
 	end
-	if IsAddOnLoaded('ElvUI_Enhanced') then -- Update the layout for the minimap buttons
+	if IsAddOnLoaded('ElvUI_Enhanced') and ElvUI then -- Update the layout for the minimap buttons
 		ElvUI[1]:GetModule('MinimapButtons'):UpdateLayout()
 	end
 end)
@@ -178,12 +182,10 @@ local ldb = LibStub('LibDataBroker-1.1'):NewDataObject(ADDON_NAME, {
 	text = ADDON_NAME,
 	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\Logo@2x',
 	OnClick = function(_, button)
-		if button == 'LeftButton' then
-			toggle()
-		end
+		if button == 'LeftButton' then toggle() end
 	end,
 	OnTooltipShow = function(tooltip)
-		tooltip:AddLine('Astral Raid Tools')
+		tooltip:AddLine(ASTRAL_RAID_TOOLS)
 		tooltip:AddLine(L['TOGGLE_OPTIONS'])
 	end,
 })
