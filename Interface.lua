@@ -3436,6 +3436,49 @@ do
   end
 end
 
+do
+  local choiceWindow
+  function AstralUI:Choices(str, name, func)
+    if not choiceWindow then
+      choiceWindow = AstralUI:Popup('Choices'):Size(650, 600)
+      choiceWindow.Edit = AstralUI:MultiEdit(choiceWindow):Point('TOP', 0, -20):Size(640, 560)
+      choiceWindow.TextInfo = AstralUI:Text(choiceWindow, 'Export Info', 11):Color():Point('BOTTOM', 0, 3):Size(640, 15):Bottom():Left()
+      choiceWindow:SetScript('OnHide', function(self) self.Edit:SetText('') end)
+      choiceWindow.Next = AstralUI:Button(choiceWindow, '>>>'):Size(100, 16):Point('BOTTOMRIGHT', 0, 0):OnClick(function(self)
+        self.now = self.now + 1
+        self:SetText('>>> ' .. self.now .. '/' .. #choiceWindow.hugeText)
+        choiceWindow.Edit:SetText(choiceWindow.hugeText[self.now])
+        choiceWindow.Edit.EditBox:HighlightText()
+        choiceWindow.Edit.EditBox:SetFocus()
+        if self.now == #choiceWindow.hugeText then
+          self:Hide()
+        end
+      end)
+    end
+    choiceWindow.title:SetText(name or 'Export')
+    choiceWindow.Edit.OnTextChanged = func
+    choiceWindow:NewPoint('CENTER', UIParent, 0, 0)
+    choiceWindow:Show()
+    if #str > 200000 then
+      choiceWindow.hugeText = {}
+      while str and str ~= "" do
+        local newText = str:sub(1,200000)..strsplit("\n",str:sub(200001))
+        choiceWindow.hugeText[#choiceWindow.hugeText+1] = newText
+        str = select(2,strsplit("\n",str:sub(200001),2))
+      end
+      choiceWindow.Next.now = 0
+      choiceWindow.Next:Show()
+      choiceWindow.Next:Click()
+    else
+      choiceWindow.hugeText = nil
+      choiceWindow.Next:Hide()
+      choiceWindow.Edit:SetText(str)
+      choiceWindow.Edit.EditBox:HighlightText()
+      choiceWindow.Edit.EditBox:SetFocus()
+    end
+  end
+end
+
 function AstralUI:UpdateScrollList(self, lineHeight, initFunc, lineFunc)
   initFunc(self)
   local scroll = self.ScrollBar:GetValue()

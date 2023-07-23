@@ -200,15 +200,13 @@ local function createSyncTable(encounterID)
 end
 
 local function deserializeSyncTable(d)
-  d = d:gsub(EARLY_PULL_PREFIX + ' ', '')
+  d = d:gsub(EARLY_PULL_PREFIX .. ' ', '')
   local syncTable = {strsplit('\t', d)}
   for i = 1, 5 do
     if i == 2 or i == 3 then
       syncTable[i] = tonumber(syncTable[i])
     end
-    if not syncTable[i] then
-      syncTable[i] = ''
-    end
+    syncTable[i] = syncTable[i] or ''
   end
   return syncTable
 end
@@ -526,7 +524,7 @@ local function afterPull()
   local bestSyncTable
   for _, entry in iterateLogWindow(syncLog, cwBeginTime, cwEndTime) do
     local syncTable = deserializeSyncTable(entry.message)
-    if syncTable and syncTable[2] == ctx.encounterID and (not bestSyncTable or compareSyncTables(bestSyncTable, syncTable)) then
+    if syncTable[2] == ctx.encounterID and (not bestSyncTable or compareSyncTables(bestSyncTable, syncTable)) then
       bestSyncTable = syncTable
     end
   end
@@ -535,7 +533,7 @@ local function afterPull()
     addon.PrintDebug('bestSyncTable', bestSyncTable[3], bestSyncTable[4], bestSyncTable[5])
   end
 
-  if not bestSyncTable or isMe(bestSyncTable) then
+  if (not bestSyncTable) or isMe(bestSyncTable) then
     announce(ctx.announceChannel, ctx.pullDesc .. getBlameDesc(bestCand, bestScore, secondScore) .. '.')
   end
 end

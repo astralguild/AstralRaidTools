@@ -47,8 +47,11 @@ local repairSpells = {
   [3] = 200061,
 }
 
+WELL_FED = 'Well Fed'
+
 local LOW_COMBAT_POTION_COUNT = 3
 local LOW_HEALTH_POTION_COUNT = 2
+local MAX_HEALTHSTONES_COUNT = 3
 
 local function lowDurability()
   local cur, max
@@ -63,7 +66,7 @@ local function lowDurability()
 end
 
 local function notFullHealthstones()
-  return GetItemCount(healthstoneItem, false, true) < 3
+  return GetItemCount(healthstoneItem, false, true) < MAX_HEALTHSTONES_COUNT
 end
 
 local function noHealthPotions()
@@ -80,7 +83,7 @@ end
 
 local function eatFoodReminder(e, _, m, ...)
   if e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
-    local wellFedBuff = AuraUtil.FindAuraByName('Well Fed', 'player')
+    local wellFedBuff = AuraUtil.FindAuraByName(WELL_FED, 'player')
     if (not wellFedBuff) and UnitHealth('player') > 0 then
       return 'SHOW'
     else
@@ -92,7 +95,7 @@ local function eatFoodReminder(e, _, m, ...)
       local spellID = select(10, ...)
       if destGUID == UnitGUID('player') then
         local name = select(1, GetSpellInfo(spellID))
-        if name == 'Well Fed' or name == 'Food' or name == 'Drink' or name == 'Food & Drink' then
+        if name == WELL_FED or name == 'Food' or name == 'Drink' or name == 'Food & Drink' then
           return 'HIDE'
         end
       end
