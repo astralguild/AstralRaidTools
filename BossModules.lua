@@ -236,7 +236,7 @@ AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
 	end
 end, 'AstralRaidBossModulesInit')
 
-local module = addon:New('Boss Modules', 'Boss Modules')
+local module = addon:New('Boss Modules', 'Boss Modules', false, false, true) -- disabled for now until tested
 local instanceDropdown, encounterList, setContent
 
 local nelthHeartMacroEnableCheckbox, nelthHeartMacroPrintCheckbox, nelthHeartMacroLogCheckbox, nelthHeartMacroAnnounceDropdown, nelthHeartIconEnableCheckbox, nelthHeartIconSizeSlider

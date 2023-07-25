@@ -54,7 +54,7 @@ local function updateFrames()
 	for _, f in pairs(options._Frames) do
 		local pos = #options.Frames + 1
 		framesList.L[pos] = f.name
-		framesList.LDisabled[pos] = (f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer() or (f.inParty and addon.IsPartyLead()) or (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))) or f._disabled
+		framesList.LDisabled[pos] = (f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer() or (f.inParty and addon.IsPartyLead()) or (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))) or (f._disabled and not (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))
 		options.Frames[pos] = f
 	end
 	framesList:Update()

@@ -33,9 +33,9 @@ Core.lua
 Options.lua
 Text.lua
 Reminders.lua
+EarlyPull.lua
 BossModules.lua
 Alerts.lua
-EarlyPull.lua
 Notifiers.lua
 Requirements.lua
 Roster.lua
