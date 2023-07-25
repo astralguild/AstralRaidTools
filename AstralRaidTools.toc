@@ -2,7 +2,7 @@
 ## Title: Astral |cfff5e4a8Raid Tools|r
 ## Notes: Raider utilities and raid lead roster management
 ## Author: Astral
-## Version: 0.8.7
+## Version: 1.0.0
 ## SavedVariables: AstralRaidSettings, AstralRaidMinimap, AstralRaidBossModulesLog
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
 ## IconTexture: Interface\AddOns\AstralRaidTools\Media\Logo@2x

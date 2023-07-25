@@ -1,15 +1,25 @@
-local _, addon = ...
+local ADDON_NAME, addon = ...
 
 function addon.IsAstralGuild()
   local guild = GetGuildInfo('player')
   return guild == 'Astral' and GetRealmName():gsub('%s+', '') == 'Area52'
 end
 
+local function printAstral(s)
+  print(WrapTextInColorCode('Astral Raid Tools: ' .. s, 'fff5e4a8'))
+end
+
 local facts = {
-  [1] = "Cryxian bought the deed to Flavortown.",
-  [2] = "Ayegon is the mayor of Flavortown.",
-  [3] = "Look at Terra's health.",
+  [1] = "Cryxian bought the deed to Flavortown",
+  [2] = "Ayegon is the mayor of Flavortown",
+  [3] = "Look at Terra's health",
+  [4] = "Hark the return of the Golden Shower Prince, he who enjoys P",
 }
+
+local function printFact()
+  if #facts == 0 then return end
+  printAstral(string.format('"%s"', facts[math.random(1, #facts)]))
+end
 
 local function sendFact(_, channel)
   if #facts == 0 then return end
@@ -23,7 +33,8 @@ local function sendFact(_, channel)
 end
 
 local function sendPoll(text, channel)
-  local choices = strsplit(' ', text)
+  local choices = {strsplit(' ', text)}
+  -- send chat addon message
   -- TODO
 end
 
@@ -38,7 +49,7 @@ local function parseCmds(text, channel)
 	text = gsub(text, '^%[%a+%] ', '') -- Strip off [SomeName] from message from using Identity-2
   local c, t = strsplit(' ', text, 1)
   for cmd, obj in pairs(commands) do
-    if c:lower() == cmd and addon.IsAstralGuild() then
+    if c:lower() == cmd then
       if obj.leadProtected and not (addon.IsPartyLead() or addon.IsRaidLead() or addon.IsOfficer()) then return end
       obj.f(t, channel)
       return
@@ -46,10 +57,23 @@ local function parseCmds(text, channel)
   end
 end
 
-AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
-AstralRaidEvents:Register('CHAT_MSG_RAID_LEADER', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
-AstralRaidEvents:Register('CHAT_MSG_PARTY', function(t) parseCmds(t, 'PARTY') end, 'AstralRaidParsePartyCmd')
-AstralRaidEvents:Register('CHAT_MSG_PARTY_LEADER', function(t) parseCmds(t, 'PARTY') end, 'AstralRaidParsePartyCmd')
+AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
+	if addonName == ADDON_NAME and addon.IsAstralGuild() then
+    -- Login message
+		AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
+      if AstralRaidSettings.astral.facts.onStartup then
+        printFact()
+      end
+      AstralRaidEvents:Unregister('PLAYER_ENTERING_WORLD', 'AstralRaidAstralGuildOnEnterWorld')
+    end, 'AstralRaidAstralGuildOnEnterWorld')
+
+    -- Command events
+    AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
+    AstralRaidEvents:Register('CHAT_MSG_RAID_LEADER', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
+    AstralRaidEvents:Register('CHAT_MSG_PARTY', function(t) parseCmds(t, 'PARTY') end, 'AstralRaidParsePartyCmd')
+    AstralRaidEvents:Register('CHAT_MSG_PARTY_LEADER', function(t) parseCmds(t, 'PARTY') end, 'AstralRaidParsePartyCmd')
+	end
+end, 'AstralRaidAstralGuildInit')
 
 -- Library Hooks
 
@@ -57,4 +81,8 @@ AstralRaidLibrary.Cmds = commands
 
 function AstralRaidLibrary:IsAstralGuild()
   return addon.IsAstralGuild()
+end
+
+function AstralRaidLibrary:GetRandomFact()
+  return facts[math.random(1, #facts)]
 end

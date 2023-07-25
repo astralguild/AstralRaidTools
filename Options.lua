@@ -127,6 +127,8 @@ end
 
 addon.Options = options
 
+-- General tab
+
 local generalPage = options:Add(GENERAL, GENERAL)
 framesList:SetListValue(1)
 framesList.selected = 1
@@ -155,6 +157,12 @@ local debugShowAllMenus = AstralUI:Check(generalPage, WrapTextInColorCode('Show 
 	updateFrames()
 end)
 
+local astralGuildHeader = AstralUI:Text(generalPage, 'Guild Options'):Point('TOPLEFT', showMinimap, 'BOTTOMLEFT', 0, -20):Shadow()
+
+local astralGuildShowFactOnStartup = AstralUI:Check(generalPage, 'Show Astral fact on login'):Point('TOPLEFT', astralGuildHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
+	AstralRaidSettings.astral.facts.onStartup = self:GetChecked()
+end)
+
 -- Initializations
 
 function addon.InitializeOptionSettings()
@@ -164,6 +172,11 @@ function addon.InitializeOptionSettings()
 	if not addon.Debug then
 		debugMode:Hide()
 		debugShowAllMenus:Hide()
+	end
+	astralGuildShowFactOnStartup:SetChecked(AstralRaidSettings.astral.facts.onStartup)
+	if not addon.IsAstralGuild() then
+		astralGuildHeader:Hide()
+		astralGuildShowFactOnStartup:Hide()
 	end
 	AstralRaidOptionsFrame.GuildText:SetFormattedText('Astral - Area 52 (US) %s', addon.CLIENT_VERSION)
 end
