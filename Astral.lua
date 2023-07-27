@@ -2,18 +2,21 @@ local ADDON_NAME, addon = ...
 
 function addon.IsAstralGuild()
   local guild = GetGuildInfo('player')
-  return guild == 'Astral' and GetRealmName():gsub('%s+', '') == 'Area52'
+  return guild == ASTRAL_GUILD and GetRealmName():gsub('%s+', '') == 'Area52'
 end
 
 local function printAstral(s)
-  print(WrapTextInColorCode('Astral Raid Tools: ' .. s, 'fff5e4a8'))
+  print(WrapTextInColorCode(ASTRAL_RAID_TOOLS .. ': ' .. s, 'fff5e4a8'))
 end
 
 local facts = {
   [1] = "Cryxian bought the deed to Flavortown",
   [2] = "Ayegon is the mayor of Flavortown",
   [3] = "Look at Terra's health",
-  [4] = "Hark the return of the Golden Shower Prince, he who enjoys P",
+  [4] = "Hark the return of the Golden Shower Prince",
+  [5] = "Terra: has a cat",
+  [6] = "Terra is also a computer case",
+  [7] = "Luna can't pronounce 'affix' or 'desiruous'",
 }
 
 local function printFact()
@@ -42,7 +45,7 @@ end
 
 local commands = {
   ['!facts'] = {f = sendFact},
-  ['!poll'] = {f = sendPoll, leadProtected = true},
+  --['!poll'] = {f = sendPoll, leadProtected = true},
 }
 
 local function parseCmds(text, channel)
@@ -51,6 +54,7 @@ local function parseCmds(text, channel)
   for cmd, obj in pairs(commands) do
     if c:lower() == cmd then
       if obj.leadProtected and not (addon.IsPartyLead() or addon.IsRaidLead() or addon.IsOfficer()) then return end
+      if obj.debug and not addon.Debug then return end
       obj.f(t, channel)
       return
     end
@@ -61,9 +65,7 @@ AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
 	if addonName == ADDON_NAME and addon.IsAstralGuild() then
     -- Login message
 		AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
-      if AstralRaidSettings.astral.facts.onStartup then
-        printFact()
-      end
+      if AstralRaidSettings.astral.facts.onStartup then printFact() end
       AstralRaidEvents:Unregister('PLAYER_ENTERING_WORLD', 'AstralRaidAstralGuildOnEnterWorld')
     end, 'AstralRaidAstralGuildOnEnterWorld')
 
@@ -78,6 +80,7 @@ end, 'AstralRaidAstralGuildInit')
 -- Library Hooks
 
 AstralRaidLibrary.Cmds = commands
+AstralRaidLibrary.Facts = facts
 
 function AstralRaidLibrary:IsAstralGuild()
   return addon.IsAstralGuild()
@@ -85,4 +88,10 @@ end
 
 function AstralRaidLibrary:GetRandomFact()
   return facts[math.random(1, #facts)]
+end
+
+function AstralRaidLibrary:RegisterAstralGuildCommand(cmd, f, leadProtected, debug)
+  if not commands[cmd] then
+    commands[cmd] = {f = f, leadProtected = leadProtected, debug = debug}
+  end
 end

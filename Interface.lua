@@ -560,7 +560,7 @@ do
   end
   function templates:AstralUIChatDownButtonTemplate(parent)
     local self = CreateFrame('Button', nil, parent)
-    self:SetSize(24,24)
+    self:SetSize(24, 24)
 
     self.NormalTexture = self:CreateTexture()
     self.NormalTexture:SetTexture('Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up')
@@ -656,7 +656,7 @@ do
     self.PushedTexture:SetPoint('TOPLEFT', -5, 1)
     self.PushedTexture:SetPoint('BOTTOMRIGHT', 5, -3)
 
-    self.DisabledTexture:SetTexture('Interface\\AddOns\\'..ADDON_NAME..'\\media\\DiesalGUIcons16x256x128')
+    self.DisabledTexture:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\media\\DiesalGUIcons16x256x128')
     self.DisabledTexture:SetTexCoord(0.25, 0.3125, 0.5, 0.625)
     self.DisabledTexture:SetVertexColor(.4, .4, .4, 1)
     self.DisabledTexture:SetSize(0, 0)
@@ -917,8 +917,8 @@ do
     return self
   end
   local function Widget_Tooltip(self, text)
-    self:SetScript("OnEnter", AstralUI.Tooltip.Std)
-    self:SetScript("OnLeave", AstralUI.Tooltip.Hide)
+    self:SetScript('OnEnter', AstralUI.Tooltip.Std)
+    self:SetScript('OnLeave', AstralUI.Tooltip.Hide)
     self.tooltipText = text
     return self
   end
@@ -947,7 +947,7 @@ do
     self:SetPoint('RIGHT', size, 0)
     self:SetPoint('TOP', 0, size)
     self:SetPoint('BOTTOM', 0, -size)
-    self:SetBackdrop({edgeFile='Interface/AddOns/' .. ADDON_NAME .. '/media/shadow', edgeSize=edgeSize or 28, insets={left=size, right=size, top=size, bottom=size}})
+    self:SetBackdrop({edgeFile='Interface/AddOns/' .. ADDON_NAME .. '/media/shadow', edgeSize = edgeSize or 28, insets={left=size, right=size, top=size, bottom=size}})
     self:SetBackdropBorderColor(0, 0, 0, .45)
     return self
   end
@@ -1057,8 +1057,8 @@ do
     end
     return self
   end
-  function AstralUI.CreateSlider(parent,width,height,x,y,minVal,maxVal,text,defVal,relativePoint,isVertical,isModern)
-    return AstralUI:Slider(parent,text,isVertical,(not isModern) and 0):Size(width,height):Point(relativePoint or 'TOPLEFT',x,y):Range(minVal,maxVal):SetTo(defVal or maxVal)
+  function AstralUI.CreateSlider(parent, width, height, x, y, minVal, maxVal, text, defVal, relativePoint, isVertical, isModern)
+    return AstralUI:Slider(parent, text, isVertical, (not isModern) and 0):Size(width, height):Point(relativePoint or 'TOPLEFT', x, y):Range(minVal, maxVal):SetTo(defVal or maxVal)
   end
 end
 
@@ -1299,7 +1299,7 @@ do
       dropDown.Buttons[i].checkButton:SetScale(.6)
       dropDown.Buttons[i].radioButton = CreateFrame('CheckButton', nil, dropDown.Buttons[i])	-- Do not used in blizzard style
     end
-    dropDown.Buttons[i].checkButton:SetScript('OnClick',CheckButtonClick)
+    dropDown.Buttons[i].checkButton:SetScript('OnClick', CheckButtonClick)
     dropDown.Buttons[i].checkButton:Hide()
     dropDown.Buttons[i].radioButton:Hide()
     dropDown.Buttons[i].Level = level
@@ -1762,7 +1762,7 @@ function AstralUI:GuildInfo(frame)
     self:SetText('www.astralguild.com')
     self:HighlightText()
   end)
-  astralGuildInfo.editBox:SetScript("OnEscapePressed", function()
+  astralGuildInfo.editBox:SetScript('OnEscapePressed', function()
     astralGuildInfo:Hide()
   end)
   astralGuildInfo.editBox:SetScript('OnEditFocusLost', function(self)
@@ -1857,7 +1857,7 @@ do
   local function Widget_Top(self) self:SetJustifyV('TOP') return self end
   local function Widget_Middle(self) self:SetJustifyV('MIDDLE') return self end
   local function Widget_Bottom(self) self:SetJustifyV('BOTTOM') return self end
-  local function Widget_Shadow(self,disable)
+  local function Widget_Shadow(self, disable)
     self:SetShadowColor(0, 0, 0, disable and 0 or 1)
     self:SetShadowOffset(1, -1)
     return self
@@ -1983,11 +1983,9 @@ do
     end)
     self:Hide()
     self:SetScript('OnShow', PopupFrameOnShow)
-
     self.ShowClick = PopupFrameShow
     self.title:SetTextColor(1, 1, 1, 1)
     self.title:SetText(title or '')
-
     self.Close:SetScript('OnClick', buttonCloseOnClick)
     Mod(self)
     return self
@@ -2168,31 +2166,31 @@ do
     self.slider:SetPoint('TOPLEFT',0,-18)
     self.slider:SetPoint('BOTTOMRIGHT',0,18)
 
-    self.bg = self.slider:CreateTexture(nil, "BACKGROUND")
-    self.bg:SetPoint("TOPLEFT",0,1)
-    self.bg:SetPoint("BOTTOMRIGHT",0,-1)
+    self.bg = self.slider:CreateTexture(nil, 'BACKGROUND')
+    self.bg:SetPoint('TOPLEFT',0,1)
+    self.bg:SetPoint('BOTTOMRIGHT',0,-1)
     self.bg:SetColorTexture(0, 0, 0, 0.3)
 
-    self.thumb = self.slider:CreateTexture(nil, "OVERLAY")
-    self.thumb:SetTexture("Interface\\Buttons\\UI-ScrollBar-Knob")
+    self.thumb = self.slider:CreateTexture(nil, 'OVERLAY')
+    self.thumb:SetTexture('Interface\\Buttons\\UI-ScrollBar-Knob')
     self.thumb:SetSize(25, 25)
     self.slider:SetThumbTexture(self.thumb)
-    self.slider:SetOrientation("VERTICAL")
+    self.slider:SetOrientation('VERTICAL')
     self.slider:SetValue(2)
 
-    self.buttonUP = AstralUI:Template("UIPanelScrollUPButtonTemplate", self) or CreateFrame("Button", nil, self, "UIPanelScrollUPButtonTemplate")
+    self.buttonUP = AstralUI:Template('UIPanelScrollUPButtonTemplate', self) or CreateFrame('Button', nil, self, 'UIPanelScrollUPButtonTemplate')
     self.buttonUP:SetSize(16,16)
-    self.buttonUP:SetPoint("TOP", 0, 0)
-    self.buttonUP:SetScript("OnClick",ScrollBarButtonUpClick)
-    self.buttonUP:SetScript("OnMouseDown",ScrollBarButtonUpMouseHoldDown)
-    self.buttonUP:SetScript("OnMouseUp",ScrollBarButtonUpMouseHoldUp)
+    self.buttonUP:SetPoint('TOP', 0, 0)
+    self.buttonUP:SetScript('OnClick',ScrollBarButtonUpClick)
+    self.buttonUP:SetScript('OnMouseDown',ScrollBarButtonUpMouseHoldDown)
+    self.buttonUP:SetScript('OnMouseUp',ScrollBarButtonUpMouseHoldUp)
 
-    self.buttonDown = AstralUI:Template("UIPanelScrollDownButtonTemplate", self) or CreateFrame("Button", nil, self, "UIPanelScrollDownButtonTemplate")
-    self.buttonDown:SetPoint("BOTTOM", 0, 0)
+    self.buttonDown = AstralUI:Template('UIPanelScrollDownButtonTemplate', self) or CreateFrame('Button', nil, self, 'UIPanelScrollDownButtonTemplate')
+    self.buttonDown:SetPoint('BOTTOM', 0, 0)
     self.buttonDown:SetSize(16, 16)
-    self.buttonDown:SetScript("OnClick", ScrollBarButtonDownClick)
-    self.buttonDown:SetScript("OnMouseDown", ScrollBarButtonDownMouseHoldDown)
-    self.buttonDown:SetScript("OnMouseUp", ScrollBarButtonDownMouseHoldUp)
+    self.buttonDown:SetScript('OnClick', ScrollBarButtonDownClick)
+    self.buttonDown:SetScript('OnMouseDown', ScrollBarButtonDownMouseHoldDown)
+    self.buttonDown:SetScript('OnMouseUp', ScrollBarButtonDownMouseHoldUp)
 
     self.clickRange = 1
 
@@ -2282,11 +2280,11 @@ do
     return self
   end
   local function Widget_AddHorizontal(self,outside)
-    self.ScrollBarHorizontal = AstralUI:ScrollBar(self):SetHorizontal():Size(0,16):Point("BOTTOMLEFT",3,3-(outside and 18 or 0)):Point("BOTTOMRIGHT",-3-18,3-(outside and 18 or 0)):Range(0,1):SetTo(0):ClickRange(20)
-    self.ScrollBarHorizontal.slider:SetScript("OnValueChanged", ScrollFrameScrollBarValueChangedH)
+    self.ScrollBarHorizontal = AstralUI:ScrollBar(self):SetHorizontal():Size(0,16):Point('BOTTOMLEFT', 3, 3-(outside and 18 or 0)):Point('BOTTOMRIGHT', -3-18, 3-(outside and 18 or 0)):Range(0, 1):SetTo(0):ClickRange(20)
+    self.ScrollBarHorizontal.slider:SetScript('OnValueChanged', ScrollFrameScrollBarValueChangedH)
     self.ScrollBarHorizontal:UpdateButtons()
 
-    self.ScrollBar:Point("BOTTOMRIGHT",-3,3+(outside and 0 or 18))
+    self.ScrollBar:Point('BOTTOMRIGHT', -3, 3+(outside and 0 or 18))
 
     self.SetNewWidth = ScrollFrameChangeWidth
     self.Width = ScrollFrameChangeWidth
@@ -2301,17 +2299,17 @@ do
   end
 
   function AstralUI:ScrollFrame(parent)
-    local self = CreateFrame("ScrollFrame", nil, parent)
+    local self = CreateFrame('ScrollFrame', nil, parent)
     AstralUI:Border(self,2,.24,.25,.30,1)
     self.content = CreateFrame('FRAME', nil, self)
     self:SetScrollChild(self.content)
 
     self.C = self.content
-    self.ScrollBar = AstralUI:ScrollBar(self):Size(16,0):Point("TOPRIGHT",-3,-3):Point("BOTTOMRIGHT",-3,3):Range(0,1):SetTo(0):ClickRange(20)
-    self.ScrollBar.slider:SetScript("OnValueChanged", ScrollFrameScrollBarValueChanged)
+    self.ScrollBar = AstralUI:ScrollBar(self):Size(16,0):Point('TOPRIGHT', -3, -3):Point('BOTTOMRIGHT', -3, 3):Range(0, 1):SetTo(0):ClickRange(20)
+    self.ScrollBar.slider:SetScript('OnValueChanged', ScrollFrameScrollBarValueChanged)
     self.ScrollBar:UpdateButtons()
 
-    self:SetScript("OnMouseWheel", ScrollFrameMouseWheel)
+    self:SetScript('OnMouseWheel', ScrollFrameMouseWheel)
 
     self.SetNewHeight = ScrollFrameChangeHeight
     self.Height = ScrollFrameChangeHeight
@@ -2334,8 +2332,8 @@ do
     GameTooltip_Hide()
   end
   function Tooltip:Std(anchorUser)
-    GameTooltip:SetOwner(self,anchorUser or "ANCHOR_RIGHT")
-    GameTooltip:SetText(self.tooltipText or "")
+    GameTooltip:SetOwner(self,anchorUser or 'ANCHOR_RIGHT')
+    GameTooltip:SetText(self.tooltipText or '')
     GameTooltip:Show()
   end
   function Tooltip:Link(data, ...)
@@ -2393,18 +2391,18 @@ do
     local tip = CreateFrame('GameTooltip', ADDON_NAME ..'LibAdditionalTooltip'..new, UIParent, 'GameTooltipTemplate'..(BackdropTemplateMixin and ',BackdropTemplate' or ''))
     additionalTooltips[new] = tip
 
-    tip:SetScript("OnLoad",nil)
-    tip:SetScript("OnHide",nil)
+    tip:SetScript('OnLoad', nil)
+    tip:SetScript('OnHide', nil)
 
     tip:SetBackdrop(additionalTooltipBackdrop)
-    tip:SetBackdropColor(0,0,0,1)
-    tip:SetBackdropBorderColor(0.3,0.3,0.4,1)
+    tip:SetBackdropColor(0, 0, 0, 1)
+    tip:SetBackdropBorderColor(0.3, 0.3, 0.4, 1)
 
     tip.gradientTexture = tip:CreateTexture()
     tip.gradientTexture:SetColorTexture(1,1,1,1)
-    tip.gradientTexture:SetGradientAlpha("VERTICAL",0,0,0,0,.8,.8,.8,.2)
-    tip.gradientTexture:SetPoint("TOPLEFT",2.5,-2.5)
-    tip.gradientTexture:SetPoint("BOTTOMRIGHT",-2.5,2.5)
+    tip.gradientTexture:SetGradientAlpha('VERTICAL', 0, 0, 0, 0, .8, .8, .8, .2)
+    tip.gradientTexture:SetPoint('TOPLEFT', 2.5, -2.5)
+    tip.gradientTexture:SetPoint('BOTTOMRIGHT', -2.5, 2.5)
 
     tip:Hide()
     return new
@@ -2427,7 +2425,7 @@ do
     else
       owner = additionalTooltips[tooltipID - 1]
     end
-    tooltip:SetOwner(owner, "ANCHOR_NONE")
+    tooltip:SetOwner(owner, 'ANCHOR_NONE')
     if link then
       tooltip:SetHyperlink(link)
     else
@@ -2436,12 +2434,12 @@ do
       end
     end
     if disableTitle then
-      local textObj = _G[tooltip:GetName().."TextLeft1"]
+      local textObj = _G[tooltip:GetName()..'TextLeft1']
       local arg1,arg2,arg3,arg4,arg5 = textObj:GetFont()
-      textObj:SetFont( arg1,select(2,_G[tooltip:GetName().."TextLeft2"]:GetFont()),arg3,arg4,arg5 )
+      textObj:SetFont( arg1,select(2,_G[tooltip:GetName()..'TextLeft2']:GetFont()),arg3,arg4,arg5 )
       tooltip.titleDisabled = tooltip.titleDisabled or arg2
     elseif tooltip.titleDisabled then
-      local textObj = _G[tooltip:GetName().."TextLeft1"]
+      local textObj = _G[tooltip:GetName()..'TextLeft1']
       local arg1,arg2,arg3,arg4,arg5 = textObj:GetFont()
       textObj:SetFont( arg1,tooltip.titleDisabled,arg3,arg4,arg5 )
       tooltip.titleDisabled = nil
@@ -2450,27 +2448,27 @@ do
     local isTop = false
     if tooltipID > 1 then
       local ownerPoint = owner:GetPoint()
-      if ownerPoint == "BOTTOMRIGHT" then
+      if ownerPoint == 'BOTTOMRIGHT' then
         isTop = true
       end
     end
     if not isTop then
-      tooltip:SetPoint("TOPRIGHT",owner,"BOTTOMRIGHT",0,0)
+      tooltip:SetPoint('TOPRIGHT', owner, 'BOTTOMRIGHT', 0, 0)
     else
-      tooltip:SetPoint("BOTTOMRIGHT",owner,"TOPRIGHT",0,0)
+      tooltip:SetPoint('BOTTOMRIGHT', owner, 'TOPRIGHT', 0, 0)
     end
     tooltip:Show()
     if not isTop and (tooltip:GetBottom() or 0) < 1 then
       owner = nil
       for i=1,(tooltipID-1) do
         local point = additionalTooltips[i]:GetPoint()
-        if point ~= "TOPRIGHT" then
+        if point ~= 'TOPRIGHT' then
           owner = additionalTooltips[i]
         end
       end
       owner = owner or GameTooltip
       tooltip:ClearAllPoints()
-      tooltip:SetPoint("BOTTOMRIGHT", owner, "TOPRIGHT", 0, 0)
+      tooltip:SetPoint('BOTTOMRIGHT', owner, 'TOPRIGHT', 0, 0)
     end
   end
   function Tooltip:HideAdd()
@@ -2665,7 +2663,7 @@ do
 
       local newStrPos = x
       for i=x,1,-1 do
-        if res:sub(i,i) == "\n" then
+        if res:sub(i,i) == '\n' then
           newStrPos = i + 1
           break
         end
@@ -2914,8 +2912,8 @@ do
         end)
 
         self.AnimTexture = self:CreateTexture()
-        self.AnimTexture:SetPoint('LEFT',0,0)
-        self.AnimTexture:SetPoint('RIGHT',0,0)
+        self.AnimTexture:SetPoint('LEFT', 0, 0)
+        self.AnimTexture:SetPoint('RIGHT', 0, 0)
         self.AnimTexture:SetHeight(mainFrame.LINE_TEXTURE_HEIGHT or 15)
         self.AnimTexture:SetColorTexture(self.anim.timer.cR, self.anim.timer.cG, self.anim.timer.cB, self.anim.timer.cA)
       end
@@ -2958,7 +2956,7 @@ do
         return
       end
       self.poins = {}
-      for i=1,self:GetNumPoints() do
+      for i=1, self:GetNumPoints() do
         self.poins[i] = {self:GetPoint()}
       end
       GameTooltip_Hide()
@@ -2973,7 +2971,7 @@ do
     local mainFrame = self.mainFrame
     if mainFrame.OnDragFunction then
       local swapLine
-      for i=1,#mainFrame.List do
+      for i=1, #mainFrame.List do
         local line = mainFrame.List[i]
         if line ~= self and line:IsShown() and MouseIsOver(line) then
           swapLine = line
@@ -2981,11 +2979,11 @@ do
         end
       end
       if swapLine then
-        mainFrame:OnDragFunction(self,swapLine)
+        mainFrame:OnDragFunction(self, swapLine)
       end
     end
     self:ClearAllPoints()
-    for i=1,#self.poins do
+    for i=1, #self.poins do
       self:SetPoint(unpack(self.poins[i]))
     end
     self.poins = nil
@@ -3000,23 +2998,23 @@ do
   local function ScrollListListMultitableEnter(self)
     local mainFrame = self:GetParent().mainFrame
     if mainFrame.HoverMultitableListValue then
-      mainFrame:HoverMultitableListValue(true,self.index,self)
+      mainFrame:HoverMultitableListValue(true, self.index, self)
     end
   end
   local function ScrollListListMultitableLeave(self)
     local mainFrame = self:GetParent().mainFrame
     if mainFrame.HoverMultitableListValue then
-      mainFrame:HoverMultitableListValue(false,self.index,self)
+      mainFrame:HoverMultitableListValue(false, self.index, self)
     end
   end
   local function ScrollListListMultitableClick(self)
     local mainFrame = self:GetParent().mainFrame
     if mainFrame.ClickMultitableListValue then
-      mainFrame:ClickMultitableListValue(self.index,self)
+      mainFrame:ClickMultitableListValue(self.index, self)
     end
   end
 
-  local function ScrollList_Line_Click(self,button,...)
+  local function ScrollList_Line_Click(self, button, ...)
     local parent = self.mainFrame
     if not parent.isCheckList then
       parent.selected = self.index
@@ -3027,16 +3025,16 @@ do
     end
     parent:Update()
     if parent.SetListValue then
-      parent:SetListValue(self.index,button,...)
+      parent:SetListValue(self.index, button, ...)
     end
     if parent.isCheckList and parent.ValueChanged then
       parent:ValueChanged()
     end
     if parent.AdditionalLineClick then
-      parent.AdditionalLineClick(self,button,...)
+      parent.AdditionalLineClick(self, button, ...)
     end
   end
-  local function ScrollList_Check_Click(self,...)
+  local function ScrollList_Check_Click(self, ...)
     local listParent = self:GetParent()
     local parent = listParent.mainFrame
     if self:GetChecked() then
@@ -3046,7 +3044,7 @@ do
     end
     parent:Update()
     if parent.SetListValue then
-      parent:SetListValue(listParent.index,...)
+      parent:SetListValue(listParent.index, ...)
     end
     if parent.isCheckList and parent.ValueChanged then
       parent:ValueChanged()
@@ -3059,7 +3057,7 @@ do
     line:SetPoint('BOTTOMRIGHT', self.Frame.C, 'TOPRIGHT', 0, -i*(self.LINE_HEIGHT or 16))
 
     if not self.T then
-      line.text = AstralUI:Text(line, 'List'..tostring(i)):Point('LEFT',(self.isCheckList and 24 or 3)+(self.LINE_PADDING_LEFT or 0),0):Point("RIGHT",-3,0):Size(0,self.LINE_HEIGHT or 16):Color():Shadow()
+      line.text = AstralUI:Text(line, 'List'..tostring(i)):Point('LEFT', (self.isCheckList and 24 or 3)+(self.LINE_PADDING_LEFT or 0),0):Point('RIGHT', -3, 0):Size(0, self.LINE_HEIGHT or 16):Color():Shadow()
       if self.fontName then
         line.text:Font(self.fontName,self.fontSize or 12)
       end
@@ -3079,7 +3077,7 @@ do
         end
 
         if self.additionalLineFunctions then
-          local hoverFrame = CreateFrame('Button',nil,line)
+          local hoverFrame = CreateFrame('Button', nil, line)
           hoverFrame:SetScript('OnEnter', ScrollListListMultitableEnter)
           hoverFrame:SetScript('OnLeave', ScrollListListMultitableLeave)
           hoverFrame:SetScript('OnClick', ScrollListListMultitableClick)
@@ -3271,7 +3269,7 @@ do
   end
   local function Widget_SetSize(self, width, height)
     self:_Size(width, height)
-    self.Frame:Size(width, height):Height(height+(self.LINE_HEIGHT or 16))
+    self.Frame:Size(width, height):Height(height + (self.LINE_HEIGHT or 16))
     self.linesPerPage = height / (self.LINE_HEIGHT or 16) + 1
     self.Frame.ScrollBar:Range(0, max(0, #self.L * (self.LINE_HEIGHT or 16) - 1 - height)):UpdateButtons()
     self:Update()
@@ -3418,10 +3416,10 @@ do
     exportWindow:Show()
     if #str > 200000 then
       exportWindow.hugeText = {}
-      while str and str ~= "" do
-        local newText = str:sub(1,200000)..strsplit("\n",str:sub(200001))
+      while str and str ~= '' do
+        local newText = str:sub(1, 200000)..strsplit('\n', str:sub(200001))
         exportWindow.hugeText[#exportWindow.hugeText+1] = newText
-        str = select(2,strsplit("\n",str:sub(200001),2))
+        str = select(2, strsplit('\n', str:sub(200001), 2))
       end
       exportWindow.Next.now = 0
       exportWindow.Next:Show()
@@ -3462,9 +3460,9 @@ do
     if #str > 200000 then
       choiceWindow.hugeText = {}
       while str and str ~= "" do
-        local newText = str:sub(1,200000)..strsplit("\n",str:sub(200001))
+        local newText = str:sub(1, 200000)..strsplit("\n",str:sub(200001))
         choiceWindow.hugeText[#choiceWindow.hugeText+1] = newText
-        str = select(2,strsplit("\n",str:sub(200001),2))
+        str = select(2,strsplit("\n",str:sub(200001), 2))
       end
       choiceWindow.Next.now = 0
       choiceWindow.Next:Show()

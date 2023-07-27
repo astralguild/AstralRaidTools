@@ -1,6 +1,7 @@
 local ADDON_NAME, addon = ...
 
 ASTRAL_RAID_TOOLS = 'Astral Raid Tools'
+ASTRAL_GUILD = 'Astral'
 
 LibStub('AceAddon-3.0'):NewAddon(addon, ADDON_NAME, 'AceConsole-3.0')
 
@@ -66,8 +67,10 @@ end
 
 -- WA Library Hooks
 
+AstralRaidLibrary.ClassData = addon.ClassData
+
 function AstralRaidLibrary:Console(...)
-	print(WrapTextInColorCode('[Astral]', '008888FF'), ...)
+	print(WrapTextInColorCode('[' .. ASTRAL_GUILD .. ']', '008888FF'), ...)
 end
 
 function AstralRaidLibrary:SendMessage(config, ...)
@@ -77,14 +80,22 @@ function AstralRaidLibrary:SendMessage(config, ...)
 	if config.raid then
 		SendChatMessage(..., 'RAID')
 	end
+	if config.raidWarning then
+		SendChatMessage(..., 'RAID_WARNING')
+	end
 	if config.console then
 		AstralRaidLibrary:Console(...)
 	end
 end
 
-function AstralRaidLibrary:RegisterWeakAura(name, prefix)
+function AstralRaidLibrary:RegisterWeakAura(name, prefix, f)
 	if not addon.W[name] then
-		addon.W[name] = {prefix = prefix}
+		addon.W[name] = {prefix = prefix, f = f}
+		if f then
+			AstralRaidComms:RegisterPrefix('RAID', prefix, function(...) f('RAID', ...) end)
+			AstralRaidComms:RegisterPrefix('PARTY', prefix, function(...) f('PARTY', ...) end)
+			AstralRaidComms:RegisterPrefix('GUILD', prefix, function(...) f('GUILD', ...) end)
+		end
 	end
 end
 
