@@ -182,7 +182,7 @@ function addon.InitializeOptionSettings()
 		astralGuildHeader:Hide()
 		astralGuildShowFactOnStartup:Hide()
 	end
-	AstralRaidOptionsFrame.GuildText:SetFormattedText('Astral - Area 52 (US) %s', addon.CLIENT_VERSION)
+	AstralRaidOptionsFrame.GuildText:SetFormattedText(ASTRAL_INFO .. ' %s', addon.CLIENT_VERSION)
 end
 
 AstralRaidEvents:Register('GROUP_ROSTER_UPDATE', function() if options:IsShown() then updateFrames() end end, 'astralRaidGroupRosterUpdateOptions')

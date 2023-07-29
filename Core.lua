@@ -2,6 +2,7 @@ local ADDON_NAME, addon = ...
 
 ASTRAL_RAID_TOOLS = 'Astral Raid Tools'
 ASTRAL_GUILD = 'Astral'
+ASTRAL_INFO = ASTRAL_GUILD .. ' - Area 52 (US)'
 
 LibStub('AceAddon-3.0'):NewAddon(addon, ADDON_NAME, 'AceConsole-3.0')
 
@@ -88,13 +89,37 @@ function AstralRaidLibrary:SendMessage(config, ...)
 	end
 end
 
-function AstralRaidLibrary:RegisterWeakAura(name, prefix, f)
+function AstralRaidLibrary:SendWeakAuraComm(name, msg, channel)
+	if addon.W[name] then
+		local w = addon.W[name]
+		if channel then
+			AstralRaidComms:SendChunkedAddonMessages(w.prefix, msg, channel)
+		else
+			AstralRaidComms:SendChunkedAddonMessages(w.prefix, msg, w.channels[1])
+		end
+	end
+end
+
+function AstralRaidLibrary:RegisterWeakAuraComm(name, prefix, f, channels)
 	if not addon.W[name] then
-		addon.W[name] = {prefix = prefix, f = f}
+		if not channels then
+			channels = {
+				[1] = 'RAID',
+				[2] = 'PARTY',
+				[3] = 'GUILD',
+			}
+		end
+		addon.W[name] = {name = name, prefix = prefix, f = f, channels = channels}
 		if f then
-			AstralRaidComms:RegisterPrefix('RAID', prefix, function(...) f('RAID', ...) end)
-			AstralRaidComms:RegisterPrefix('PARTY', prefix, function(...) f('PARTY', ...) end)
-			AstralRaidComms:RegisterPrefix('GUILD', prefix, function(...) f('GUILD', ...) end)
+			for _, channel in pairs(channels) do
+				AstralRaidComms:RegisterPrefix(channel, prefix, function(...)
+					local msg, sender = ...
+					AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
+						local player = Ambiguate(sender, 'short')
+						f(channel, player, m)
+					end)
+				end)
+			end
 		end
 	end
 end
