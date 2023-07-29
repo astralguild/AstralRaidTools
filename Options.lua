@@ -219,6 +219,9 @@ function addon:OnInitialize()
 		},
 	})
 	addon.icon:Register(ADDON_NAME, ldb, self.db.profile.minimap)
+
+	if AstralRaidSettings.astral.facts.onStartup then addon.PrintFact() end
+	if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
 end
 
 SLASH_ASTRALRAID1 = '/astralraidtools'

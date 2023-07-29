@@ -20,7 +20,7 @@ local facts = {
   [12] = "Lp likes olympic rings",
 }
 
-local function printFact()
+function addon.PrintFact()
   if #facts == 0 then return end
   addon.Console(WrapTextInColorCode(string.format('"%s"', facts[math.random(1, #facts)]), 'C1E1C1FF'))
 end
@@ -61,19 +61,12 @@ local function parseCmds(text, channel)
   end
 end
 
-AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
-	if addonName == ADDON_NAME and addon.IsAstralGuild() then
-    -- Login message
-    if AstralRaidSettings.astral.facts.onStartup then printFact() end
-    if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
-
-    -- Command events
-    AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'ParseRaidCmd')
-    AstralRaidEvents:Register('CHAT_MSG_RAID_LEADER', function(t) parseCmds(t, 'RAID') end, 'ParseRaidCmd')
-    AstralRaidEvents:Register('CHAT_MSG_PARTY', function(t) parseCmds(t, 'PARTY') end, 'ParsePartyCmd')
-    AstralRaidEvents:Register('CHAT_MSG_PARTY_LEADER', function(t) parseCmds(t, 'PARTY') end, 'ParsePartyCmd')
-	end
-end, 'AstralGuildInit')
+if addon.IsAstralGuild() then
+  AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'ParseRaidCmd')
+  AstralRaidEvents:Register('CHAT_MSG_RAID_LEADER', function(t) parseCmds(t, 'RAID') end, 'ParseRaidCmd')
+  AstralRaidEvents:Register('CHAT_MSG_PARTY', function(t) parseCmds(t, 'PARTY') end, 'ParsePartyCmd')
+  AstralRaidEvents:Register('CHAT_MSG_PARTY_LEADER', function(t) parseCmds(t, 'PARTY') end, 'ParsePartyCmd')
+end
 
 -- Library Hooks
 
