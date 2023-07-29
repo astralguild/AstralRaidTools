@@ -152,3 +152,31 @@ end
 function AstralRaidLibrary:Encounter()
 	return addon.InEncounter, addon.Encounter
 end
+
+function AstralRaidLibrary:GetPlayerRole()
+  return addon.GetPlayerRole()
+end
+
+function AstralRaidLibrary:GetWeakAuras()
+  return addon.GetWeakAuras()
+end
+
+function AstralRaidLibrary:GetAddons()
+  return addon.GetAddons()
+end
+
+function AstralRaidLibrary:IsRaidLead()
+  return addon.IsRaidLead()
+end
+
+function AstralRaidLibrary:IsPartyLead()
+  return addon.IsPartyLead()
+end
+
+function AstralRaidLibrary:IsOfficer()
+  return addon.IsOfficer()
+end
+
+function AstralRaidLibrary:GetGroupRank()
+  return addon.GetGroupRank()
+end
