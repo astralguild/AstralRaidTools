@@ -42,7 +42,7 @@ end
 AstralRaidComms:RegisterPrefix('RAID', 'alertShow', function(...) showAlert('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('RAID', 'alertHide', function(...) hideAlert('RAID', ...) end)
 
-AstralRaidEvents:Register('PLAYER_LOGIN', initAlerts, 'astralRaidInitAlerts')
+AstralRaidEvents:Register('PLAYER_LOGIN', initAlerts, 'InitAlerts')
 
 -- Library Hooks
 

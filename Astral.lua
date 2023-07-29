@@ -68,12 +68,12 @@ AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
     if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
 
     -- Command events
-    AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
-    AstralRaidEvents:Register('CHAT_MSG_RAID_LEADER', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
-    AstralRaidEvents:Register('CHAT_MSG_PARTY', function(t) parseCmds(t, 'PARTY') end, 'AstralRaidParsePartyCmd')
-    AstralRaidEvents:Register('CHAT_MSG_PARTY_LEADER', function(t) parseCmds(t, 'PARTY') end, 'AstralRaidParsePartyCmd')
+    AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'ParseRaidCmd')
+    AstralRaidEvents:Register('CHAT_MSG_RAID_LEADER', function(t) parseCmds(t, 'RAID') end, 'ParseRaidCmd')
+    AstralRaidEvents:Register('CHAT_MSG_PARTY', function(t) parseCmds(t, 'PARTY') end, 'ParsePartyCmd')
+    AstralRaidEvents:Register('CHAT_MSG_PARTY_LEADER', function(t) parseCmds(t, 'PARTY') end, 'ParsePartyCmd')
 	end
-end, 'AstralRaidAstralGuildInit')
+end, 'AstralGuildInit')
 
 -- Library Hooks
 

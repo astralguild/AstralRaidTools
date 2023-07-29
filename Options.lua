@@ -185,8 +185,8 @@ function addon.InitializeOptionSettings()
 	AstralRaidOptionsFrame.GuildText:SetFormattedText(ASTRAL_INFO .. ' %s', addon.CLIENT_VERSION)
 end
 
-AstralRaidEvents:Register('GROUP_ROSTER_UPDATE', function() if options:IsShown() then updateFrames() end end, 'astralRaidGroupRosterUpdateOptions')
-AstralRaidEvents:Register('PARTY_LEADER_CHANGED', function() if options:IsShown() then updateFrames() end end, 'astralRaidPartyLeaderChangedOptions')
+AstralRaidEvents:Register('GROUP_ROSTER_UPDATE', function() if options:IsShown() then updateFrames() end end, 'GroupRosterUpdateOptions')
+AstralRaidEvents:Register('PARTY_LEADER_CHANGED', function() if options:IsShown() then updateFrames() end end, 'PartyLeaderChangedOptions')
 
 local function toggle()
 	AstralRaidOptionsFrame:SetShown(not AstralRaidOptionsFrame:IsShown())

@@ -97,8 +97,8 @@ local function unitSpellcastSucceeded(...)
 	end
 end
 
-AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'astralRaidNotifiersCLEU')
-AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', unitSpellcastSucceeded, 'astralRaidNotifiersUnitSpellcastSucceeded')
+AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'NotifiersCLEU')
+AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', unitSpellcastSucceeded, 'NotifiersUnitSpellcastSucceeded')
 
 local module = addon:New(L['NOTIFIERS'], L['NOTIFIERS'], true)
 local enableCheckbox, toConsoleCheckbox, toOfficerCheckbox, toRaidCheckbox, encounterList, specificHeader, instanceDropdown, encounterDetailsList

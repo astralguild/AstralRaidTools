@@ -49,7 +49,7 @@ end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
 	addon.InInstance, addon.InstanceType = IsInInstance()
-end, 'astralRaidGetInstance')
+end, 'GetInstance')
 
 AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName, difficultyID, groupSize)
   addon.InEncounter = true
@@ -64,12 +64,12 @@ AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName
   }
   bwClear()
 	bw()
-end, 'astralRaidStartEncounter')
+end, 'StartEncounter')
 
 AstralRaidEvents:Register('ENCOUNTER_END', function()
   addon.InEncounter = false
   addon.Encounter['end'] = GetTime()
-end, 'astralRaidEndEncounter')
+end, 'EndEncounter')
 
 MYTHIC_DIFFICULTY = 16
 

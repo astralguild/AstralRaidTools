@@ -660,13 +660,13 @@ end
 
 init()
 
-AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', playerEnteringWorld, 'astralRaidEarlyPullPlayerEnteringWorld')
-AstralRaidEvents:Register('CHAT_MSG_ADDON', chatMsgAddon, 'astralRaidEarlyPullChatMsgAddon')
-AstralRaidEvents:Register('UNIT_THREAT_LIST_UPDATE', unitThreatListUpdate, 'astralRaidEarlyPullUnitThreatListUpdate')
-AstralRaidEvents:Register('UNIT_TARGET', unitTarget, 'astralRaidEarlyPullUnitTarget')
-AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function() cleu(CombatLogGetCurrentEventInfo()) end, 'astralRaidEarlyPullCLEU')
-AstralRaidEvents:Register('ENCOUNTER_START', encounterStart, 'astralRaidEarlyPullEncounterStart')
-AstralRaidEvents:Register('INSTANCE_ENCOUNTER_ENGAGE_UNIT', instanceEncounterEngageUnit, 'astralRaidEarlyPullInstanceEncounterEngageUnit')
+AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', playerEnteringWorld, 'EarlyPullPlayerEnteringWorld')
+AstralRaidEvents:Register('CHAT_MSG_ADDON', chatMsgAddon, 'EarlyPullChatMsgAddon')
+AstralRaidEvents:Register('UNIT_THREAT_LIST_UPDATE', unitThreatListUpdate, 'EarlyPullUnitThreatListUpdate')
+AstralRaidEvents:Register('UNIT_TARGET', unitTarget, 'EarlyPullUnitTarget')
+AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function() cleu(CombatLogGetCurrentEventInfo()) end, 'EarlyPullCLEU')
+AstralRaidEvents:Register('ENCOUNTER_START', encounterStart, 'EarlyPullEncounterStart')
+AstralRaidEvents:Register('INSTANCE_ENCOUNTER_ENGAGE_UNIT', instanceEncounterEngageUnit, 'EarlyPullInstanceEncounterEngageUnit')
 
 AstralRaidComms:RegisterPrefix('RAID', EARLY_PULL_PREFIX, function(...) onSync('RAID', ...) end)
 AstralRaidComms:RegisterPrefix('PARTY', EARLY_PULL_PREFIX, function(...) onSync('PARTY', ...) end)

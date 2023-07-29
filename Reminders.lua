@@ -202,7 +202,7 @@ AstralRaidEvents:Register('PLAYER_LOGIN', function() -- initialize all reminders
       AstralRaidSettings.texts.enabled[name] = true
     end
   end
-end, 'astralRaidInitReminders')
+end, 'InitReminders')
 
 local module = addon:New(L['REMINDERS'], L['REMINDERS'])
 local fontDropdown, fontSizeSlider, reminderEnableCheckbox, inPartyCheckbox, outsideInstancesCheckbox, reminderWidgets

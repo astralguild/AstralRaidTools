@@ -203,10 +203,10 @@ local function handle(e, ...)
 	end
 end
 
-AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', function(...) handle('UNIT_SPELLCAST_SUCCEEDED', ...) end, 'astralRaidBossModulesUnitSpellcastSucceeded')
-AstralRaidEvents:Register('CHAT_MSG_ADDON', function(...) handle('CHAT_MSG_ADDON', ...) end, 'astralRaidBossModulesChatMsgAddon')
-AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function(...) handle('COMBAT_LOG_EVENT_UNFILTERED', GetCurrentCombatTextEventInfo()) end, 'astralRaidBossModulesCLEU')
-AstralRaidEvents:Register('ENCOUNTER_START', function(...) handle('ENCOUNTER_START', ...) end, 'astralRaidBossModulesEncounterStart')
+AstralRaidEvents:Register('UNIT_SPELLCAST_SUCCEEDED', function(...) handle('UNIT_SPELLCAST_SUCCEEDED', ...) end, 'BossModulesUnitSpellcastSucceeded')
+AstralRaidEvents:Register('CHAT_MSG_ADDON', function(...) handle('CHAT_MSG_ADDON', ...) end, 'BossModulesChatMsgAddon')
+AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', function(...) handle('COMBAT_LOG_EVENT_UNFILTERED', GetCurrentCombatTextEventInfo()) end, 'BossModulesCLEU')
+AstralRaidEvents:Register('ENCOUNTER_START', function(...) handle('ENCOUNTER_START', ...) end, 'BossModulesEncounterStart')
 
 local function initPrivateAuraAnchors()
 	local frame = CreateFrame('FRAME', nil, UIParent)
@@ -234,7 +234,7 @@ AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
 	if addonName == ADDON_NAME then
 		initPrivateAuraAnchors()
 	end
-end, 'AstralRaidBossModulesInit')
+end, 'BossModulesInit')
 
 local module = addon:New('Boss Modules', 'Boss Modules', false, false, true) -- disabled for now until tested
 local instanceDropdown, encounterList, setContent
