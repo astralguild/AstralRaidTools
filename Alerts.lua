@@ -46,9 +46,10 @@ AstralRaidEvents:Register('PLAYER_LOGIN', initAlerts, 'InitAlerts')
 
 -- Library Hooks
 
-function AstralRaidLibrary:ShowAlert(text)
+function AstralRaidLibrary:ShowAlert(text, time)
   alert:SetText(text)
   addon.ShowText('alertPrimary')
+  if time then C_Timer.After(time, function() addon.HideText('alertPrimary') end) end
 end
 
 function AstralRaidLibrary:HideAlert()

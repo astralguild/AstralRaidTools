@@ -249,3 +249,13 @@ AstralRaidEvents:Register('PLAYER_ALIVE', resurrected, 'TextsResurrected')
 AstralRaidEvents:Register('PLAYER_DEAD', dead, 'TextsDeath')
 AstralRaidEvents:Register('PLAYER_UNGHOST', alive, 'TextsAlive')
 AstralRaidEvents:Register('COMBAT_LOG_EVENT_UNFILTERED', cleu, 'TextsCLEU')
+
+-- Library Hooks
+
+function AstralRaidLibrary:CreateText(name, text, type)
+  return addon.CreateText(name, text, type)
+end
+
+function AstralRaidLibrary:AddTextEventCallback(func, name, event, sound)
+  addon.AddTextEventCallback(func, name, event, sound)
+end
