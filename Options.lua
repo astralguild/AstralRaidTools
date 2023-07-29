@@ -49,12 +49,16 @@ framesList.Frame.ScrollBar.buttonDown:Hide()
 options.Frames = {}
 options._Frames = {}
 
+local function isDisabled(f)
+	return (f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer() or (f.inParty and addon.IsPartyLead()) or (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))) or (f._disabled and not (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))
+end
+
 local function updateFrames()
 	options.Frames = {}
 	for _, f in pairs(options._Frames) do
 		local pos = #options.Frames + 1
 		framesList.L[pos] = f.name
-		framesList.LDisabled[pos] = (f.leadProtected and not (addon.IsRaidLead() or addon.IsOfficer() or (f.inParty and addon.IsPartyLead()) or (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))) or (f._disabled and not (addon.Debug and AstralRaidSettings.general.debug.showAllMenus))
+		framesList.LDisabled[pos] = isDisabled(f)
 		options.Frames[pos] = f
 	end
 	framesList:Update()

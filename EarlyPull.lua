@@ -536,6 +536,10 @@ local function afterPull()
   if (not bestSyncTable) or isMe(bestSyncTable) then
     announce(ctx.announceChannel, ctx.pullDesc .. getBlameDesc(bestCand, bestScore, secondScore) .. '.')
   end
+
+  if addon.Encounter then
+    addon.Encounter.whoPulled = bestCand
+  end
 end
 
 local function playerEnteringWorld()

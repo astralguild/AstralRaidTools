@@ -830,20 +830,20 @@ do
     self.Icon:SetTexture('Interface\\Minimap\\Tracking\\None')
     self.Icon:SetSize(20, 20)
 
-    self.IconOverlay = self:CreateTexture(nil, "ARTWORK")
-    self.IconOverlay:SetPoint("TOPLEFT", self.Icon)
-    self.IconOverlay:SetPoint("BOTTOMRIGHT", self.Icon)
-    self.IconOverlay:SetColorTexture(0,0,0,0.5)
+    self.IconOverlay = self:CreateTexture(nil, 'ARTWORK')
+    self.IconOverlay:SetPoint('TOPLEFT', self.Icon)
+    self.IconOverlay:SetPoint('BOTTOMRIGHT', self.Icon)
+    self.IconOverlay:SetColorTexture(0, 0, 0, 0.5)
 
     self.Button = CreateFrame('Button', nil, self)
-    self.Button:SetSize(32,32)
+    self.Button:SetSize(32, 32)
     self.Button:SetPoint('TOPLEFT')
 
     self.Button.Border = self.Button:CreateTexture(nil, 'BORDER')
     self.Button.Border:SetPoint('TOPLEFT')
     self.Button.Border:SetTexture('Interface\\Addons\\' .. ADDON_NAME .. '\\media\\radioModern')
-    self.Button.Border:SetSize(32,32)
-    self.Button.Border:SetTexCoord(0,0.25,0,1)
+    self.Button.Border:SetSize(32, 32)
+    self.Button.Border:SetTexCoord(0, 0.25, 0, 1)
 
     self.Button.Shine = self.Button:CreateTexture(nil, 'OVERLAY')
     self.Button.Shine:SetPoint('TOPLEFT', 2, -2)
@@ -1158,7 +1158,6 @@ do
       'Enable', Widget_Enable,
       'ColorBorder', Widget_ColorBorder
     )
-
     self._Size = self.Size
     self.Size = Widget_SetSize
     self._SetWidth = self.SetWidth
@@ -1240,7 +1239,6 @@ for i = 1, 2 do
   _G[ADDON_NAME .. 'DropDownList'..i] = ScrollDropDown_Blizzard[i]
   ScrollDropDown_Blizzard[i].Buttons = {}
   ScrollDropDown_Blizzard[i].MaxLines = 0
-
   ScrollDropDown_Blizzard[i].Slider = AstralUI.CreateSlider(ScrollDropDown_Blizzard[i], 10, 170, -15, -11, 1, 10, 'Text', 1, 'TOPRIGHT', true)
   ScrollDropDown_Blizzard[i].Slider:SetScript('OnValueChanged', function (self, value)
     value = Round(value)
@@ -2300,7 +2298,7 @@ do
 
   function AstralUI:ScrollFrame(parent)
     local self = CreateFrame('ScrollFrame', nil, parent)
-    AstralUI:Border(self,2,.24,.25,.30,1)
+    AstralUI:Border(self, 2, .24, .25, .30, 1)
     self.content = CreateFrame('FRAME', nil, self)
     self:SetScrollChild(self.content)
 
@@ -2327,7 +2325,6 @@ end
 do
   local Tooltip = {}
   AstralUI.Tooltip = Tooltip
-
   function Tooltip:Hide()
     GameTooltip_Hide()
   end
@@ -2435,13 +2432,13 @@ do
     end
     if disableTitle then
       local textObj = _G[tooltip:GetName()..'TextLeft1']
-      local arg1,arg2,arg3,arg4,arg5 = textObj:GetFont()
-      textObj:SetFont( arg1,select(2,_G[tooltip:GetName()..'TextLeft2']:GetFont()),arg3,arg4,arg5 )
+      local arg1, arg2, arg3, arg4, arg5 = textObj:GetFont()
+      textObj:SetFont(arg1, select(2, _G[tooltip:GetName()..'TextLeft2']:GetFont()), arg3, arg4, arg5)
       tooltip.titleDisabled = tooltip.titleDisabled or arg2
     elseif tooltip.titleDisabled then
       local textObj = _G[tooltip:GetName()..'TextLeft1']
-      local arg1,arg2,arg3,arg4,arg5 = textObj:GetFont()
-      textObj:SetFont( arg1,tooltip.titleDisabled,arg3,arg4,arg5 )
+      local arg1, arg2, arg3, arg4, arg5 = textObj:GetFont()
+      textObj:SetFont(arg1, tooltip.titleDisabled, arg3, arg4, arg5)
       tooltip.titleDisabled = nil
     end
     tooltip:ClearAllPoints()
@@ -2460,7 +2457,7 @@ do
     tooltip:Show()
     if not isTop and (tooltip:GetBottom() or 0) < 1 then
       owner = nil
-      for i=1,(tooltipID-1) do
+      for i = 1, (tooltipID-1) do
         local point = additionalTooltips[i]:GetPoint()
         if point ~= 'TOPRIGHT' then
           owner = additionalTooltips[i]
@@ -2492,7 +2489,7 @@ do
       parent.ScrollBar:SetValue(max)
     end
     if parent.OnTextChanged then
-      parent.OnTextChanged(self,...)
+      parent.OnTextChanged(self, ...)
     elseif self.OnTextChanged then
       self:OnTextChanged(...)
     end
@@ -2567,12 +2564,12 @@ do
     if y < scrollNow then
       parent.ScrollBar:SetValue(max(floor(y),0))
     elseif (y + height) > (scrollNow + heightNow) then
-      local _,scrollMax = parent.ScrollBar:GetMinMaxValues()
-      parent.ScrollBar:SetValue(min(ceil( y + height - heightNow ),scrollMax))
+      local _, scrollMax = parent.ScrollBar:GetMinMaxValues()
+      parent.ScrollBar:SetValue(min(ceil(y + height - heightNow), scrollMax))
     end
 
     if parent.Cursor730fix then
-      parent:Cursor730fix(height,y)
+      parent:Cursor730fix(height, y)
     end
 
     if parent.OnCursorChanged then
@@ -2731,10 +2728,7 @@ do
 
       self.specialCheckObj = specialCheck
 
-      self:SetScript('OnVerticalScroll', function(self, offset)
-        LUA_ModdedSetText(self)
-      end)
-
+      self:SetScript('OnVerticalScroll', function(self, offset) LUA_ModdedSetText(self) end)
       return self
     end
   end
@@ -2803,7 +2797,6 @@ do
   end
   local function Widget_Tooltip(self, text)
     self.tooltip = self:GetText()
-    --if self.tooltip == "" or not self.tooltip then self.tooltip = " " end
     if self.tooltip == '' or not self.tooltip then
       self.tooltip = text
     else
@@ -2851,7 +2844,6 @@ do
 
     return self
   end
-
 
   function AstralUI:Button(parent,text,template)
     if template == 0 then
@@ -2978,9 +2970,7 @@ do
           break
         end
       end
-      if swapLine then
-        mainFrame:OnDragFunction(self, swapLine)
-      end
+      if swapLine then mainFrame:OnDragFunction(self, swapLine) end
     end
     self:ClearAllPoints()
     for i=1, #self.poins do
@@ -3058,9 +3048,7 @@ do
 
     if not self.T then
       line.text = AstralUI:Text(line, 'List'..tostring(i)):Point('LEFT', (self.isCheckList and 24 or 3)+(self.LINE_PADDING_LEFT or 0),0):Point('RIGHT', -3, 0):Size(0, self.LINE_HEIGHT or 16):Color():Shadow()
-      if self.fontName then
-        line.text:Font(self.fontName,self.fontSize or 12)
-      end
+      if self.fontName then line.text:Font(self.fontName,self.fontSize or 12) end
       line:SetFontString(line.text)
       line:SetPushedTextOffset(2, -1)
     else
@@ -3075,7 +3063,6 @@ do
         if width == 0 then
           zeroWidth = j
         end
-
         if self.additionalLineFunctions then
           local hoverFrame = CreateFrame('Button', nil, line)
           hoverFrame:SetScript('OnEnter', ScrollListListMultitableEnter)

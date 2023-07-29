@@ -83,6 +83,7 @@ end
 
 local function eatFoodReminder(e, _, m, ...)
   if e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
+    if not addon.InInstance then return 'HIDE' end
     local wellFedBuff = AuraUtil.FindAuraByName(WELL_FED, 'player')
     if (not wellFedBuff) and UnitHealth('player') > 0 then
       return 'SHOW'
@@ -319,7 +320,7 @@ function module.options:OnShow()
   end
 
   fontSizeSlider:SetTo(AstralRaidSettings.general.font.size):OnChange(function(self, event)
-    event = event - event%1
+    event = event - event % 1
     AstralRaidSettings.general.font.size = event
     addon.UpdateTextsFonts()
     self.tooltipText = event

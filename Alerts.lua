@@ -43,3 +43,14 @@ AstralRaidComms:RegisterPrefix('RAID', 'alertShow', function(...) showAlert('RAI
 AstralRaidComms:RegisterPrefix('RAID', 'alertHide', function(...) hideAlert('RAID', ...) end)
 
 AstralRaidEvents:Register('PLAYER_LOGIN', initAlerts, 'astralRaidInitAlerts')
+
+-- Library Hooks
+
+function AstralRaidLibrary:ShowAlert(text)
+  alert:SetText(text)
+  addon.ShowText('alertPrimary')
+end
+
+function AstralRaidLibrary:HideAlert()
+  addon.HideText('alertPrimary')
+end

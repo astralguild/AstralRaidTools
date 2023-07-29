@@ -63,7 +63,7 @@ function addon.ClassColorName(unit)
   end
 end
 
-function addon.DelUnitNameServer(unitName)
+local function delUnitNameServer(unitName)
   unitName = strsplit("-", unitName)
   return unitName
 end
@@ -262,7 +262,7 @@ function module.options:Load()
       if not raidNames[raidNamesUsed] then
         break
       end
-      local name = addon.DelUnitNameServer(namesList[i].name)
+      local name = delUnitNameServer(namesList[i].name)
       raidNames[raidNamesUsed]:SetText(name)
       raidNames[raidNamesUsed]:SetTextColor(addon.ClassColorNum(namesList[i].class))
       namesList2[raidNamesUsed] = name

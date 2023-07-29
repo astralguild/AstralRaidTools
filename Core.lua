@@ -120,6 +120,14 @@ function AstralRaidLibrary:GetBossAbilities(...)
 	return addon.GetBossAbilities(...)
 end
 
+function AstralRaidLibrary:GetBossName(bossID)
+	return addon.GetBossName(bossID)
+end
+
 function AstralRaidLibrary:GetPlayerRole()
 	return addon.GetPlayerRole()
+end
+
+function AstralRaidLibrary:Encounter()
+	return addon.InEncounter, addon.Encounter
 end

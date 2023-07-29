@@ -60,6 +60,7 @@ AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName
     groupSize = groupSize,
     start = GetTime(),
     phase = 1,
+		whoPulled = nil,
   }
   bwClear()
 	bw()
@@ -645,15 +646,11 @@ end
 
 function addon.GetBossAbilities(bossID, difficultyID)
 	if not bossID then return end
-	if not difficultyID then
-		difficultyID = MYTHIC_DIFFICULTY
-	end
+	if not difficultyID then difficultyID = MYTHIC_DIFFICULTY end
 	local abilities = {}
 	EJ_SetDifficulty(difficultyID)
 	local stack, _, _, _, curSectionID = {}, EJ_GetEncounterInfo(encounterIDtoEJidData[bossID])
-	if not curSectionID then
-		return {}
-	end
+	if not curSectionID then return {} end
 	repeat
 		local info = C_EncounterJournal.GetSectionInfo(curSectionID)
 		if info.spellID and info.spellID > 0 then

@@ -5,23 +5,24 @@ function addon.IsAstralGuild()
   return guild == ASTRAL_GUILD and GetRealmName():gsub('%s+', '') == 'Area52'
 end
 
-local function printAstral(s)
-  print(WrapTextInColorCode(ASTRAL_RAID_TOOLS .. ': ' .. s, 'fff5e4a8'))
-end
-
 local facts = {
-  [1] = "Cryxian bought the deed to Flavortown",
-  [2] = "Ayegon is the mayor of Flavortown",
-  [3] = "Look at Terra's health",
-  [4] = "Hark the return of the Golden Shower Prince",
-  [5] = "Terra: has a cat",
-  [6] = "Terra is also a computer case",
-  [7] = "Luna can't pronounce 'affix' or 'desiruous'",
+  [1]  = "Cryxian bought the deed to Flavortown",
+  [2]  = "Ayegon is the mayor of Flavortown",
+  [3]  = "Look at Terra's health",
+  [4]  = "Hark the return of the Golden Shower Prince",
+  [5]  = "Terra: has a cat",
+  [6]  = "Terra is also a computer case",
+  [7]  = "Luna can't pronounce 'affix' or 'desiruous'",
+  [8]  = "Where is the comp sheet?",
+  [9]  = "Cryxian is HR",
+  [10] = "Terra's bags are full",
+  [11] = "Praise Sarah",
+  [12] = "Lp likes olympic rings",
 }
 
 local function printFact()
   if #facts == 0 then return end
-  printAstral(string.format('"%s"', facts[math.random(1, #facts)]))
+  addon.Console(WrapTextInColorCode(string.format('"%s"', facts[math.random(1, #facts)]), 'C1E1C1FF'))
 end
 
 local function sendFact(_, channel)
@@ -51,23 +52,20 @@ local commands = {
 local function parseCmds(text, channel)
 	text = gsub(text, '^%[%a+%] ', '') -- Strip off [SomeName] from message from using Identity-2
   local c, t = strsplit(' ', text, 1)
-  for cmd, obj in pairs(commands) do
-    if c:lower() == cmd then
-      if obj.leadProtected and not (addon.IsPartyLead() or addon.IsRaidLead() or addon.IsOfficer()) then return end
-      if obj.debug and not addon.Debug then return end
-      obj.f(t, channel)
-      return
-    end
+  if commands[c:lower()] then
+    local obj = commands[c:lower()]
+    if obj.leadProtected and not (addon.IsPartyLead() or addon.IsRaidLead() or addon.IsOfficer()) then return end
+    if obj.debug and not addon.Debug then return end
+    obj.f(t, channel)
+    return
   end
 end
 
 AstralRaidEvents:Register('ADDON_LOADED', function(addonName)
 	if addonName == ADDON_NAME and addon.IsAstralGuild() then
     -- Login message
-		AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
-      if AstralRaidSettings.astral.facts.onStartup then printFact() end
-      AstralRaidEvents:Unregister('PLAYER_ENTERING_WORLD', 'AstralRaidAstralGuildOnEnterWorld')
-    end, 'AstralRaidAstralGuildOnEnterWorld')
+    if AstralRaidSettings.astral.facts.onStartup then printFact() end
+    if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
 
     -- Command events
     AstralRaidEvents:Register('CHAT_MSG_RAID', function(t) parseCmds(t, 'RAID') end, 'AstralRaidParseRaidCmd')
