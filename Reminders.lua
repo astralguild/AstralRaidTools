@@ -104,9 +104,9 @@ local function eatFoodReminder(e, _, m, ...)
   end
 end
 
-local function cauldronReminder(e, ...)
-  if e == 'UNIT_SPELLCAST_SUCCEEDED' then
-    local spellID = select(3, ...)
+local function cauldronReminder(e, _, m, ...)
+  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' then
+    local spellID = select(10, ...)
     for _, cauldronSpellID in pairs(cauldronSpells) do
       if spellID == cauldronSpellID then
         hideAfter('cauldronDown', 20)
@@ -114,6 +114,7 @@ local function cauldronReminder(e, ...)
       end
     end
   end
+  return 'HIDE'
 end
 
 local function repairReminder(e, _, m, ...)

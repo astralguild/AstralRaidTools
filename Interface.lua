@@ -3422,7 +3422,7 @@ do
 end
 
 do
-  local choiceWindow
+  local choiceWindow -- TODO
   function AstralUI:Choices(str, name, func)
     if not choiceWindow then
       choiceWindow = AstralUI:Popup('Choices'):Size(650, 600)
