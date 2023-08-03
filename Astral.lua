@@ -18,6 +18,7 @@ local facts = {
   [10] = "Terra's bags are full",
   [11] = "Praise Sarah",
   [12] = "Lp likes olympic rings",
+  [13] = "Something about 'there's no way'",
 }
 
 function addon.PrintFact()

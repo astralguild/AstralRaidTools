@@ -84,9 +84,19 @@ function AstralRaidLibrary:SendMessage(config, ...)
 	if config.raidWarning then
 		SendChatMessage(..., 'RAID_WARNING')
 	end
+	if config.party then
+		SendChatMessage(..., 'PARTY')
+	end
+	if config.instanceChat then
+		SendChatMessage(..., 'INSTANCE_CHAT')
+	end
 	if config.console then
 		AstralRaidLibrary:Console(...)
 	end
+end
+
+function AstralRaidLibrary:GetInstanceChannel()
+	return addon.GetInstanceChannel()
 end
 
 function AstralRaidLibrary:SendWeakAuraComm(name, msg, channel)
