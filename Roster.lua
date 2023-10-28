@@ -22,7 +22,7 @@ local function delUnitNameServer(unitName)
   return unitName
 end
 
-local module = addon:New(L['ROSTER'], L['ROSTER_VIEW'], true)
+local module = addon:New(L['ROSTER'], L['ROSTER_VIEW'], true, true)
 
 local statusIcons = {
   [1] = 'Interface\\RaidFrame\\ReadyCheck-Waiting',

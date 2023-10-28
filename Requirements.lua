@@ -1,7 +1,7 @@
 local ADDON_NAME, addon = ...
 
-local waModule = addon:New('WA Requirements', 'WeakAuras', true)
-local addonModule = addon:New('Addon Requirements', 'Addons', true)
+local waModule = addon:New('WA Requirements', 'WeakAuras', true, true)
+local addonModule = addon:New('Addon Requirements', 'Addons', true, true)
 
 addon.WeakAuraResponses = {}
 addon.AddonResponses = {}
