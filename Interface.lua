@@ -1724,7 +1724,7 @@ function AstralUI:GuildInfo(frame)
   astralGuildInfo = CreateFrame('FRAME', nil, frame, BackdropTemplateMixin and 'BackdropTemplate')
   astralGuildInfo:Hide()
   astralGuildInfo:SetFrameLevel(8)
-  astralGuildInfo:SetSize(300, 150)
+  astralGuildInfo:SetSize(300, 170)
   astralGuildInfo:EnableKeyboard(true)
   astralGuildInfo:SetPoint('BOTTOM', UIParent, 'TOP', 0, -300)
 
@@ -1733,20 +1733,24 @@ function AstralUI:GuildInfo(frame)
   astralGuildInfo.background:SetColorTexture(33/255, 33/255, 33/255, 0.8)
 
   astralGuildInfo.title = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal_ART')
-  astralGuildInfo.title:SetPoint('TOP', astralGuildInfo, 'TOP', 0, -10)
+  astralGuildInfo.title:SetPoint('TOP', astralGuildInfo, 'TOP', 0, -20)
   astralGuildInfo.title:SetText(ADDON_NAME)
 
   astralGuildInfo.author = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal_ART')
-  astralGuildInfo.author:SetPoint('TOP', astralGuildInfo.title, 'BOTTOM', 0, -20)
+  astralGuildInfo.author:SetPoint('TOP', astralGuildInfo.title, 'BOTTOM', 0, -40)
   astralGuildInfo.author:SetText('Made by Luna <Astral> @ Area 52')
 
+  astralGuildInfo.author2 = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal_ART')
+  astralGuildInfo.author2:SetPoint('TOP', astralGuildInfo.author, 'BOTTOM', 0, -10)
+  astralGuildInfo.author2:SetText('Maintained by Kyylier <Astral> @ Area 52')
+
   astralGuildInfo.visit = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal_ART')
-  astralGuildInfo.visit:SetPoint('TOP', astralGuildInfo.author, 'BOTTOM', 0, -20)
+  astralGuildInfo.visit:SetPoint('TOP', astralGuildInfo.author2, 'BOTTOM', 0, -20)
   astralGuildInfo.visit:SetText('Visit <Astral> at')
 
   astralGuildInfo.editBox = CreateFrame('EditBox', nil, astralGuildInfo, 'BackdropTemplate')
   astralGuildInfo.editBox:SetSize(125, 20)
-  astralGuildInfo.editBox:SetPoint('TOP', astralGuildInfo.visit, 'BOTTOM', 0, -20)
+  astralGuildInfo.editBox:SetPoint('TOP', astralGuildInfo.visit, 'BOTTOM', 0, 0)
 
   astralGuildInfo.logo = astralGuildInfo:CreateTexture(nil, 'ARTWORK')
   astralGuildInfo.logo:SetSize(32, 32)
