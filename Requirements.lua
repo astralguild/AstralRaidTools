@@ -16,8 +16,8 @@ local function waPush(channel, ...)
     for wa, _ in pairs(AstralRaidSettings.wa.required) do
       addon.WeakAuraResponses[player][wa] = true
     end
-    for wa, url in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      addon.WeakAuraResponses[player][wa] = url
+    for wa, resp in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+      addon.WeakAuraResponses[player][wa] = resp
     end
     addon.UpdateRosterPage()
   end)
@@ -33,8 +33,8 @@ local function addonPush(channel, ...)
     for a, _ in pairs(AstralRaidSettings.addons.required) do
       addon.AddonResponses[player][a] = true
     end
-    for a, ver in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      addon.AddonResponses[player][a] = ver
+    for a, resp in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+      addon.AddonResponses[player][a] = resp
     end
     addon.UpdateRosterPage()
   end)
