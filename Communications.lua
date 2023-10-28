@@ -188,14 +188,25 @@ local function waRequest(channel, ...)
   local weakAuras = addon.GetWeakAuras()
   AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
     addon.PrintDebug('waRequest', m)
-    local resp = addon.PlayerClass
+    local first = true
+    local resp = ''
     for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      if not weakAuras[wa] or tostring(weakAuras[wa].version) ~= v then
+      local validWa = weakAuras[wa] and tostring(weakAuras[wa].version) == v and not weakAuras[wa].load.use_never
+      if not validWa then
         local d = ''
-        if weakAuras[wa] then
+        if not weakAuras[wa] then
+          d = 'MISSING'
+        elseif weakAuras[wa].load.use_never then
+          d = 'LOAD_NEVER'
+        else
           d = tostring(weakAuras[wa].version)
         end
-        resp = resp .. string.format(' "%s":"%s"', wa, d)
+        -- Why does Lua not have a built-in string.trim
+        if not first then
+          resp = resp .. ' '
+        end
+        first = false
+        resp = resp .. string.format('"%s":"%s"', wa, d)
       end
     end
     AstralRaidComms:SendChunkedAddonMessages('waPush', resp, channel)
