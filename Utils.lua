@@ -1,5 +1,15 @@
 local ADDON_NAME, addon = ...
 
+function addon.GetNormalizedRealmName()
+    local result = GetNormalizedRealmName()
+    if not result then
+        result = GetRealmName()
+        result = result:gsub("%s+", "")
+        result = result:gsub("%-", "")
+    end
+    return result
+end
+
 function addon.Console(...)
     print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', 'fff5e4a8'), ...)
 end
@@ -37,23 +47,24 @@ function addon.PairsByKeys(t, f)
     return iter
 end
 
-function addon.IterateRoster(maxGroup, index)
+function addon.IterateRoster(_, index)
     index = (index or 0) + 1
-    maxGroup = maxGroup or 8
 
     if IsInRaid() then
-        if index > GetNumGroupMembers() then
+        if index > 40 then
             return
         end
         local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(index)
-        if subgroup > maxGroup then
-            return addon.IterateRoster(maxGroup, index)
+        if name == nil then
+            return addon.IterateRoster(_, index)
         end
-        local guid = UnitGUID(name or ('raid'..index))
-        name = name or ''
-        return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
+        local guid = UnitGUID('raid'..index)
+        local _, _, guildRank = GetGuildInfo(UnitGUID('raid'..index))
+        local namePart, realmPart = UnitFullName('raid'..index)
+        realmPart = realmPart or addon.GetNormalizedRealmName()
+        return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole, namePart .. '-' .. realmPart, guildRank
     else
-        local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _
+        local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _, nameWithRealm
         local unit = index == 1 and 'player' or 'party'..(index-1)
         local guid = UnitGUID(unit)
         if not guid then
@@ -61,10 +72,13 @@ function addon.IterateRoster(maxGroup, index)
         end
         subgroup = 1
         name, _ = UnitName(unit)
-        name = name or ''
         if _ then
             name = name .. '-' .. _
+            nameWithRealm = name
+        else
+            nameWithRealm = name .. '-' .. addon.GetNormalizedRealmName()
         end
+
         class, fileName = UnitClass(unit)
         if UnitIsGroupLeader(unit) then
             rank = 2
@@ -78,7 +92,8 @@ function addon.IterateRoster(maxGroup, index)
         if UnitIsDeadOrGhost(unit) then
             isDead = true
         end
+        local _, _, guildRank = GetGuildInfo(unit)
         combatRole = UnitGroupRolesAssigned(unit)
-        return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
+        return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole, nameWithRealm, guildRank
     end
 end

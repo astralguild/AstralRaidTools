@@ -183,11 +183,25 @@ end
 
 -- Version/Addon/WA Checking
 
+function AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender)
+  addon.PrintDebug(
+          sender,
+          'IsGroupLeaderOrAssist:', AstralGroupLib:IsGroupLeaderOrAssist(sender),
+          'IsInSameGuild:', AstralGroupLib:IsInSameGuild(sender),
+          'IsGuildOfficer:', AstralGroupLib:IsGuildOfficer(sender))
+  return AstralGroupLib:IsGroupLeaderOrAssist(sender)
+          -- and AstralGroupLib:IsInSameGuild(sender)
+          -- and AstralGroupLib:IsGuildOfficer(sender)
+end
+
 local function waRequest(channel, ...)
   local msg, sender = ...
   local weakAuras = addon.GetWeakAuras()
   AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
     addon.PrintDebug('waRequest', m)
+    if not AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender) then
+      return
+    end
     local first = true
     local resp = ''
     for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
@@ -219,6 +233,9 @@ local function addonRequest(channel, ...)
   local addons = addon.GetAddons()
   AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
     addon.PrintDebug('addonRequest', m)
+    if not AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender) then
+      return
+    end
     local first = true
     local resp = ''
     for a, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do

@@ -126,7 +126,7 @@ end
 
 function AstralRaidLibrary:GetRoster()
 	local l = {}
-	for _, name, _, class, guid, rank, level, online, isDead, combatRole in addon.IterateRoster do
+	for _, name, _, class, guid, rank, level, online, isDead, combatRole, nameWithRealm, guildRank in addon.IterateRoster do
 		l[#l + 1] = {
 			name = name,
 			class = class,
@@ -136,6 +136,9 @@ function AstralRaidLibrary:GetRoster()
 			online = online,
 			isDead = isDead,
 			combatRole = combatRole,
+			nameWithRealm = nameWithRealm,
+			inSameGuild = IsPlayerInGuildFromGUID(guid),
+			guildRank = guildRank,
 		}
 	end
 	return l
