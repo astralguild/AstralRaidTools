@@ -236,6 +236,7 @@ function module.options:Load()
 
 	function encounterDetailsList:Update()
     AstralUI:UpdateScrollList(self, 32, function(self)
+			if not currentInstance then return end
 			local index = AstralRaidSettings.notifiers.instances[currentInstance].encounters[encounterList.selected]
 			local encounter = AstralRaidSettings.notifiers.encounters[index]
 			local list = {}
