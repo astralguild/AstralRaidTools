@@ -158,7 +158,7 @@ do
 
     self.background = self:CreateTexture(nil, 'BACKGROUND')
     self.background:SetAllPoints(self)
-    self.background:SetColorTexture(33/255, 33/255, 33/255, 0.5)
+    self.background:SetColorTexture(33/255, 33/255, 33/255, 0.7)
 
     local menuBar = CreateFrame('FRAME', nil, self)
     menuBar:SetWidth(self.MenuBarWidth)
@@ -166,7 +166,7 @@ do
     menuBar:SetPoint('TOPLEFT', self, 'TOPLEFT')
     menuBar.texture = menuBar:CreateTexture(nil, 'BACKGROUND')
     menuBar.texture:SetAllPoints(menuBar)
-    menuBar.texture:SetColorTexture(33/255, 33/255, 33/255, 0.8)
+    menuBar.texture:SetColorTexture(33/255, 33/255, 33/255, 0.9)
     self.MenuBar = menuBar
 
     local icon = menuBar:CreateTexture(nil, 'ARTWORK')
