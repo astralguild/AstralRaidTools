@@ -56,43 +56,6 @@ do
 	end
 end
 
-function addon.Console(...)
-	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', 'fff5e4a8'), ...)
-end
-
-function addon.PrintDebug(...)
-  if addon.Debug then
-    addon.Console(WrapTextInColorCode('D', 'C1E1C1FF'), ...)
-  end
-end
-
-function addon.DebugTableToString(o)
-	if type(o) == 'table' then
-		local s = '{ '
-		for k,v in pairs(o) do
-			if type(k) ~= 'number' then k = '"'..k..'"' end
-			s = s .. '['..k..'] = ' .. addon.DebugTableToString(v) .. ','
-		end
-		return s .. '} '
-	else
-		return tostring(o)
-	end
-end
-
-function addon.PairsByKeys(t, f)
-	local a = {}
-	for n in pairs(t) do table.insert(a, n) end
-	table.sort(a, f)
-	local i = 0
-	local iter = function ()
-		i = i + 1
-		if a[i] == nil then return nil
-		else return a[i], t[a[i]]
-		end
-	end
-	return iter
-end
-
 -- WA Library Hooks
 
 AstralRaidLibrary.ClassData = addon.ClassData

@@ -23,14 +23,18 @@ Localization\ruRU.lua
 Localization\zhCN.lua
 Localization\zhTW.lua
 
+
 Events.lua
 Settings.lua
-Communications.lua
+Utils.lua
 ClassData.lua
-Player.lua
 Instance.lua
+Player.lua
 Interface.lua
 Core.lua
+Group.lua
+
+Communications.lua
 Options.lua
 Text.lua
 Reminders.lua
