@@ -93,9 +93,9 @@ local function checkButtonCooldown(self)
 end
 
 function module.options:Load()
-  local LISTFRAME_WIDTH = 610
+  local LISTFRAME_WIDTH = 760
   local LISTFRAME_HEIGHT = 455
-  local LINE_HEIGHT, LINE_NAME_WIDTH = 16, 150
+  local LINE_HEIGHT, LINE_NAME_WIDTH = 18, 225
   local VERTICALNAME_WIDTH = 20
   local VERTICALNAME_COUNT = 20
 
@@ -227,12 +227,12 @@ function module.options:Load()
     local l = {}
     for a, data in addon.PairsByKeys(AstralRaidSettings.addons.required) do
       if data then
-        l[#l+1] = {a, 'Addon'}
+        l[#l+1] = {a, 'A'}
       end
     end
     for wa, data in addon.PairsByKeys(AstralRaidSettings.wa.required) do
       if data then
-        l[#l+1] = {wa, 'WeakAura'}
+        l[#l+1] = {wa, 'W'}
       end
     end
     roster.list = l
@@ -283,7 +283,7 @@ function module.options:Load()
     local backgroundLineStatus = (roster.prevTopLine % 2) == 1
     for i = start, #list do
       local data, t = unpack(list[i])
-      local name = data .. string.format(' (|cfff5e4a8%s|r)', t)
+      local name = string.format('|cfff5e4a8%s|r ', t) .. data
       local line = self.lines[lineCount]
       lineCount = lineCount + 1
       if not line then
@@ -295,7 +295,7 @@ function module.options:Load()
 
       line.t:SetShown(backgroundLineStatus)
       local ll, yy
-      if t == 'WeakAura' then
+      if t == 'W' then
         ll = addon.WeakAuraResponses
         yy = weakAuras
       else

@@ -140,13 +140,13 @@ do
   function templates:AstralOptionsFrame(parent, logoPath)
     local self = CreateFrame('FRAME', nil, parent, BackdropTemplateMixin and 'BackdropTemplate')
 
-    self:SetSize(850, 650)
+    self:SetSize(1000, 650)
     self:SetFrameStrata('HIGH')
     self:SetToplevel(true)
     self:EnableMouse(true)
     self:SetPoint('CENTER')
 
-    self.Width = 850
+    self.Width = 1000
     self.Height = 650
     self.ListWidth = 165
     self.MenuBarWidth = 50

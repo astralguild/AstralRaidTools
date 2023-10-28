@@ -26,7 +26,7 @@ AstralRaidOptionsFrame:SetDontSavePosition(true)
 
 -- Paging
 
-local OPTIONS_FRAME_WIDTH = 850
+local OPTIONS_FRAME_WIDTH = 1000
 
 local options = AstralRaidOptionsFrame or {}
 
