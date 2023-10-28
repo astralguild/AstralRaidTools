@@ -152,7 +152,7 @@ do
     self.MenuBarWidth = 50
     self.ContentWidth = self.Width - self.ListWidth - self.MenuBarWidth
 
-    self.HeaderText = self:CreateFontString(nil, 'ARTWORK', 'InterUIBold_Normal')
+    self.HeaderText = self:CreateFontString(nil, 'ARTWORK', 'InterUIBold_Normal_ART')
     self.HeaderText:SetPoint('TOP', 0, -14)
     self.HeaderText:SetTextColor(1, 1, 1, 1)
 
@@ -308,7 +308,7 @@ function templates:AstralDialogTemplate(parent)
   self.DialogBG:SetTexture('Interface\\PaperDollInfoFrame\\UI-Character-CharacterTab-L1')
   self.DialogBG:SetTexCoord(0.255, 1, 0.29, 1)
 
-  self.title = self:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal')
+  self.title = self:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal_ART')
   self.title:SetPoint('TOPLEFT', 12, -8)
   self.title:SetPoint('TOPRIGHT', -32, -24)
 
@@ -1710,7 +1710,7 @@ end
 function AstralUI:GuildInfo(frame)
   local astralGuildInfo
   local guildVersionString = CreateFrame('BUTTON', nil, frame)
-  guildVersionString:SetNormalFontObject('InterUIRegular_Small')
+  guildVersionString:SetNormalFontObject('InterUIRegular_Small_ART')
   guildVersionString:SetSize(110, 20)
   guildVersionString:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
   guildVersionString:SetAlpha(0.65)
@@ -1732,15 +1732,15 @@ function AstralUI:GuildInfo(frame)
   astralGuildInfo.background:SetAllPoints(astralGuildInfo)
   astralGuildInfo.background:SetColorTexture(33/255, 33/255, 33/255, 0.8)
 
-  astralGuildInfo.title = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal')
+  astralGuildInfo.title = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal_ART')
   astralGuildInfo.title:SetPoint('TOP', astralGuildInfo, 'TOP', 0, -10)
   astralGuildInfo.title:SetText(ADDON_NAME)
 
-  astralGuildInfo.author = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal')
+  astralGuildInfo.author = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal_ART')
   astralGuildInfo.author:SetPoint('TOP', astralGuildInfo.title, 'BOTTOM', 0, -20)
   astralGuildInfo.author:SetText('Made by Luna <Astral> @ Area 52')
 
-  astralGuildInfo.visit = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal')
+  astralGuildInfo.visit = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIRegular_Normal_ART')
   astralGuildInfo.visit:SetPoint('TOP', astralGuildInfo.author, 'BOTTOM', 0, -20)
   astralGuildInfo.visit:SetText('Visit <Astral> at')
 
@@ -1753,7 +1753,7 @@ function AstralUI:GuildInfo(frame)
   astralGuildInfo.logo:SetTexture('Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\logo.png')
   astralGuildInfo.logo:SetPoint('TOPLEFT', astralGuildInfo, 'TOPLEFT', 14, -10)
 
-  astralGuildInfo.editBox:SetFontObject(InterUIRegular_Normal)
+  astralGuildInfo.editBox:SetFontObject(InterUIRegular_Normal_ART)
   astralGuildInfo.editBox:SetText('www.astralguild.com')
   astralGuildInfo.editBox:HighlightText()
   astralGuildInfo.editBox:SetScript('OnChar', function(self)
@@ -1903,7 +1903,7 @@ do
     if template == 0 then
       template = nil
     elseif not template then
-      template = 'InterUIBold_Normal'
+      template = 'InterUIBold_Normal_ART'
     end
     local self = parent:CreateFontString(nil, 'ARTWORK', template)
     if template and size then

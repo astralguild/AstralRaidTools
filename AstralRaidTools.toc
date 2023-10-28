@@ -9,6 +9,7 @@
 ## AddonCompartmentFunc: OpenAstralRaidWindow
 
 embeds.xml
+fonts.xml
 
 Localization\Localization.lua
 Localization\enUS.lua
