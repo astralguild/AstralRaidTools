@@ -66,6 +66,19 @@ function addon.PrintDebug(...)
   end
 end
 
+function addon.DebugTableToString(o)
+	if type(o) == 'table' then
+		local s = '{ '
+		for k,v in pairs(o) do
+			if type(k) ~= 'number' then k = '"'..k..'"' end
+			s = s .. '['..k..'] = ' .. addon.DebugTableToString(v) .. ','
+		end
+		return s .. '} '
+	else
+		return tostring(o)
+	end
+end
+
 function addon.PairsByKeys(t, f)
 	local a = {}
 	for n in pairs(t) do table.insert(a, n) end
