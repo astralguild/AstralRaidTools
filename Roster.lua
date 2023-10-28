@@ -225,14 +225,14 @@ function module.options:Load()
 
   function roster:Update()
     local l = {}
-    for wa, data in pairs(AstralRaidSettings.wa.required) do
-      if data then
-        l[#l+1] = {wa, 'WeakAura'}
-      end
-    end
-    for a, data in pairs(AstralRaidSettings.addons.required) do
+    for a, data in addon.PairsByKeys(AstralRaidSettings.addons.required) do
       if data then
         l[#l+1] = {a, 'Addon'}
+      end
+    end
+    for wa, data in addon.PairsByKeys(AstralRaidSettings.wa.required) do
+      if data then
+        l[#l+1] = {wa, 'WeakAura'}
       end
     end
     roster.list = l

@@ -110,7 +110,7 @@ local function updateWeakAuraList()
     end
   end
 
-  for wa, data in pairs(weakAuras) do
+  for wa, data in addon.PairsByKeys(weakAuras) do
     if not childrenWAs[wa] then
       childrenWAs[wa] = getChildrenWeakAuras(weakAuras, wa)
     end
@@ -126,7 +126,7 @@ end
 local function updateAddonList()
   local addons = addon.GetAddons()
   local list = {}
-  for _, data in pairs(addons) do
+  for _, data in addon.PairsByKeys(addons) do
     list[#list+1] = data
   end
   addonList.list = list
