@@ -42,11 +42,12 @@ end
 function addon.GetAddons()
   local addons = {}
   for i = 1, GetNumAddOns() do
-    local name, title, _, _, _, _, _ = GetAddOnInfo(i)
+    local name, title, _, _, notLoadableReason, _, _ = GetAddOnInfo(i)
     addons[name] = {
       name = name,
       title = title,
       version = C_AddOns.GetAddOnMetadata(name, 'Version') or '',
+      notLoadableReason = notLoadableReason,
     }
   end
   return addons

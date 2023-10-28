@@ -319,9 +319,12 @@ function module.options:Load()
             roster:SetIcon(line.icons[j], 2)
             line.icons[j].t = ''
           elseif type(d[data]) == 'string' then -- data different
-            if d[data] == 'MISSING' then
+            if d[data] == 'MISSING' or d[data] == 'NOT_INSTALLED' then
               roster:SetIcon(line.icons[j], 1)
               line.icons[j].t = 'Not installed'
+            elseif d[data] == 'DISABLED' then
+              roster:SetIcon(line.icons[j], 1)
+              line.icons[j].t = 'Disabled'
             elseif d[data] == 'LOAD_NEVER' then
               roster:SetIcon(line.icons[j], 1)
               line.icons[j].t = 'Set to never load'

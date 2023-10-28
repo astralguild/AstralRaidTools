@@ -219,14 +219,24 @@ local function addonRequest(channel, ...)
   local addons = addon.GetAddons()
   AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
     addon.PrintDebug('addonRequest', m)
-    local resp = addon.PlayerClass
+    local first = true
+    local resp = ''
     for a, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      if not addons[a] or addons[a].version ~= v then
+      local validAddon = addons[a] and addons[a].version == v and addons[a].notLoadableReason ~= 'DISABLED'
+      if not validAddon then
         local d = ''
-        if addons[a] then
+        if not addons[a] then
+          d = 'NOT_INSTALLED'
+        elseif addons[a].notLoadableReason == 'DISABLED' then
+          d = 'DISABLED'
+        else
           d = addons[a].version
         end
-        resp = resp .. string.format(' "%s":"%s"', a, d)
+        if not first then
+          resp = resp .. ' '
+        end
+        first = false
+        resp = resp .. string.format('"%s":"%s"', a, d)
       end
     end
     AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)
