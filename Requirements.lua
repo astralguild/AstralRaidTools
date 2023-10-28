@@ -88,10 +88,10 @@ local parentWAs = {}
 
 local function getChildrenWeakAuras(weakAuras, parent)
   local children = {}
-  for wa, data in pairs(weakAuras) do
-    if data.parent == parent then
-      children[#children+1] = wa
-      parentWAs[wa] = parent
+  if weakAuras[parent].controlledChildren ~= nil then
+    for _, childName in pairs(weakAuras[parent].controlledChildren) do
+      children[#children+1] = childName
+      parentWAs[childName] = parent
     end
   end
   return children
@@ -103,7 +103,7 @@ local function updateWeakAuraList()
 
   local function recurseChildren(name)
     if expandedWAs[name] then
-      for _, child in pairs(childrenWAs[name]) do
+      for _, child in addon.PairsByKeys(childrenWAs[name]) do
         list[#list+1] = child
         recurseChildren(child)
       end
