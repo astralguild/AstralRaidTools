@@ -52,24 +52,4 @@ function AstralGroupLib:IsGroupLeaderOrAssist(name)
     return false
 end
 
--- Not working
-function AstralGroupLib:IsInSameGuild(name)
-    local player = AstralGroupLib.RosterByPlayerNameAndRealm[name] or AstralGroupLib.RosterByPlayerName[name]
-    if player then
-        return player.inSameGuild
-    end
-    return false
-end
-
--- Not working
-function AstralGroupLib:IsGuildOfficer(name)
-    local player = AstralGroupLib.RosterByPlayerNameAndRealm[name] or AstralGroupLib.RosterByPlayerName[name]
-    if player then
-        -- Note: Probably different per guild
-        return player.guildRank <= 4
-    end
-    return false
-end
-
-
 AstralGroupLib:Init()

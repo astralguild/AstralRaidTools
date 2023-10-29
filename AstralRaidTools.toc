@@ -32,7 +32,8 @@ Instance.lua
 Player.lua
 Interface.lua
 Core.lua
-Group.lua
+GroupLib.lua
+GuildLib.lua
 
 Communications.lua
 Options.lua

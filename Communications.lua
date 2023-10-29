@@ -187,11 +187,11 @@ function AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender)
   addon.PrintDebug(
           sender,
           'IsGroupLeaderOrAssist:', AstralGroupLib:IsGroupLeaderOrAssist(sender),
-          'IsInSameGuild:', AstralGroupLib:IsInSameGuild(sender),
-          'IsGuildOfficer:', AstralGroupLib:IsGuildOfficer(sender))
+          'IsInSameGuild:', AstralGuildLib:IsInSameGuild(sender),
+          'IsGuildOfficer:', AstralGuildLib:IsGuildOfficer(sender))
   return AstralGroupLib:IsGroupLeaderOrAssist(sender)
-          -- and AstralGroupLib:IsInSameGuild(sender)
-          -- and AstralGroupLib:IsGuildOfficer(sender)
+          and AstralGuildLib:IsInSameGuild(sender)
+          and AstralGuildLib:IsGuildOfficer(sender)
 end
 
 local function waRequest(channel, ...)
