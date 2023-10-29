@@ -196,10 +196,20 @@ function module.options:Load()
     local start = floor(scroll / LINE_HEIGHT) + 1
 
     local namesList, namesList2 = {},{}
-    for _, name, _, class in addon.IterateRoster do
+    for _, name, class, _, _, _, _, _, _, nameWithRealm in addon.IterateRoster do
+
+      -- Display the realm if different
+      local overrideName = nil
+      local shortName, realmName = strsplit('-', nameWithRealm)
+      if realmName ~= nil and realmName ~= addon.GetNormalizedRealmName() then
+        overrideName = nameWithRealm
+      end
+
+
       namesList[#namesList + 1] = {
         name = name,
         class = class,
+        overrideName = overrideName,
       }
     end
     sort(namesList, sortByName)
@@ -216,8 +226,9 @@ function module.options:Load()
       if not raidNames[raidNamesUsed] then
         break
       end
+      local overrideName = namesList[i].overrideName
       local name = delUnitNameServer(namesList[i].name)
-      raidNames[raidNamesUsed]:SetText(name)
+      raidNames[raidNamesUsed]:SetText(overrideName or name)
       raidNames[raidNamesUsed]:SetTextColor(addon.ClassColorNum(namesList[i].class))
       namesList2[raidNamesUsed] = name
       if raidNames[raidNamesUsed].Vis then
