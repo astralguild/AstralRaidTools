@@ -158,7 +158,7 @@ do
 
     self.background = self:CreateTexture(nil, 'BACKGROUND')
     self.background:SetAllPoints(self)
-    self.background:SetColorTexture(33/255, 33/255, 33/255, 0.7)
+    self.background:SetColorTexture(0, 0, 0, 0.6)
 
     local menuBar = CreateFrame('FRAME', nil, self)
     menuBar:SetWidth(self.MenuBarWidth)
@@ -1730,7 +1730,7 @@ function AstralUI:GuildInfo(frame)
 
   astralGuildInfo.background = astralGuildInfo:CreateTexture(nil, 'BACKGROUND')
   astralGuildInfo.background:SetAllPoints(astralGuildInfo)
-  astralGuildInfo.background:SetColorTexture(33/255, 33/255, 33/255, 0.8)
+  astralGuildInfo.background:SetColorTexture(0, 0, 0, 0.6)
 
   astralGuildInfo.title = astralGuildInfo:CreateFontString(nil, 'OVERLAY', 'InterUIBold_Normal_ART')
   astralGuildInfo.title:SetPoint('TOP', astralGuildInfo, 'TOP', 0, -20)
@@ -1749,7 +1749,7 @@ function AstralUI:GuildInfo(frame)
   astralGuildInfo.visit:SetText('Visit <Astral> at')
 
   astralGuildInfo.editBox = CreateFrame('EditBox', nil, astralGuildInfo, 'BackdropTemplate')
-  astralGuildInfo.editBox:SetSize(125, 20)
+  astralGuildInfo.editBox:SetSize(128, 20)
   astralGuildInfo.editBox:SetPoint('TOP', astralGuildInfo.visit, 'BOTTOM', 0, 0)
 
   astralGuildInfo.logo = astralGuildInfo:CreateTexture(nil, 'ARTWORK')

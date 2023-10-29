@@ -113,8 +113,8 @@ function options:Add(moduleName, frameName, leadProtected, inParty, disabled)
 	local self = CreateFrame('FRAME', 'AstralRaidOptions' .. moduleName, options)
 	self:SetSize(options.ContentWidth - 12, options.Height - 16 - 45)
 	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 12, -45)
-  self.moduleName = moduleName
-  self.name = frameName or moduleName
+  	self.moduleName = moduleName
+  	self.name = frameName or moduleName
 	self.leadProtected = leadProtected
 	self.inParty = inParty
 	self._disabled = disabled
