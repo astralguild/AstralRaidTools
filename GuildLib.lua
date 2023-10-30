@@ -1,6 +1,6 @@
 local _, addon = ...
 
-AstralGuildLib = CreateFrame('FRAME', 'AstralGuildLib')
+AstralGuildLib = {}
 
 AstralGuildLib.GuildRosterUpdateEventTriggered = false
 AstralGuildLib.GuildRosterRefreshRequested = true
@@ -34,9 +34,11 @@ function AstralGuildLib:RefreshGuildRoster()
     AstralGuildLib.RosterByPlayerName = {}
     AstralGuildLib.RosterByPlayerNameAndRealm = {}
     AstralGuildLib.RosterByGuid = {}
-    for _, item in pairs(AstralGuildLib.Roster) do AstralGuildLib.RosterByPlayerName[item.name] = item end
-    for _, item in pairs(AstralGuildLib.Roster) do AstralGuildLib.RosterByPlayerNameAndRealm[item.nameWithRealm] = item end
-    for _, item in pairs(AstralGuildLib.Roster) do AstralGuildLib.RosterByGuid[item.guid] = item end
+    for _, item in pairs(AstralGuildLib.Roster) do
+        AstralGuildLib.RosterByPlayerName[item.name] = item
+        AstralGuildLib.RosterByPlayerNameAndRealm[item.nameWithRealm] = item
+        AstralGuildLib.RosterByGuid[item.guid] = item
+    end
 end
 
 function AstralGuildLib:IsInSameGuild(name)

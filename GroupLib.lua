@@ -1,6 +1,6 @@
 local _, addon = ...
 
-AstralGroupLib = CreateFrame('FRAME', 'AstralGroupLib')
+AstralGroupLib = {}
 
 AstralGroupLib.RosterRefreshRequested = true
 AstralGroupLib.Roster = {}
@@ -36,9 +36,11 @@ function AstralGroupLib:RefreshGroupRoster()
     AstralGroupLib.RosterByPlayerName = {}
     AstralGroupLib.RosterByPlayerNameAndRealm = {}
     AstralGroupLib.RosterByGuid = {}
-    for _, item in pairs(AstralGroupLib.Roster) do AstralGroupLib.RosterByPlayerName[item.name] = item end
-    for _, item in pairs(AstralGroupLib.Roster) do AstralGroupLib.RosterByPlayerNameAndRealm[item.nameWithRealm] = item end
-    for _, item in pairs(AstralGroupLib.Roster) do AstralGroupLib.RosterByGuid[item.guid] = item end
+    for _, item in pairs(AstralGroupLib.Roster) do
+        AstralGroupLib.RosterByPlayerName[item.name] = item
+        AstralGroupLib.RosterByPlayerNameAndRealm[item.nameWithRealm] = item
+        AstralGroupLib.RosterByGuid[item.guid] = item
+    end
     addon.PrintDebug(addon.DebugTableToString(AstralGroupLib.Roster))
 end
 
