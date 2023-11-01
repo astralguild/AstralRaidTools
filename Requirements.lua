@@ -101,23 +101,20 @@ local function updateWeakAuraList()
   local weakAuras = allWAs or addon.GetWeakAuras()
   local list = {}
 
-  local function recurseChildren(name)
-    if expandedWAs[name] then
-      for _, child in addon.PairsByKeys(childrenWAs[name]) do
-        list[#list+1] = child
-        recurseChildren(child)
+  local function addWeakAuraToList(weakAuraName)
+    list[#list+1] = weakAuraName
+    childrenWAs[weakAuraName] = getChildrenWeakAuras(weakAuras, weakAuraName)
+    if expandedWAs[weakAuraName] then
+      for _, childWeakAuraName in addon.PairsByKeys(childrenWAs[weakAuraName]) do
+        addWeakAuraToList(childWeakAuraName)
       end
     end
   end
 
-  for wa, data in addon.PairsByKeys(weakAuras) do
-    if not childrenWAs[wa] then
-      childrenWAs[wa] = getChildrenWeakAuras(weakAuras, wa)
-    end
+  for weakAuraName, data in addon.PairsByKeys(weakAuras) do
     if not data.parent then
-      list[#list+1] = wa
+      addWeakAuraToList(weakAuraName)
     end
-    recurseChildren(wa)
   end
   allWAs = weakAuras
   waList.list = list
