@@ -29,7 +29,7 @@ local statusIcons = {
   [2] = 'Interface\\RaidFrame\\ReadyCheck-Ready',
   [3] = 'Interface\\RaidFrame\\ReadyCheck-NotReady',
   [4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
-  [5] = 'Interface\\SpellShadow\\Spell-Shadow-Unacceptable',
+  [5] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\ReadyCheck-NotReady-Grey.png',
 }
 local notInGroupText, roster, raidSlider, raidNames, updateButton
 local cdRequest = 5
@@ -104,7 +104,7 @@ function module.options:Load()
       self:SetTexture(statusIcons[4]) -- dash
       self:SetVertexColor(0.6, 0.6, 0.6, 1)
     elseif type == 5 then
-      self:SetTexture(statusIcons[5]) -- ⊘
+      self:SetTexture(statusIcons[5])
       self:SetVertexColor(1, 1, 1, 1)
     end
   end
