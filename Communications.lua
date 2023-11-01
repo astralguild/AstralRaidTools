@@ -183,19 +183,44 @@ end
 
 -- Version/Addon/WA Checking
 
+function AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender)
+  addon.PrintDebug(
+          sender,
+          'IsGroupLeaderOrAssist:', AstralGroupLib:IsGroupLeaderOrAssist(sender),
+          'IsInSameGuild:', AstralGuildLib:IsInSameGuild(sender),
+          'IsGuildOfficer:', AstralGuildLib:IsGuildOfficer(sender))
+  return AstralGroupLib:IsGroupLeaderOrAssist(sender)
+          and AstralGuildLib:IsInSameGuild(sender)
+          and AstralGuildLib:IsGuildOfficer(sender)
+end
+
 local function waRequest(channel, ...)
   local msg, sender = ...
   local weakAuras = addon.GetWeakAuras()
   AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
     addon.PrintDebug('waRequest', m)
-    local resp = addon.PlayerClass
+    if not AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender) then
+      return
+    end
+    local first = true
+    local resp = ''
     for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      if not weakAuras[wa] or tostring(weakAuras[wa].version) ~= v then
+      local validWa = weakAuras[wa] and tostring(weakAuras[wa].version) == v and not weakAuras[wa].load.use_never
+      if not validWa then
         local d = ''
-        if weakAuras[wa] then
+        if not weakAuras[wa] then
+          d = 'MISSING'
+        elseif weakAuras[wa].load.use_never then
+          d = 'LOAD_NEVER'
+        else
           d = tostring(weakAuras[wa].version)
         end
-        resp = resp .. string.format(' "%s":"%s"', wa, d)
+        -- Why does Lua not have a built-in string.trim
+        if not first then
+          resp = resp .. ' '
+        end
+        first = false
+        resp = resp .. string.format('"%s":"%s"', wa, d)
       end
     end
     AstralRaidComms:SendChunkedAddonMessages('waPush', resp, channel)
@@ -208,14 +233,27 @@ local function addonRequest(channel, ...)
   local addons = addon.GetAddons()
   AstralRaidComms:DecodeChunkedAddonMessages(sender, msg, function(m)
     addon.PrintDebug('addonRequest', m)
-    local resp = addon.PlayerClass
+    if not AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender) then
+      return
+    end
+    local first = true
+    local resp = ''
     for a, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      if not addons[a] or addons[a].version ~= v then
+      local validAddon = addons[a] and addons[a].version == v and addons[a].notLoadableReason ~= 'DISABLED'
+      if not validAddon then
         local d = ''
-        if addons[a] then
+        if not addons[a] then
+          d = 'NOT_INSTALLED'
+        elseif addons[a].notLoadableReason == 'DISABLED' then
+          d = 'DISABLED'
+        else
           d = addons[a].version
         end
-        resp = resp .. string.format(' "%s":"%s"', a, d)
+        if not first then
+          resp = resp .. ' '
+        end
+        first = false
+        resp = resp .. string.format('"%s":"%s"', a, d)
       end
     end
     AstralRaidComms:SendChunkedAddonMessages('addonPush', resp, channel)

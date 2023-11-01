@@ -1,7 +1,7 @@
 local ADDON_NAME, addon = ...
 
-local waModule = addon:New('WA Requirements', 'WeakAuras', true)
-local addonModule = addon:New('Addon Requirements', 'Addons', true)
+local waModule = addon:New('WA Requirements', 'WeakAuras', true, true)
+local addonModule = addon:New('Addon Requirements', 'Addons', true, true)
 
 addon.WeakAuraResponses = {}
 addon.AddonResponses = {}
@@ -16,8 +16,8 @@ local function waPush(channel, ...)
     for wa, _ in pairs(AstralRaidSettings.wa.required) do
       addon.WeakAuraResponses[player][wa] = true
     end
-    for wa, url in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      addon.WeakAuraResponses[player][wa] = url
+    for wa, resp in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+      addon.WeakAuraResponses[player][wa] = resp
     end
     addon.UpdateRosterPage()
   end)
@@ -33,8 +33,8 @@ local function addonPush(channel, ...)
     for a, _ in pairs(AstralRaidSettings.addons.required) do
       addon.AddonResponses[player][a] = true
     end
-    for a, ver in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      addon.AddonResponses[player][a] = ver
+    for a, resp in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
+      addon.AddonResponses[player][a] = resp
     end
     addon.UpdateRosterPage()
   end)
@@ -88,10 +88,10 @@ local parentWAs = {}
 
 local function getChildrenWeakAuras(weakAuras, parent)
   local children = {}
-  for wa, data in pairs(weakAuras) do
-    if data.parent == parent then
-      children[#children+1] = wa
-      parentWAs[wa] = parent
+  if weakAuras[parent].controlledChildren ~= nil then
+    for _, childName in pairs(weakAuras[parent].controlledChildren) do
+      children[#children+1] = childName
+      parentWAs[childName] = parent
     end
   end
   return children
@@ -103,14 +103,14 @@ local function updateWeakAuraList()
 
   local function recurseChildren(name)
     if expandedWAs[name] then
-      for _, child in pairs(childrenWAs[name]) do
+      for _, child in addon.PairsByKeys(childrenWAs[name]) do
         list[#list+1] = child
         recurseChildren(child)
       end
     end
   end
 
-  for wa, data in pairs(weakAuras) do
+  for wa, data in addon.PairsByKeys(weakAuras) do
     if not childrenWAs[wa] then
       childrenWAs[wa] = getChildrenWeakAuras(weakAuras, wa)
     end
@@ -126,7 +126,7 @@ end
 local function updateAddonList()
   local addons = addon.GetAddons()
   local list = {}
-  for _, data in pairs(addons) do
+  for _, data in addon.PairsByKeys(addons) do
     list[#list+1] = data
   end
   addonList.list = list

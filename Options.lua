@@ -26,7 +26,7 @@ AstralRaidOptionsFrame:SetDontSavePosition(true)
 
 -- Paging
 
-local OPTIONS_FRAME_WIDTH = 850
+local OPTIONS_FRAME_WIDTH = 1000
 
 local options = AstralRaidOptionsFrame or {}
 
@@ -113,8 +113,8 @@ function options:Add(moduleName, frameName, leadProtected, inParty, disabled)
 	local self = CreateFrame('FRAME', 'AstralRaidOptions' .. moduleName, options)
 	self:SetSize(options.ContentWidth - 12, options.Height - 16 - 45)
 	self:SetPoint('TOPLEFT', options.MenuBar, 'TOPRIGHT', options.ListWidth + 12, -45)
-  self.moduleName = moduleName
-  self.name = frameName or moduleName
+  	self.moduleName = moduleName
+  	self.name = frameName or moduleName
 	self.leadProtected = leadProtected
 	self.inParty = inParty
 	self._disabled = disabled
@@ -161,12 +161,6 @@ local debugShowAllMenus = AstralUI:Check(generalPage, WrapTextInColorCode('Show 
 	updateFrames()
 end)
 
-local astralGuildHeader = AstralUI:Text(generalPage, 'Guild Options'):Point('TOPLEFT', showMinimap, 'BOTTOMLEFT', 0, -20):Shadow()
-
-local astralGuildShowFactOnStartup = AstralUI:Check(generalPage, 'Show Astral fact on login'):Point('TOPLEFT', astralGuildHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
-	AstralRaidSettings.astral.facts.onStartup = self:GetChecked()
-end)
-
 -- Initializations
 
 function addon.InitializeOptionSettings()
@@ -176,11 +170,6 @@ function addon.InitializeOptionSettings()
 	if not addon.Debug then
 		debugMode:Hide()
 		debugShowAllMenus:Hide()
-	end
-	astralGuildShowFactOnStartup:SetChecked(AstralRaidSettings.astral.facts.onStartup)
-	if not addon.IsAstralGuild() then
-		astralGuildHeader:Hide()
-		astralGuildShowFactOnStartup:Hide()
 	end
 	AstralRaidOptionsFrame.GuildText:SetFormattedText(ASTRAL_INFO .. ' %s', addon.CLIENT_VERSION)
 end
@@ -220,7 +209,6 @@ function addon:OnInitialize()
 	})
 	addon.icon:Register(ADDON_NAME, ldb, self.db.profile.minimap)
 
-	if AstralRaidSettings.astral.facts.onStartup then addon.PrintFact() end
 	if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
 end
 

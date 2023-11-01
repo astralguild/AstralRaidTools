@@ -9,6 +9,7 @@
 ## AddonCompartmentFunc: OpenAstralRaidWindow
 
 embeds.xml
+fonts.xml
 
 Localization\Localization.lua
 Localization\enUS.lua
@@ -22,14 +23,19 @@ Localization\ruRU.lua
 Localization\zhCN.lua
 Localization\zhTW.lua
 
+
 Events.lua
 Settings.lua
-Communications.lua
+Utils.lua
 ClassData.lua
-Player.lua
 Instance.lua
+Player.lua
 Interface.lua
 Core.lua
+GroupLib.lua
+GuildLib.lua
+
+Communications.lua
 Options.lua
 Text.lua
 Reminders.lua
@@ -39,4 +45,3 @@ Alerts.lua
 Notifiers.lua
 Requirements.lua
 Roster.lua
-Astral.lua

@@ -1,52 +1,6 @@
 local ADDON_NAME, addon = ...
 local L = addon.L
 
-function addon.IterateRoster(maxGroup, index)
-  index = (index or 0) + 1
-  maxGroup = maxGroup or 8
-
-  if IsInRaid() then
-    if index > GetNumGroupMembers() then
-      return
-    end
-    local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(index)
-    if subgroup > maxGroup then
-      return addon.IterateRoster(maxGroup, index)
-    end
-    local guid = UnitGUID(name or ('raid'..index))
-    name = name or ''
-    return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
-  else
-    local name, rank, subgroup, level, class, fileName, online, isDead, combatRole, _
-    local unit = index == 1 and 'player' or 'party'..(index-1)
-    local guid = UnitGUID(unit)
-    if not guid then
-      return
-    end
-    subgroup = 1
-    name, _ = UnitName(unit)
-    name = name or ''
-    if _ then
-      name = name .. '-' .. _
-    end
-    class, fileName = UnitClass(unit)
-    if UnitIsGroupLeader(unit) then
-      rank = 2
-    else
-      rank = 1
-    end
-    level = UnitLevel(unit)
-    if UnitIsConnected(unit) then
-      online = true
-    end
-    if UnitIsDeadOrGhost(unit) then
-      isDead = true
-    end
-    combatRole = UnitGroupRolesAssigned(unit)
-    return index, name, subgroup, fileName, guid, rank, level, online, isDead, combatRole
-  end
-end
-
 function addon.ClassColorName(unit)
   if unit and UnitExists(unit) then
     local name = UnitName(unit)
@@ -68,7 +22,7 @@ local function delUnitNameServer(unitName)
   return unitName
 end
 
-local module = addon:New(L['ROSTER'], L['ROSTER_VIEW'], true)
+local module = addon:New(L['ROSTER'], L['ROSTER_VIEW'], true, true)
 
 local statusIcons = {
   [1] = 'Interface\\RaidFrame\\ReadyCheck-Waiting',
@@ -93,9 +47,9 @@ local function checkButtonCooldown(self)
 end
 
 function module.options:Load()
-  local LISTFRAME_WIDTH = 610
+  local LISTFRAME_WIDTH = 760
   local LISTFRAME_HEIGHT = 455
-  local LINE_HEIGHT, LINE_NAME_WIDTH = 16, 150
+  local LINE_HEIGHT, LINE_NAME_WIDTH = 18, 225
   local VERTICALNAME_WIDTH = 20
   local VERTICALNAME_COUNT = 20
 
@@ -225,14 +179,14 @@ function module.options:Load()
 
   function roster:Update()
     local l = {}
-    for wa, data in pairs(AstralRaidSettings.wa.required) do
+    for a, data in addon.PairsByKeys(AstralRaidSettings.addons.required) do
       if data then
-        l[#l+1] = {wa, 'WeakAura'}
+        l[#l+1] = {a, 'A'}
       end
     end
-    for a, data in pairs(AstralRaidSettings.addons.required) do
+    for wa, data in addon.PairsByKeys(AstralRaidSettings.wa.required) do
       if data then
-        l[#l+1] = {a, 'Addon'}
+        l[#l+1] = {wa, 'W'}
       end
     end
     roster.list = l
@@ -242,10 +196,20 @@ function module.options:Load()
     local start = floor(scroll / LINE_HEIGHT) + 1
 
     local namesList, namesList2 = {},{}
-    for _, name, _, class in addon.IterateRoster do
+    for _, name, class, _, _, _, _, _, _, nameWithRealm in addon.IterateRoster do
+
+      -- Display the realm if different
+      local overrideName = nil
+      local shortName, realmName = strsplit('-', nameWithRealm)
+      if realmName ~= nil and realmName ~= addon.GetNormalizedRealmName() then
+        overrideName = nameWithRealm
+      end
+
+
       namesList[#namesList + 1] = {
         name = name,
         class = class,
+        overrideName = overrideName,
       }
     end
     sort(namesList, sortByName)
@@ -262,8 +226,9 @@ function module.options:Load()
       if not raidNames[raidNamesUsed] then
         break
       end
+      local overrideName = namesList[i].overrideName
       local name = delUnitNameServer(namesList[i].name)
-      raidNames[raidNamesUsed]:SetText(name)
+      raidNames[raidNamesUsed]:SetText(overrideName or name)
       raidNames[raidNamesUsed]:SetTextColor(addon.ClassColorNum(namesList[i].class))
       namesList2[raidNamesUsed] = name
       if raidNames[raidNamesUsed].Vis then
@@ -283,7 +248,7 @@ function module.options:Load()
     local backgroundLineStatus = (roster.prevTopLine % 2) == 1
     for i = start, #list do
       local data, t = unpack(list[i])
-      local name = data .. string.format(' (|cfff5e4a8%s|r)', t)
+      local name = string.format('|cfff5e4a8%s|r ', t) .. data
       local line = self.lines[lineCount]
       lineCount = lineCount + 1
       if not line then
@@ -295,7 +260,7 @@ function module.options:Load()
 
       line.t:SetShown(backgroundLineStatus)
       local ll, yy
-      if t == 'WeakAura' then
+      if t == 'W' then
         ll = addon.WeakAuraResponses
         yy = weakAuras
       else
@@ -319,13 +284,21 @@ function module.options:Load()
             roster:SetIcon(line.icons[j], 2)
             line.icons[j].t = ''
           elseif type(d[data]) == 'string' then -- data different
-            roster:SetIcon(line.icons[j], 3)
-            line.icons[j].t = string.format('%s: %s\n%s: %s', L['YOUR_VERSION'], tostring(yy[data].version), L['THEIR_VERSION'], d[data])
+            if d[data] == 'MISSING' or d[data] == 'NOT_INSTALLED' then
+              roster:SetIcon(line.icons[j], 1)
+              line.icons[j].t = 'Not installed'
+            elseif d[data] == 'DISABLED' then
+              roster:SetIcon(line.icons[j], 1)
+              line.icons[j].t = 'Disabled'
+            elseif d[data] == 'LOAD_NEVER' then
+              roster:SetIcon(line.icons[j], 1)
+              line.icons[j].t = 'Set to never load'
+            else
+              roster:SetIcon(line.icons[j], 3)
+              line.icons[j].t = string.format('%s: %s\n%s: %s', L['YOUR_VERSION'], tostring(yy[data].version), L['THEIR_VERSION'], d[data])
+            end
           elseif d and not d[data] then
             roster:SetIcon(line.icons[j], 4)
-            line.icons[j].t = ''
-          else
-            roster:SetIcon(line.icons[j], 1)
             line.icons[j].t = ''
           end
         end

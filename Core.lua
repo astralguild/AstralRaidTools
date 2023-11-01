@@ -56,16 +56,6 @@ do
 	end
 end
 
-function addon.Console(...)
-	print(WrapTextInColorCode('[' .. ADDON_NAME .. ']', 'fff5e4a8'), ...)
-end
-
-function addon.PrintDebug(...)
-  if addon.Debug then
-    addon.Console(WrapTextInColorCode('D', 'C1E1C1FF'), ...)
-  end
-end
-
 -- WA Library Hooks
 
 AstralRaidLibrary.ClassData = addon.ClassData
@@ -136,7 +126,7 @@ end
 
 function AstralRaidLibrary:GetRoster()
 	local l = {}
-	for _, name, _, class, guid, rank, level, online, isDead, combatRole in addon.IterateRoster do
+	for _, name, class, guid, rank, level, online, isDead, combatRole, nameWithRealm in addon.IterateRoster do
 		l[#l + 1] = {
 			name = name,
 			class = class,
@@ -146,6 +136,24 @@ function AstralRaidLibrary:GetRoster()
 			online = online,
 			isDead = isDead,
 			combatRole = combatRole,
+			nameWithRealm = nameWithRealm
+		}
+	end
+	return l
+end
+
+function AstralRaidLibrary:GetGuildRoster()
+	local l = {}
+	for _, name, class, guid, rank, level, online, nameWithRealm, canSpeakInOfficerChat in addon.IterateGuildRoster do
+		l[#l + 1] = {
+			name = name,
+			class = class,
+			guid = guid,
+			rank = rank,
+			level = level,
+			online = online,
+			nameWithRealm = nameWithRealm,
+			isOfficer = canSpeakInOfficerChat,
 		}
 	end
 	return l
