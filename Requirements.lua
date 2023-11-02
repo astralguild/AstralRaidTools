@@ -144,9 +144,7 @@ function waModule.options:Load()
   waList = AstralUI:ScrollFrame(self):Point('TOPLEFT', waHeader, 'BOTTOMLEFT', 0, -10):Size(AstralRaidOptionsFrame.ContentWidth - 30, AstralRaidOptionsFrame.Height - 100)
 
   AstralUI:Button(self, REFRESH):Point('LEFT', waHeader, 'RIGHT', 10, 0):Size(100,15):OnClick(function(self)
-    allWAs = nil
-    expandedWAs = {}
-    waList:Update()
+    waList:Update(true)
   end)
 
   noWAs = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
@@ -197,7 +195,10 @@ function waModule.options:Load()
     line:Hide()
   end
 
-  function waList:Update()
+  function waList:Update(refreshWaList)
+    if refreshWaList then
+      allWAs = nil
+    end
     AstralUI:UpdateScrollList(self, 32, updateWeakAuraList, function(line, data)
       line.waName:SetText(data)
       local children = childrenWAs[data]
@@ -214,7 +215,7 @@ function waModule.options:Load()
   end
 
   waList:SetScript('OnShow', function()
-    waList:Update()
+    waList:Update(true)
   end)
 
   waList.ScrollBar.slider:SetScript('OnValueChanged', function(self)
