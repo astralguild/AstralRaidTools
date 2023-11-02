@@ -194,6 +194,21 @@ function AstralRaidComms:IsAllowedToCheckAddonsAndWeakauras(sender)
           and AstralGuildLib:IsGuildOfficer(sender)
 end
 
+local function isWeakauraOrGroupFullyDisabled(allWeakAuras, weakAuraName)
+  local allChildren = allWeakAuras[weakAuraName].controlledChildren
+  if allChildren then
+    local any = false
+    for _,childName in pairs(allChildren) do
+      any = true
+      if not isWeakauraOrGroupFullyDisabled(allWeakAuras, childName) then
+        return false
+      end
+    end
+    return any -- Empty groups should return false (i.e. we treat them as enabled)
+  end
+  return allWeakAuras[weakAuraName].load.use_never
+end
+
 local function waRequest(channel, ...)
   local msg, sender = ...
   local weakAuras = addon.GetWeakAuras()
@@ -205,12 +220,13 @@ local function waRequest(channel, ...)
     local first = true
     local resp = ''
     for wa, v in string.gmatch(m, '"([^"]+)":"([^"]+)"') do
-      local validWa = weakAuras[wa] and tostring(weakAuras[wa].version) == v and not weakAuras[wa].load.use_never
+      local waDisabled = weakAuras[wa] and isWeakauraOrGroupFullyDisabled(weakAuras, wa)
+      local validWa = weakAuras[wa] and tostring(weakAuras[wa].version) == v and not waDisabled
       if not validWa then
         local d = ''
         if not weakAuras[wa] then
           d = 'MISSING'
-        elseif weakAuras[wa].load.use_never then
+        elseif waDisabled then
           d = 'LOAD_NEVER'
         else
           d = tostring(weakAuras[wa].version)
