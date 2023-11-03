@@ -97,27 +97,36 @@ local function getChildrenWeakAuras(weakAuras, parent)
   return children
 end
 
+local function hasCheckedDescendant(weakAuras, waName)
+  if weakAuras[waName].controlledChildren == nil then
+    return false
+  end
+  for _, childName in pairs(weakAuras[waName].controlledChildren) do
+    if AstralRaidSettings.wa.required[childName] or hasCheckedDescendant(weakAuras, childName) then
+      return true
+    end
+  end
+  return false
+end
+
 local function updateWeakAuraList()
   local weakAuras = allWAs or addon.GetWeakAuras()
   local list = {}
 
-  local function recurseChildren(name)
-    if expandedWAs[name] then
-      for _, child in addon.PairsByKeys(childrenWAs[name]) do
-        list[#list+1] = child
-        recurseChildren(child)
+  local function addWeakAuraToList(weakAuraName)
+    list[#list+1] = weakAuraName
+    childrenWAs[weakAuraName] = getChildrenWeakAuras(weakAuras, weakAuraName)
+    if expandedWAs[weakAuraName] then
+      for _, childWeakAuraName in addon.PairsByKeys(childrenWAs[weakAuraName]) do
+        addWeakAuraToList(childWeakAuraName)
       end
     end
   end
 
-  for wa, data in addon.PairsByKeys(weakAuras) do
-    if not childrenWAs[wa] then
-      childrenWAs[wa] = getChildrenWeakAuras(weakAuras, wa)
-    end
+  for weakAuraName, data in addon.PairsByKeys(weakAuras) do
     if not data.parent then
-      list[#list+1] = wa
+      addWeakAuraToList(weakAuraName)
     end
-    recurseChildren(wa)
   end
   allWAs = weakAuras
   waList.list = list
@@ -147,9 +156,7 @@ function waModule.options:Load()
   waList = AstralUI:ScrollFrame(self):Point('TOPLEFT', waHeader, 'BOTTOMLEFT', 0, -10):Size(AstralRaidOptionsFrame.ContentWidth - 30, AstralRaidOptionsFrame.Height - 100)
 
   AstralUI:Button(self, REFRESH):Point('LEFT', waHeader, 'RIGHT', 10, 0):Size(100,15):OnClick(function(self)
-    allWAs = nil
-    expandedWAs = {}
-    waList:Update()
+    waList:Update(true)
   end)
 
   noWAs = self:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
@@ -171,6 +178,7 @@ function waModule.options:Load()
     else
       AstralRaidSettings.wa.required[self:GetParent().data] = nil
     end
+    waList:Update();
   end
 
   local function waOnExpand(self)
@@ -200,7 +208,10 @@ function waModule.options:Load()
     line:Hide()
   end
 
-  function waList:Update()
+  function waList:Update(refreshWaList)
+    if refreshWaList then
+      allWAs = nil
+    end
     AstralUI:UpdateScrollList(self, 32, updateWeakAuraList, function(line, data)
       line.waName:SetText(data)
       local children = childrenWAs[data]
@@ -210,6 +221,13 @@ function waModule.options:Load()
       else
         line.expand.texture:SetTexCoord(0.375, 0.4375, 0.5, 0.625)
       end
+      if hasCheckedDescendant(allWAs, data) then
+        line.chk.Texture:SetColorTexture(50 / 255, 205 / 255, 50 / 255, 0.3)
+        line.chk:Tooltip('Has a required sub-WeakAura')
+      else
+        line.chk.Texture:SetColorTexture(0, 0, 0, .3)
+        line.chk:Tooltip(nil)
+      end
       line:SetPoint('TOPLEFT', math.min(getChildLevel(data)*10, AstralRaidOptionsFrame.ContentWidth - 40), line.y)
       line:SetPoint('RIGHT', 0, 0)
       line.chk:SetChecked(AstralRaidSettings.wa.required[data])
@@ -217,7 +235,7 @@ function waModule.options:Load()
   end
 
   waList:SetScript('OnShow', function()
-    waList:Update()
+    waList:Update(true)
   end)
 
   waList.ScrollBar.slider:SetScript('OnValueChanged', function(self)

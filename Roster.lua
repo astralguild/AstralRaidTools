@@ -29,6 +29,7 @@ local statusIcons = {
   [2] = 'Interface\\RaidFrame\\ReadyCheck-Ready',
   [3] = 'Interface\\RaidFrame\\ReadyCheck-NotReady',
   [4] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\dash.png',
+  [5] = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\ReadyCheck-NotReady-Grey.png',
 }
 local notInGroupText, roster, raidSlider, raidNames, updateButton
 local cdRequest = 5
@@ -102,6 +103,9 @@ function module.options:Load()
     elseif type == 4 then
       self:SetTexture(statusIcons[4]) -- dash
       self:SetVertexColor(0.6, 0.6, 0.6, 1)
+    elseif type == 5 then
+      self:SetTexture(statusIcons[5])
+      self:SetVertexColor(1, 1, 1, 1)
     end
   end
 
@@ -288,10 +292,10 @@ function module.options:Load()
               roster:SetIcon(line.icons[j], 1)
               line.icons[j].t = 'Not installed'
             elseif d[data] == 'DISABLED' then
-              roster:SetIcon(line.icons[j], 1)
+              roster:SetIcon(line.icons[j], 5)
               line.icons[j].t = 'Disabled'
             elseif d[data] == 'LOAD_NEVER' then
-              roster:SetIcon(line.icons[j], 1)
+              roster:SetIcon(line.icons[j], 5)
               line.icons[j].t = 'Set to never load'
             else
               roster:SetIcon(line.icons[j], 3)
