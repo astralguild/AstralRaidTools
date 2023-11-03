@@ -41,7 +41,7 @@ function AstralGroupLib:RefreshGroupRoster()
         AstralGroupLib.RosterByPlayerNameAndRealm[item.nameWithRealm] = item
         AstralGroupLib.RosterByGuid[item.guid] = item
     end
-    addon.PrintDebug(addon.DebugTableToString(AstralGroupLib.Roster))
+    -- addon.PrintDebug(addon.DebugTableToString(AstralGroupLib.Roster))
 end
 
 function AstralGroupLib:IsGroupLeaderOrAssist(name)
