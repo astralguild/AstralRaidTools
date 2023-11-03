@@ -97,6 +97,18 @@ local function getChildrenWeakAuras(weakAuras, parent)
   return children
 end
 
+local function hasCheckedDescendant(weakAuras, waName)
+  if weakAuras[waName].controlledChildren == nil then
+    return false
+  end
+  for _, childName in pairs(weakAuras[waName].controlledChildren) do
+    if AstralRaidSettings.wa.required[childName] or hasCheckedDescendant(weakAuras, childName) then
+      return true
+    end
+  end
+  return false
+end
+
 local function updateWeakAuraList()
   local weakAuras = allWAs or addon.GetWeakAuras()
   local list = {}
@@ -166,6 +178,7 @@ function waModule.options:Load()
     else
       AstralRaidSettings.wa.required[self:GetParent().data] = nil
     end
+    waList:Update();
   end
 
   local function waOnExpand(self)
@@ -207,6 +220,13 @@ function waModule.options:Load()
         line.expand.texture:SetTexCoord(0.25, 0.3125, 0.5, 0.625)
       else
         line.expand.texture:SetTexCoord(0.375, 0.4375, 0.5, 0.625)
+      end
+      if hasCheckedDescendant(allWAs, data) then
+        line.chk.Texture:SetColorTexture(50 / 255, 205 / 255, 50 / 255, 0.3)
+        line.chk:Tooltip('Has a required sub-WeakAura')
+      else
+        line.chk.Texture:SetColorTexture(0, 0, 0, .3)
+        line.chk:Tooltip(nil)
       end
       line:SetPoint('TOPLEFT', math.min(getChildLevel(data)*10, AstralRaidOptionsFrame.ContentWidth - 40), line.y)
       line:SetPoint('RIGHT', 0, 0)

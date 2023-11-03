@@ -158,7 +158,7 @@ do
 
     self.background = self:CreateTexture(nil, 'BACKGROUND')
     self.background:SetAllPoints(self)
-    self.background:SetColorTexture(0, 0, 0, 0.6)
+    self.background:SetColorTexture(0, 0, 0, 0.8)
 
     local menuBar = CreateFrame('FRAME', nil, self)
     menuBar:SetWidth(self.MenuBarWidth)
