@@ -57,28 +57,6 @@ function addon.LoadDefaultSettings()
   addon.AddDefaultSettings('earlypull', 'general', {isEnabled = false, printResults = true})
   addon.AddDefaultSettings('earlypull', 'announce', {onlyGuild = false, earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1})
 
-  local encounters = addon.GetEncountersList(true, true)
-  for i = 1, #encounters do
-    local instance = encounters[i]
-    if not AstralRaidSettings.notifiers.instances[instance[1]] then
-      AstralRaidSettings.notifiers.instances[instance[1]] = {
-        encounters = {},
-      }
-    end
-
-    for j = 2, #instance do
-      if not AstralRaidSettings.notifiers.encounters[instance[j]] then
-        AstralRaidSettings.notifiers.encounters[instance[j]] = {
-          name = addon.GetBossName(instance[j]),
-          auras = {},
-          casts = {},
-          hps = {},
-          pows = {},
-        }
-        table.insert(AstralRaidSettings.notifiers.instances[instance[1]].encounters, instance[j])
-      end
-    end
-  end
-
+  -- AstralRaidSettings.general.debug.isEnabled = true
   addon.Debug = AstralRaidSettings.general.debug.isEnabled
 end

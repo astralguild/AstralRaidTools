@@ -33,6 +33,10 @@ function addon.DebugTableToString(o)
     end
 end
 
+function addon.REVERSE(k1, k2)
+    return k2 < k1
+end
+
 function addon.PairsByKeys(t, f)
     local a = {}
     for n in pairs(t) do table.insert(a, n) end
