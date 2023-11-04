@@ -28,6 +28,7 @@ Events.lua
 Settings.lua
 Utils.lua
 ClassData.lua
+InstanceLib.lua
 Instance.lua
 Player.lua
 Interface.lua
@@ -40,7 +41,6 @@ Options.lua
 Text.lua
 Reminders.lua
 EarlyPull.lua
-BossModules.lua
 Alerts.lua
 Notifiers.lua
 Requirements.lua
