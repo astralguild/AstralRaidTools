@@ -17,6 +17,9 @@ local function hideAfter(r, time)
   end)
 end
 
+local augmentRuneItem = 211495
+local augmentRuneSpell = 393438
+
 local guildBankSpell = 83958
 local healthstoneSpell = 29893
 local healthstoneItem = 5512
@@ -63,6 +66,14 @@ local function lowDurability()
           end
       end
   end
+end
+
+local function hasInfiniteAugmentRune()
+  return GetItemCount(augmentRuneItem, false, false) > 0
+end
+
+local function hasInfiniteAugmentRuneBuff()
+  return C_UnitAuras.GetPlayerAuraBySpellID(augmentRuneSpell)
 end
 
 local function notFullHealthstones()
@@ -167,6 +178,20 @@ local function combatPotionsReminder(e, _, m, ...)
   end
 end
 
+local function infiniteAugmentRuneReminder(e, _, m, ...)
+  if not hasInfiniteAugmentRune() then
+    return 'HIDE'
+  end
+  if hasInfiniteAugmentRuneBuff() then
+    return 'HIDE'
+  end
+  if UnitHealth('player') == 0 then
+    return 'HIDE'
+  end
+
+  return 'SHOW'
+end
+
 local function noReleaseReminder(e, ...)
   if UnitHealth('player') == 0 then
     StaticPopup_Show('WANT_TO_RELEASE_ASTRAL')
@@ -186,7 +211,7 @@ AstralRaidReminders = {
   ['healthstones'] = {text = L['GRAB_HEALTHSTONES'], sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder},
   ['healingPotions'] = {text = L['GRAB_HEALING_POTIONS'], sound = 'Noot Noot', callbacks = {'cleu'}, func = healingPotionsReminder},
   ['combatPotions'] = {text = L['GRAB_COMBAT_POTIONS'], callbacks = {'cleu'}, func = combatPotionsReminder},
-  ['infiniteRune'] = {text = L['RUNE_UP'], callbacks = {}},
+  ['infiniteAugmentRune'] = {text = 'USE AUGMENT RUNE', callbacks = {'enterInstance', 'resurrected', 'cleu'}, func = infiniteAugmentRuneReminder},
   ['noRelease'] = {text = L['DONT_RELEASE'], sound = 'Voice: Don\'t Release', callbacks = {'leaveCombat', 'dead', 'resurrected', 'alive'}, func = noReleaseReminder},
 }
 
