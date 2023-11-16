@@ -35,6 +35,8 @@ local notInGroupText, roster, raidSlider, raidNames, updateButton
 local cdRequest = 5
 local lastRequest = nil
 
+local allWeakaurasCache, allAddonsCache
+
 local function checkButtonCooldown(self)
   if (GetTime() - lastRequest) >= cdRequest then
     self:SetText(UPDATE)
@@ -184,13 +186,21 @@ function module.options:Load()
   function roster:Update()
     local l = {}
     for a, data in addon.PairsByKeys(AstralRaidSettings.addons.required) do
-      if data then
-        l[#l+1] = {a, 'A'}
+      if allAddonsCache and allAddonsCache[a] then
+        if data then
+          l[#l+1] = {a, 'A'}
+        end
+      else
+        AstralRaidSettings.addons.required[a] = nil
       end
     end
     for wa, data in addon.PairsByKeys(AstralRaidSettings.wa.required) do
-      if data then
-        l[#l+1] = {wa, 'W'}
+      if allWeakaurasCache and allWeakaurasCache(wa) then
+        if data then
+          l[#l+1] = {wa, 'W'}
+        end
+      else
+        AstralRaidSettings.wa.required[wa] = nil
       end
     end
     roster.list = l
@@ -346,6 +356,9 @@ function module.options:OnShow()
     updateButton:Show()
     notInGroupText:Hide()
     roster:Update()
+
+    allWeakaurasCache = addon.GetWeakAuras()
+    allAddonsCache = addon.GetAddons()
   end
 end
 
