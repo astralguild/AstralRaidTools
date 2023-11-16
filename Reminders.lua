@@ -20,7 +20,7 @@ end
 local guildBankSpell = 83958
 local healthstoneSpell = 29893
 local healthstoneItem = 5512
-local hpPotionItem = 191380
+local hpPotionItem = 207023
 local combatPotionItems = {
   [1] = 191914,
   [2] = 191913,
