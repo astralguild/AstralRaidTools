@@ -186,7 +186,7 @@ OpenAstralRaidWindow = toggle
 local ldb = LibStub('LibDataBroker-1.1'):NewDataObject(ADDON_NAME, {
 	type = 'data source',
 	text = ADDON_NAME,
-	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\Logo@2x',
+	icon = 'Interface\\AddOns\\' .. ADDON_NAME .. '\\Media\\minimap.png',
 	OnClick = function(_, button)
 		if button == 'LeftButton' then toggle() end
 	end,

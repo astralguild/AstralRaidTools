@@ -7,7 +7,7 @@
 ## X-Wago-ID: 56n9VWN9
 ## X-Curse-Project-ID: 897512
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibStub
-## IconTexture: Interface\AddOns\AstralRaidTools\Media\Logo@2x
+## IconTexture: Interface\AddOns\AstralRaidTools\Media\minimap.png
 ## AddonCompartmentFunc: OpenAstralRaidWindow
 
 embeds.xml
