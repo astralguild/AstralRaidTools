@@ -195,7 +195,7 @@ function module.options:Load()
       end
     end
     for wa, data in addon.PairsByKeys(AstralRaidSettings.wa.required) do
-      if allWeakaurasCache and allWeakaurasCache(wa) then
+      if allWeakaurasCache and allWeakaurasCache[wa] then
         if data then
           l[#l+1] = {wa, 'W'}
         end
