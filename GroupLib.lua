@@ -9,11 +9,11 @@ AstralGroupLib.RosterByPlayerNameAndRealm = {}
 AstralGroupLib.RosterByGuid = {}
 
 local function TimerLoop()
-    if AstralGroupLib.RosterRefreshRequested then
+    if AstralGroupLib.RosterRefreshRequested and not InCombatLockdown() then
         AstralGroupLib.RefreshGroupRoster()
         AstralGroupLib.RosterRefreshRequested = false
     end
-    C_Timer.After(1, TimerLoop)
+    C_Timer.After(5, TimerLoop)
 end
 
 function AstralGroupLib:Init()

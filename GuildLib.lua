@@ -10,7 +10,7 @@ AstralGuildLib.RosterByPlayerNameAndRealm = {}
 AstralGuildLib.RosterByGuid = {}
 
 local function TimerLoop()
-    if AstralGuildLib.GuildRosterUpdateEventTriggered and AstralGuildLib.GuildRosterRefreshRequested then
+    if AstralGuildLib.GuildRosterUpdateEventTriggered and AstralGuildLib.GuildRosterRefreshRequested and not InCombatLockdown() then
         AstralGuildLib.RefreshGuildRoster()
         AstralGuildLib.GuildRosterRefreshRequested = false
     end
@@ -29,7 +29,7 @@ function AstralGuildLib:OnGuildRosterUpdate()
 end
 
 function AstralGuildLib:RefreshGuildRoster()
-    addon.PrintDebug('AstralGuildLib:RefreshGuildRoster')
+    -- addon.PrintDebug('AstralGuildLib:RefreshGuildRoster')
     AstralGuildLib.Roster = AstralRaidLibrary:GetGuildRoster()
     AstralGuildLib.RosterByPlayerName = {}
     AstralGuildLib.RosterByPlayerNameAndRealm = {}
