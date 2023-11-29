@@ -186,21 +186,17 @@ function module.options:Load()
   function roster:Update()
     local l = {}
     for a, data in addon.PairsByKeys(AstralRaidSettings.addons.required) do
-      if allAddonsCache and allAddonsCache[a] then
-        if data then
-          l[#l+1] = {a, 'A'}
-        end
-      else
+      if allAddonsCache and not allAddonsCache[a] then
         AstralRaidSettings.addons.required[a] = nil
+      elseif data then
+        l[#l+1] = {a, 'A'}
       end
     end
     for wa, data in addon.PairsByKeys(AstralRaidSettings.wa.required) do
-      if allWeakaurasCache and allWeakaurasCache[wa] then
-        if data then
-          l[#l+1] = {wa, 'W'}
-        end
-      else
+      if allWeakaurasCache and not allWeakaurasCache[wa] then
         AstralRaidSettings.wa.required[wa] = nil
+      elseif data then
+        l[#l+1] = {wa, 'W'}
       end
     end
     roster.list = l

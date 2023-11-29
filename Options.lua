@@ -141,8 +141,8 @@ framesList:Update()
 local generalHeader = AstralUI:Text(generalPage, L['GENERAL_OPTIONS']):Point('TOPLEFT', 0, 0):Shadow()
 
 local showMinimap = AstralUI:Check(generalPage, L['SHOW_MINIMAP_BUTTON']):Point('TOPLEFT', generalHeader, 'BOTTOMLEFT', 0, -10):OnClick(function (self)
-	AstralRaidSettings.general.show_minimap_button.isEnabled = self:GetChecked()
-	if AstralRaidSettings.general.show_minimap_button.isEnabled then
+	AstralRaidSettings.general.show_minimap_button = self:GetChecked()
+	if AstralRaidSettings.general.show_minimap_button then
 		addon.icon:Show(ADDON_NAME)
 	else
 		addon.icon:Hide(ADDON_NAME)
@@ -164,7 +164,7 @@ end)
 -- Initializations
 
 function addon.InitializeOptionSettings()
-  showMinimap:SetChecked(AstralRaidSettings.general.show_minimap_button.isEnabled)
+  showMinimap:SetChecked(AstralRaidSettings.general.show_minimap_button)
   debugMode:SetChecked(AstralRaidSettings.general.debug.isEnabled)
   debugShowAllMenus:SetChecked(AstralRaidSettings.general.debug.showAllMenus)
 	if not addon.Debug then
@@ -195,22 +195,14 @@ local ldb = LibStub('LibDataBroker-1.1'):NewDataObject(ADDON_NAME, {
 		tooltip:AddLine(L['TOGGLE_OPTIONS'])
 	end,
 })
-addon.icon = LibStub('LibDBIcon-1.0')
 
-function addon:OnInitialize()
-	addon.LoadDefaultSettings()
-
-	self.db = LibStub('AceDB-3.0'):New('AstralRaidMinimap', {
-		profile = {
-			minimap = {
-				hide = not AstralRaidSettings.general.show_minimap_button.isEnabled,
-			},
-		},
+local function onPlayerLogin()
+	addon.icon:Register(ADDON_NAME, ldb, {
+		hide = not AstralRaidSettings.general.show_minimap_button,
 	})
-	addon.icon:Register(ADDON_NAME, ldb, self.db.profile.minimap)
-
-	if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
 end
+
+AstralRaidEvents:Register('PLAYER_LOGIN', onPlayerLogin, 'Options_PLAYER_LOGIN')
 
 SLASH_ASTRALRAID1 = '/astralraidtools'
 SLASH_ASTRALRAID2 = '/astralraid'

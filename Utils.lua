@@ -1,5 +1,9 @@
 local ADDON_NAME, addon = ...
 
+addon.PlayerName = UnitName('player')
+addon.PlayerClass = select(2, UnitClass('player'))
+addon.PlayerNameRealm = addon.PlayerName .. '-' .. GetRealmName():gsub("%s+", "")
+
 function addon.GetNormalizedRealmName()
     local result = GetNormalizedRealmName()
     if not result then
@@ -108,11 +112,55 @@ function addon.IterateGuildRoster(_, index)
     if index > GetNumGuildMembers() then
         return
     end
-    local nameWithRealm, rankName, rankIndex, level, classDisplayName, zone, publicNote, officerNote, isOnline, status, class, achievementPoints, achievementRank, isMobile, canSoR, repStanding, guid = GetGuildRosterInfo(index)
+    local nameWithRealm, rankName, rankIndex, level, classDisplayName, zone, publicNote,
+            officerNote, isOnline, status, class, achievementPoints, achievementRank, isMobile,
+            canSoR, repStanding, guid = GetGuildRosterInfo(index)
     if not nameWithRealm then
         return
     end
     local shortName = Ambiguate(nameWithRealm, 'guild')
     local canSpeakInOfficerChat = C_GuildInfo.GuildControlGetRankFlags(rankIndex + 1)[4]
     return index, shortName, class, guid, rankIndex + 1, level, isOnline, nameWithRealm, canSpeakInOfficerChat
+end
+
+
+function addon.GetWeakAuras()
+    if not WeakAurasSaved then
+        return {}
+    end
+    local wa = {}
+    for waName, waData in pairs(WeakAurasSaved.displays) do
+        wa[waName] = waData
+    end
+    return wa
+end
+
+function addon.GetAddons()
+    local addons = {}
+    for i = 1, GetNumAddOns() do
+        local name, title, _, _, notLoadableReason, _, _ = GetAddOnInfo(i)
+        addons[name] = {
+            name = name,
+            title = title,
+            version = C_AddOns.GetAddOnMetadata(name, 'Version') or '',
+            notLoadableReason = notLoadableReason,
+        }
+    end
+    return addons
+end
+
+function addon.IsRaidLead()
+    return (IsInRaid() and (UnitIsGroupAssistant('player') or UnitIsGroupLeader('player')))
+end
+
+function addon.IsPartyLead()
+    return (IsInGroup() and (UnitIsGroupAssistant('player') or UnitIsGroupLeader('player')))
+end
+
+function addon.IsOfficer()
+    return C_GuildInfo.IsGuildOfficer()
+end
+
+function addon.GetGroupRank()
+    return UnitIsGroupLeader('player') and 2 or UnitIsGroupAssistant('player') and 1 or 0
 end

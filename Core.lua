@@ -1,10 +1,13 @@
 local ADDON_NAME, addon = ...
+local L = addon.L
 
 ASTRAL_RAID_TOOLS = 'Astral Raid Tools'
 ASTRAL_GUILD = 'Astral'
 ASTRAL_INFO = ASTRAL_GUILD .. ' - Area 52 (US)'
 
 LibStub('AceAddon-3.0'):NewAddon(addon, ADDON_NAME, 'AceConsole-3.0')
+
+addon.icon = LibStub('LibDBIcon-1.0')
 
 addon.CLIENT_VERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
 
@@ -13,8 +16,6 @@ addon.ModulesOptions = {}
 addon.A = {}
 addon.W = {}
 addon.mod = {}
-
-AstralRaidLibrary = {}
 
 function addon.mod:Event(event, ...)
 	return self[event](self, ...)
@@ -56,8 +57,54 @@ do
 	end
 end
 
+local DEFAULT_SETTINGS = {
+	profile = {
+
+	},
+	global = {
+		general = {
+			debug = { isEnabled = false, showAllMenus = false },
+			show_minimap_button = true,
+			font = { name = 'PT Sans Narrow', size = 72 },
+			sounds = { channel = 'Master' }
+		},
+		wa = { required = {} },
+		addons = { required = {} },
+		texts = {
+			position = { x = 0, y = 400 },
+			reminders = { inRaid = true, inParty = false, outsideInstances = false, enable = true },
+			alerts = { outsideInstances = false, enable = true },
+			enabled = {},
+			sounds = {},
+		},
+		notifiers = {
+			general = { isEnabled = false, toConsole = true, toOfficer = false, toRaid = false },
+			instances = {},
+			encounters = {},
+		},
+		earlypull = {
+			general = { isEnabled = false, printResults = true },
+			announce = { onlyGuild = false, earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1 },
+		}
+	}
+}
+
+
+function addon:OnInitialize()
+	self.db = LibStub('AceDB-3.0'):New('AstralRaidToolsDB', DEFAULT_SETTINGS)
+
+	-- Shim layer to back the AstralRaidSettings object with the global DB
+	AstralRaidSettings = self.db.global
+
+	--AstralRaidSettings.general.debug.isEnabled = true
+	addon.Debug = AstralRaidSettings.general.debug.isEnabled
+
+	if addon.Debug then addon.PrintDebug('ADDON_LOADED') end
+end
+
 -- WA Library Hooks
 
+AstralRaidLibrary = {}
 AstralRaidLibrary.ClassData = addon.ClassData
 
 function AstralRaidLibrary:Console(...)
