@@ -53,7 +53,7 @@ function module.options:Load()
   local LISTFRAME_WIDTH = 760
   local LISTFRAME_HEIGHT = 455
   local LINE_HEIGHT, LINE_NAME_WIDTH = 18, 225
-  local VERTICALNAME_WIDTH = 20
+  local VERTICALNAME_WIDTH = 24
   local VERTICALNAME_COUNT = 20
 
   roster = AstralUI:ScrollFrame(self):Point(0, -80):Size(LISTFRAME_WIDTH, LISTFRAME_HEIGHT)
@@ -146,7 +146,7 @@ function module.options:Load()
 
   raidNames = CreateFrame('FRAME', nil, self)
   for i = 1,VERTICALNAME_COUNT do
-    raidNames[i] = AstralUI:Text(raidNames, 'raid'..i, 9):Point('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0):Color(1, 1, 1)
+    raidNames[i] = AstralUI:Text(raidNames, 'raid'..i, 11):Point('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0):Color(1, 1, 1)
     local f = CreateFrame('FRAME', nil, self)
     f:SetPoint('BOTTOMLEFT', roster, 'TOPLEFT', LINE_NAME_WIDTH + 15 + VERTICALNAME_WIDTH*(i-1), 0)
     f:SetSize(VERTICALNAME_WIDTH, 80)
