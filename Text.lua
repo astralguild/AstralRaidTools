@@ -122,7 +122,8 @@ end
 -- Basic Checks
 
 local function canShowReminder()
-  return (IsInRaid() or (IsInGroup() and AstralRaidSettings.texts.reminders.inParty)) and addon.InInstance and not addon.InEncounter and not InCombatLockdown() and AstralRaidSettings.texts.reminders.enable
+  return (IsInRaid() or (IsInGroup() and AstralRaidSettings.texts.reminders.inParty)) and addon.InInstance and not addon.InEncounter and not InCombatLockdown() and not addon.InRemix and 
+AstralRaidSettings.texts.reminders.enable
 end
 
 local function canShowAlert()
