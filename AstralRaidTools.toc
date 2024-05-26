@@ -2,7 +2,7 @@
 ## Title: Astral |cfff5e4a8Raid Tools|r
 ## Notes: Raider utilities and raid lead roster management
 ## Author: Astral
-## Version: 1.0.11
+## Version: 1.0.12
 ## SavedVariables: AstralRaidToolsDB
 ## X-Wago-ID: 56n9VWN9
 ## X-Curse-Project-ID: 897512
