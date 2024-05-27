@@ -71,7 +71,9 @@ local function updateFrames()
 end
 
 options:SetScript('OnShow', function(self)
-	self:SetPropagateKeyboardInput(true)
+	if not InCombatLockdown() then
+		self:SetPropagateKeyboardInput(true)
+	end
   addon.InitializeOptionSettings()
 	updateFrames()
 end)

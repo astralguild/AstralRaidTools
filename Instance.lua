@@ -49,6 +49,7 @@ end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
   addon.InInstance, addon.InstanceType = IsInInstance()
+	addon.IsRemix = addon.IsRemix or C_UnitAuras.GetPlayerAuraBySpellID(424143)
 end, 'GetInstance')
 
 AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName, difficultyID, groupSize)
