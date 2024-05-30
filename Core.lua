@@ -136,6 +136,10 @@ function AstralRaidLibrary:GetInstanceChannel()
 	return addon.GetInstanceChannel()
 end
 
+function AstralRaidLibrary:IsRemix()
+	return addon.IsRemix()
+end
+
 function AstralRaidLibrary:SendWeakAuraComm(name, msg, channel)
 	if addon.W[name] then
 		local w = addon.W[name]

@@ -122,7 +122,6 @@ end
 -- Basic Checks
 
 local function canShowReminder()
-  if addon.IsRemix() then return false end
   return (IsInRaid() or (IsInGroup() and AstralRaidSettings.texts.reminders.inParty)) and addon.InInstance and not addon.InEncounter and not InCombatLockdown() and 
 AstralRaidSettings.texts.reminders.enable
 end
@@ -152,7 +151,7 @@ local events = {}
 local function handle(e, event, ...)
   local t = texts[e.name]
   if not t then return end
-  if t.type == 'REMINDER' and (InCombatLockdown() or C_PvP.IsPVPMap()) then return end
+  if t.type == 'REMINDER' and (InCombatLockdown() or C_PvP.IsPVPMap() or addon.IsRemix()) then return end
   local action = e.f(event, ...)
   if action then
     if action == 'SHOW' and canShowText(t.type) and textIsEnabled(e.name) then

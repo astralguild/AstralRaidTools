@@ -46,7 +46,7 @@ do
 end
 
 function addon.IsRemix()
-	return C_UnitAuras.GetPlayerAuraBySpellID(424143) -- Mists of Pandaria Remix
+	return PlayerGetTimerunningSeasonID and PlayerGetTimerunningSeasonID() ~= nil
 end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
