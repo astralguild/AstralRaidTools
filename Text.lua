@@ -122,7 +122,7 @@ end
 -- Basic Checks
 
 local function canShowReminder()
-  if addon.IsRemix then return false end
+  if addon.IsRemix() then return false end
   return (IsInRaid() or (IsInGroup() and AstralRaidSettings.texts.reminders.inParty)) and addon.InInstance and not addon.InEncounter and not InCombatLockdown() and 
 AstralRaidSettings.texts.reminders.enable
 end

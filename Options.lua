@@ -18,7 +18,9 @@ AstralRaidOptionsFrame:SetScript('OnDragStart', function(self) self:StartMoving(
 AstralRaidOptionsFrame:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
 AstralRaidOptionsFrame:SetScript('OnKeyDown', function (self, key)
 	if key == 'ESCAPE' then
-		self:SetPropagateKeyboardInput(false)
+		if not InCombatLockdown() then
+			self:SetPropagateKeyboardInput(false)
+		end
 		AstralRaidOptionsFrame:Hide()
 	end
 end)

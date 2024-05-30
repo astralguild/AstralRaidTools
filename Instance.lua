@@ -1,7 +1,5 @@
 local _, addon = ...
 
-addon.IsRemix = C_UnitAuras.GetPlayerAuraBySpellID(424143) -- Mists of Pandaria Remix
-
 addon.InInstance = false
 addon.InstanceType = nil
 
@@ -47,9 +45,12 @@ do
 	end
 end
 
+function addon.IsRemix()
+	return C_UnitAuras.GetPlayerAuraBySpellID(424143) -- Mists of Pandaria Remix
+end
+
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', function()
   addon.InInstance, addon.InstanceType = IsInInstance()
-	addon.IsRemix = addon.IsRemix or C_UnitAuras.GetPlayerAuraBySpellID(424143)
 end, 'GetInstance')
 
 AstralRaidEvents:Register('ENCOUNTER_START', function(encounterID, encounterName, difficultyID, groupSize)
