@@ -1,5 +1,6 @@
 local _, addon = ...
 local L = addon.L
+local GetSpellLink = C_Spell.GetSpellLink
 
 local function auraTrigger(e, _, m, _, name, ...)
 	local encounterID = addon.Encounter.encounterID
