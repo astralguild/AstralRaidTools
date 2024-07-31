@@ -1,5 +1,6 @@
 local _, addon = ...
 local L = addon.L
+local GetSpellLink = C_Spell.GetSpellLink
 
 -- Adapted/copied from Early Pull weakaura (https://wago.io/TyN8l9eWg/1)
 
