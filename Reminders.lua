@@ -21,8 +21,11 @@ local augmentRuneItem = 211495
 local augmentRuneSpell = 393438
 
 local guildBankSpell = 83958
-local healthstoneSpell = 452982
-local healthstoneItem = 224464
+local healthstoneSpell = 29893
+local healthstoneItems = {
+  [1] = 5512,
+  [2] = 224464,
+}
 local hpPotionItem = 207023
 local combatPotionItems = {
   [1] = 191914,
@@ -77,7 +80,11 @@ local function hasInfiniteAugmentRuneBuff()
 end
 
 local function notFullHealthstones()
-  return GetItemCount(healthstoneItem, false, true) < MAX_HEALTHSTONES_COUNT
+  local totalHealthstones = 0
+  for _, healthstoneId in pairs(healthstoneItems) do
+    totalHealthstones = totalHealthstones + GetItemCount(healthstoneId, false, true)
+  end
+  return totalHealthstones < MAX_HEALTHSTONES_COUNT
 end
 
 local function noHealthPotions()
