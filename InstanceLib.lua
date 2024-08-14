@@ -235,7 +235,7 @@ function AstralInstanceLib:_GetAbilitiesInJournalOrder(journalSections, difficul
             if sectionInfo.spellID then
                 local spellID = sectionInfo.spellID
                 if spellID > 0 and not spellAlreadyAdded[spellID] then
-                    local spellName,_,spellIcon,castTime,minRange,maxRange,_,_ = GetSpellInfo(spellID)
+                    local spellName,_,spellIcon,castTime,minRange,maxRange,_,_ = C_Spell.GetSpellInfo(spellID)
                     result[#result + 1] = {
                         SpellID = spellID,
                         SpellName = spellName,
