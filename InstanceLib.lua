@@ -236,12 +236,15 @@ function AstralInstanceLib:_GetAbilitiesInJournalOrder(journalSections, difficul
                 local spellID = sectionInfo.spellID
                 if spellID > 0 and not spellAlreadyAdded[spellID] then
 					local spellInfo = C_Spell.GetSpellInfo(spellID)
-                    result[#result + 1] = {
-                        SpellID = spellInfo.spellID,
-                        SpellName = spellInfo.name,
-                        SpellIcon = spellInfo.iconID,
-                        JournalSectionID = journalSectionID,
-                    }
+					-- Even though this is from the encounter journal, can still be nil
+					if spellInfo ~= nil then
+						result[#result + 1] = {
+							SpellID = spellInfo.spellID,
+							SpellName = spellInfo.name,
+							SpellIcon = spellInfo.iconID,
+							JournalSectionID = journalSectionID,
+						}
+					end
                     spellAlreadyAdded[spellID] = true
                 end
             end
