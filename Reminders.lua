@@ -113,7 +113,7 @@ local function eatFoodReminder(e, _, m, ...)
       local destGUID = select(6, ...)
       local spellID = select(10, ...)
       if destGUID == UnitGUID('player') then
-        local name = select(1, C_Spell.GetSpellInfo(spellID))
+        local name = C_Spell.GetSpellInfo(spellID).name
         if name == WELL_FED or name == 'Food' or name == 'Drink' or name == 'Food & Drink' then
           return 'HIDE'
         end
