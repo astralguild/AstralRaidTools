@@ -151,7 +151,7 @@ local showMinimap = AstralUI:Check(generalPage, L['SHOW_MINIMAP_BUTTON']):Point(
 	else
 		addon.icon:Hide(ADDON_NAME)
 	end
-	if IsAddOnLoaded('ElvUI_Enhanced') and ElvUI then -- Update the layout for the minimap buttons
+	if C_AddOns.IsAddOnLoaded('ElvUI_Enhanced') and ElvUI then -- Update the layout for the minimap buttons
 		ElvUI[1]:GetModule('MinimapButtons'):UpdateLayout()
 	end
 end)
