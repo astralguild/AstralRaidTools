@@ -137,8 +137,8 @@ end
 
 function addon.GetAddons()
     local addons = {}
-    for i = 1, GetNumAddOns() do
-        local name, title, _, _, notLoadableReason, _, _ = GetAddOnInfo(i)
+    for i = 1, C_AddOns.GetNumAddOns() do
+        local name, title, _, _, notLoadableReason, _, _ = C_AddOns.GetAddOnInfo(i)
         addons[name] = {
             name = name,
             title = title,
