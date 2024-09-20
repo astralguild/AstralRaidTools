@@ -54,6 +54,7 @@ local repairSpells = {
 }
 
 WELL_FED = 'Well Fed'
+HEARTY_WELL_FED = 'Hearty Well Fed'
 
 local LOW_COMBAT_POTION_COUNT = 3
 local LOW_HEALTH_POTION_COUNT = 2
@@ -103,6 +104,9 @@ local function eatFoodReminder(e, _, m, ...)
   if e ~= 'COMBAT_LOG_EVENT_UNFILTERED' then
     if not addon.InInstance then return 'HIDE' end
     local wellFedBuff = AuraUtil.FindAuraByName(WELL_FED, 'player')
+	if (not WellFedBuff) then
+		wellFedBuff = AuraUtil.FindAuraByName(HEARTY_WELL_FED, 'player')
+	end
     if (not wellFedBuff) and UnitHealth('player') > 0 then
       return 'SHOW'
     else
@@ -114,7 +118,7 @@ local function eatFoodReminder(e, _, m, ...)
       local spellID = select(10, ...)
       if destGUID == UnitGUID('player') then
         local name = C_Spell.GetSpellInfo(spellID).name
-        if name == WELL_FED or name == 'Food' or name == 'Drink' or name == 'Food & Drink' then
+        if name == WELL_FED or name == HEARTY_WELL_FED or name == 'Food' or name == 'Drink' or name == 'Food & Drink' then
           return 'HIDE'
         end
       end
