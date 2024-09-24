@@ -26,7 +26,7 @@ local healthstoneItems = {
   [1] = 5512,
   [2] = 224464,
 }
-local hpPotionItem = 207023
+local hpPotionItem = 211880
 local combatPotionItems = {
   [1] = 191914,
   [2] = 191913,
@@ -42,10 +42,15 @@ local combatPotionItems = {
   [12] = 191387,
   [13] = 191401,
 }
-local cauldronSpells = {
-  [1] = 371611, -- Prepare Potion Cauldron of Ultimate Power r3
-  [2] = 371606, -- Prepare Potion Cauldron of Ultimate Power r2
-  [3] = 371535, -- Prepare Potion Cauldron of Ultimate Power r1
+local flaskCauldronSpells = {
+  [1] = 432877,
+  [2] = 432878,
+  [3] = 432879,
+}
+local potionCauldronSpells = {
+  [1] = 433292,
+  [2] = 433293,
+  [3] = 433294,
 }
 local repairSpells = {
   [1] = 67826,
@@ -126,12 +131,25 @@ local function eatFoodReminder(e, _, m, ...)
   end
 end
 
-local function cauldronReminder(e, _, m, ...)
+local function flaskCauldronReminder(e, _, m, ...)
   if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' then
     local spellID = select(10, ...)
-    for _, cauldronSpellID in pairs(cauldronSpells) do
+    for _, cauldronSpellID in pairs(flaskCauldronSpells) do
       if spellID == cauldronSpellID then
-        hideAfter('cauldronDown', 20)
+        hideAfter('flaskCauldronDown', 20)
+        return 'SHOW'
+      end
+    end
+  end
+  return 'HIDE'
+end
+
+local function potionCauldronReminder(e, _, m, ...)
+  if e == 'COMBAT_LOG_EVENT_UNFILTERED' and m == 'SPELL_CAST_SUCCESS' then
+    local spellID = select(10, ...)
+    for _, cauldronSpellID in pairs(potionCauldronSpells) do
+      if spellID == cauldronSpellID then
+        hideAfter('potionCauldronDown', 20)
         return 'SHOW'
       end
     end
@@ -217,7 +235,8 @@ end
 
 AstralRaidReminders = {
   ['eatFood'] = {text = L['EAT_FOOD'], sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu', 'leaveCombat'}, func = eatFoodReminder},
-  ['cauldronDown'] = {text = L['CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = cauldronReminder},
+  ['potionCauldronDown'] = {text = L['POTION_CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = potionCauldronReminder},
+  ['flaskCauldronDown'] = {text = L['FLASK_CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = flaskCauldronReminder},
   ['repairDown'] =  {text = L['REPAIR'], sound = 2917320, callbacks = {'enterInstance', 'cleu'}, func = repairReminder},
   ['healthstones'] = {text = L['GRAB_HEALTHSTONES'], sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder},
   ['healingPotions'] = {text = L['GRAB_HEALING_POTIONS'], sound = 'Noot Noot', callbacks = {'cleu'}, func = healingPotionsReminder},
