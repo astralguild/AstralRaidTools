@@ -17,6 +17,8 @@ local remindersState = {}
 local wasShownBeforeTest = false
 local remindersShownBeforeCombat = false
 
+local disabledDueToCombat = {}
+
 function addon.CreateText(name, text, type)
   if texts[name] then
     return texts[name]
@@ -206,6 +208,12 @@ end
 
 local function enterCombat(...)
   hideRemindersForCombat()
+  for k, e in pairs(events.cleu) do
+	if e.disableCleuInCombat then
+		events.cleu[k] = nil
+		table.insert(disabledDueToCombat, e)
+	end
+  end
   if not events.enterCombat then return end
   for _, e in pairs(events.enterCombat) do
     handle(e, 'PLAYER_ENTER_COMBAT', ...)
@@ -214,6 +222,10 @@ end
 
 local function leaveCombat(...)
   showRemindersAfterCombat()
+  for _, e in pairs(disabledDueToCombat) do
+	table.insert(events.cleu, e)
+  end
+  disabledDueToCombat = {}
   if not events.leaveCombat then return end
   for _, e in pairs(events.leaveCombat) do
     handle(e, 'PLAYER_LEAVE_COMBAT', ...)
@@ -236,11 +248,11 @@ local function cleu(...)
   for _, e in pairs(events.cleu) do handle(e, 'COMBAT_LOG_EVENT_UNFILTERED', CombatLogGetCurrentEventInfo()) end
 end
 
-function addon.AddTextEventCallback(func, name, event, sound)
+function addon.AddTextEventCallback(func, name, event, sound, disableCleuInCombat)
   if not events[event] then
     events[event] = {}
   end
-  table.insert(events[event], {f = func, name = name, sound = sound})
+  table.insert(events[event], {f = func, name = name, sound = sound, disableCleuInCombat = disableCleuInCombat})
 end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', enterInstance, 'TextsEnterInstance')

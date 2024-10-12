@@ -234,14 +234,14 @@ local function noReleaseReminder(e, ...)
 end
 
 AstralRaidReminders = {
-  ['eatFood'] = {text = L['EAT_FOOD'], sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu', 'leaveCombat'}, func = eatFoodReminder},
-  ['potionCauldronDown'] = {text = L['POTION_CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = potionCauldronReminder},
-  ['flaskCauldronDown'] = {text = L['FLASK_CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = flaskCauldronReminder},
-  ['repairDown'] =  {text = L['REPAIR'], sound = 2917320, callbacks = {'enterInstance', 'cleu'}, func = repairReminder},
-  ['healthstones'] = {text = L['GRAB_HEALTHSTONES'], sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder},
-  ['healingPotions'] = {text = L['GRAB_HEALING_POTIONS'], sound = 'Noot Noot', callbacks = {'cleu'}, func = healingPotionsReminder},
-  ['combatPotions'] = {text = L['GRAB_COMBAT_POTIONS'], callbacks = {'cleu'}, func = combatPotionsReminder},
-  ['infiniteAugmentRune'] = {text = 'USE AUGMENT RUNE', callbacks = {'enterInstance', 'resurrected', 'cleu'}, func = infiniteAugmentRuneReminder},
+  ['eatFood'] = {text = L['EAT_FOOD'], sound = 'Details Whip1', callbacks = {'enterInstance', 'resurrected', 'cleu', 'leaveCombat'}, func = eatFoodReminder, disableCleuInCombat = true},
+  ['potionCauldronDown'] = {text = L['POTION_CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = potionCauldronReminder, disableCleuInCombat = true},
+  ['flaskCauldronDown'] = {text = L['FLASK_CAULDRON_DOWN'], sound = 'Banana Peel Slip', callbacks = {'cleu'}, func = flaskCauldronReminder, disableCleuInCombat = true},
+  ['repairDown'] =  {text = L['REPAIR'], sound = 2917320, callbacks = {'enterInstance', 'cleu'}, func = repairReminder, disableCleuInCombat = true},
+  ['healthstones'] = {text = L['GRAB_HEALTHSTONES'], sound = 'Arrow Swoosh', callbacks = {'cleu'}, func = healthstoneReminder, disableCleuInCombat = true},
+  ['healingPotions'] = {text = L['GRAB_HEALING_POTIONS'], sound = 'Noot Noot', callbacks = {'cleu'}, func = healingPotionsReminder, disableCleuInCombat = true},
+  ['combatPotions'] = {text = L['GRAB_COMBAT_POTIONS'], callbacks = {'cleu'}, func = combatPotionsReminder, disableCleuInCombat = true},
+  ['infiniteAugmentRune'] = {text = 'USE AUGMENT RUNE', callbacks = {'enterInstance', 'resurrected', 'cleu'}, func = infiniteAugmentRuneReminder, disableCleuInCombat = true},
   ['noRelease'] = {text = L['DONT_RELEASE'], sound = 'Voice: Don\'t Release', callbacks = {'leaveCombat', 'dead', 'resurrected', 'alive'}, func = noReleaseReminder},
 }
 
@@ -249,7 +249,7 @@ AstralRaidEvents:Register('PLAYER_LOGIN', function() -- initialize all reminders
   for name, r in pairs(AstralRaidReminders) do
     addon.CreateText(name, r.text, 'REMINDER')
     for i = 1, #r.callbacks do
-      addon.AddTextEventCallback(r.func, name, r.callbacks[i], r.sound)
+      addon.AddTextEventCallback(r.func, name, r.callbacks[i], r.sound, r.disableCleuInCombat)
     end
     if not AstralRaidSettings.texts.sounds[name] then
       AstralRaidSettings.texts.sounds[name] = r.sound or 'None'
