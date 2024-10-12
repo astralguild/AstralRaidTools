@@ -244,8 +244,8 @@ function addon.AddTextEventCallback(func, name, event, sound)
 end
 
 AstralRaidEvents:Register('PLAYER_ENTERING_WORLD', enterInstance, 'TextsEnterInstance')
-AstralRaidEvents:Register('PLAYER_ENTER_COMBAT', enterCombat, 'TextsEnterCombat')
-AstralRaidEvents:Register('PLAYER_LEAVE_COMBAT', leaveCombat, 'TextsLeaveCombat')
+AstralRaidEvents:Register('PLAYER_REGEN_DISABLED', enterCombat, 'TextsEnterCombat')
+AstralRaidEvents:Register('PLAYER_REGEN_ENABLED', leaveCombat, 'TextsLeaveCombat')
 AstralRaidEvents:Register('PLAYER_ALIVE', resurrected, 'TextsResurrected')
 AstralRaidEvents:Register('PLAYER_DEAD', dead, 'TextsDeath')
 AstralRaidEvents:Register('PLAYER_UNGHOST', alive, 'TextsAlive')
