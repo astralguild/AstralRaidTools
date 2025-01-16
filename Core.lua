@@ -85,7 +85,10 @@ local DEFAULT_SETTINGS = {
 		earlypull = {
 			general = { isEnabled = false, printResults = true },
 			announce = { onlyGuild = false, earlyPull = 1, onTimePull = 1, latePull = 1, untimedPull = 1 },
-		}
+		},
+		readycheck = {
+			severedstrands = { enable = false },
+		},
 	}
 }
 
