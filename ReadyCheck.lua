@@ -29,7 +29,7 @@ AstralRaidEvents:Register('READY_CHECK', function()
 								local expectedNumBuffs = min(6, expectedNumBuffs) -- Nerubar Finery buff caps at 6 (18%)
 								
 								if numBuffStacks ~= expectedNumBuffs then
-									print(GetUnitName(unit) .. " has " .. (numBuffStacks+1) .. "/" .. (expectedNumBuffs+1) .. " stacks of Severed Strands.")
+									print(GetUnitName(unit, true) .. " has " .. (numBuffStacks+1) .. "/" .. (expectedNumBuffs+1) .. " stacks of Severed Strands.")
 								end
 							end
 						else
